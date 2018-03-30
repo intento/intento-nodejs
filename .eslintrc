@@ -1,0 +1,27 @@
+{
+    "extends": [
+        "eslint:recommended"
+    ],
+    "env": {
+        "node": true,
+        "es6": true,
+        "jest": true
+    },
+    "parser": "babel-eslint",
+    "globals": {},
+    "rules": {
+        "no-console": "off",
+        "indent": [
+            2,
+            4
+        ],
+        "semi": [
+            2,
+            "never"
+        ],
+        "object-curly-spacing": [
+            2,
+            "always"
+        ]
+    }
+}

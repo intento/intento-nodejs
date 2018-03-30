@@ -38,3 +38,8 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+.eslintrc
+yarn.lock
+
+example.js
