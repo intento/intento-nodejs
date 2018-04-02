@@ -30,14 +30,11 @@ node_modules/
 # Optional REPL history
 .node_repl_history
 
-# Output of 'npm pack'
-*.tgz
-
 # Yarn Integrity file
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env*
 
 .eslintrc
 yarn.lock

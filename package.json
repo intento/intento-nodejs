@@ -5,9 +5,13 @@
   "repository": "git@github.com:intento/intento-nodejs.git",
   "author": "Intento Inc.",
   "license": "Apache-2.0",
-  "private": false,
+  "scripts": {
+    "build": "webpack"
+  },
   "devDependencies": {
     "babel-eslint": "^8.2.2",
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13"
   }
 }

@@ -61,6 +61,7 @@ const response_handler = function (response, fn) {
     })
 }
 
+
 // Translation specific requests
 
 Intentor.prototype.translationRequest = function ({ params, content, data, method, fn }) {
@@ -87,6 +88,7 @@ Intentor.prototype.translateWithStrategy = function (strategy, context, fn) {
     }
     this.translationRequest({ content, method:'POST', fn })
 } 
+
 
 // Sentiment Analysis specific requests
 
