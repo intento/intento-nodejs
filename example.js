@@ -6,7 +6,9 @@ const apikey = process.env.INTENTO_API_KEY
 const google_api_key = process.env.GOOGLE_API_KEY
 
 if (!apikey) {
-    console.error('Missing Intento API key in the environment. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment')
+    console.error(
+        'Missing Intento API key in the environment. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment'
+    )
     process.exit(1)
 }
 
@@ -22,12 +24,15 @@ const client = new IntentoConnector({ apikey }, true) // debug mode is on
 // - source language will be detected automatically
 // - provider for the translation will be smart-selected based on the Smart routing feature
 //   see more on that here https://github.com/intento/intento-api#smart-routing
-client.ai.text.translate.fullfill({ text: 'How\'s it going?', to: 'es' })
+client.ai.text.translate.fullfill({ text: "How's it going?", to: 'es' })
 
 // Analyze text for sentiments
 // https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage
-client.ai.text.sentiment.fullfill({ text: 'We love this', lang: 'en', provider: 'ai.text.sentiment.ibm.natural_language_understanding' })
-
+client.ai.text.sentiment.fullfill({
+    text: 'We love this',
+    lang: 'en',
+    provider: 'ai.text.sentiment.ibm.natural_language_understanding',
+})
 
 /* Get information on providers */
 
@@ -40,10 +45,15 @@ client.ai.text.translate.getProviders({ lang_detect: true }, (err, data) => {
 })
 
 // Also source language (`from`), target language(`to`) and bulk mode feature availability (`bulk: true`) can be specified as params
-client.ai.text.translate.getProviders({ to: 'ru', bulk: true, lang_detect: true }, (err, data) => {
-    console.log('\nProvider supporting bulk translation to russian with language detect feature')
-    prettyPrintProviders(err, data)
-})
+client.ai.text.translate.getProviders(
+    { to: 'ru', bulk: true, lang_detect: true },
+    (err, data) => {
+        console.log(
+            '\nProvider supporting bulk translation to russian with language detect feature'
+        )
+        prettyPrintProviders(err, data)
+    }
+)
 
 // Providers for sentiment analysys
 client.ai.text.sentiment.getProviders(prettyPrintProviders)
@@ -51,21 +61,23 @@ client.ai.text.sentiment.getProviders(prettyPrintProviders)
 // Providers to get meanings of texts in selected languages
 client.ai.text.dictionary.getProviders(prettyPrintProviders)
 
-
 /* Advanced usage */
 
 const sampleContext = {
-    text: 'How\'s it going?',
+    text: "How's it going?",
     from: 'en',
-    to: 'es'
+    to: 'es',
 }
 
 // Translate with specific strategy
-client.ai.text.translate.withStrategy('best_price', sampleContext, (err, data) => {
-    console.log('\nTranslate with a "best_price" strategy \n')
-    defaultCallback(err, data)
-})
-
+client.ai.text.translate.withStrategy(
+    'best_price',
+    sampleContext,
+    (err, data) => {
+        console.log('\nTranslate with a "best_price" strategy \n')
+        defaultCallback(err, data)
+    }
+)
 
 /* Advanced general examples */
 
@@ -86,7 +98,6 @@ client.makeRequest({
         defaultCallback(err, data)
     },
 })
-
 
 // With custom google api key
 client.makeRequest({
@@ -112,8 +123,6 @@ client.makeRequest({
     },
 })
 
-
-
 /* helpers */
 
 function defaultCallback(err, data) {
@@ -123,7 +132,6 @@ function defaultCallback(err, data) {
     }
     console.log('API response:\n', data, '\n\n')
 }
-
 
 function prettyPrintProviders(err, data) {
     if (err) {

@@ -17,38 +17,38 @@ function IntentoConnector(credentials = {}, debug = false) {
     if (!apikey) {
         console.error('Missing Intento API key')
         return {
-            error: 'No Intento API key provided'
+            error: 'No Intento API key provided',
         }
     }
 
     this.options = {
         host: 'api.inten.to',
         headers: {
-            apikey
-        }
+            apikey,
+        },
     }
 
     this.ai = Object.freeze({
         text: {
             translate: {
-                fullfill: function (context, fn) {
+                fullfill: function(context, fn) {
                     this.fullfill('translate', context, fn)
                 }.bind(this),
-                getProviders: function (params, fn) {
+                getProviders: function(params, fn) {
                     this.getProviders('translate', params, fn)
                 }.bind(this),
-                withStrategy: function (strategy, context, fn) {
+                withStrategy: function(strategy, context, fn) {
                     this.withStrategy('translate', strategy, context, fn)
                 }.bind(this),
             },
             sentiment: {
-                fullfill: function (context, fn) {
+                fullfill: function(context, fn) {
                     this.fullfill('sentiment', context, fn)
                 }.bind(this),
-                getProviders: function (params, fn) {
+                getProviders: function(params, fn) {
                     this.getProviders('sentiment', params, fn)
                 }.bind(this),
-                withStrategy: function (strategy, context, fn) {
+                withStrategy: function(strategy, context, fn) {
                     if (this.debug) {
                         console.warn('Experimental feature')
                     }
@@ -56,27 +56,26 @@ function IntentoConnector(credentials = {}, debug = false) {
                 }.bind(this),
             },
             dictionary: {
-                fullfill: function (context, fn) {
+                fullfill: function(context, fn) {
                     this.fullfill('dictionary', context, fn)
                 }.bind(this),
-                getProviders: function (params, fn) {
+                getProviders: function(params, fn) {
                     this.getProviders('dictionary', params, fn)
                 }.bind(this),
-                withStrategy: function (strategy, context, fn) {
+                withStrategy: function(strategy, context, fn) {
                     if (this.debug) {
                         console.warn('Experimental feature')
                     }
                     this.withStrategy('dictionary', strategy, context, fn)
                 }.bind(this),
             },
-        }
+        },
     })
 }
 
 module.exports = IntentoConnector
 
 module.exports.default = Object.assign({}, module.exports)
-
 
 IntentoConnector.prototype.makeRequest = function({
     path = '',
@@ -94,7 +93,9 @@ IntentoConnector.prototype.makeRequest = function({
         }
     }
     if (data && content) {
-        console.warn('Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.')
+        console.warn(
+            'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
+        )
     }
     const urlParams = querystring.stringify(params)
     const settings = {
@@ -115,8 +116,7 @@ IntentoConnector.prototype.makeRequest = function({
     req.end()
 }
 
-
-IntentoConnector.prototype.fullfill = function (slug, context = {}, fn) {
+IntentoConnector.prototype.fullfill = function(slug, context = {}, fn) {
     const provider = context.provider
     delete context.provider
 
@@ -124,7 +124,7 @@ IntentoConnector.prototype.fullfill = function (slug, context = {}, fn) {
 
     if (slug === 'dictionary') {
         content.service = {
-            provider: 'ai.text.dictionary.yandex.dictionary_api.1-0'
+            provider: 'ai.text.dictionary.yandex.dictionary_api.1-0',
         }
     } else if (slug === 'sentiment') {
         if (!provider) {
@@ -134,13 +134,13 @@ IntentoConnector.prototype.fullfill = function (slug, context = {}, fn) {
                 '\nProvider `id` is needed to be specified as a provider'
             )
             console.log('No request will be made')
-            this.ai.text.sentiment.getProviders(function(err, data){
+            this.ai.text.sentiment.getProviders(function(err, data) {
                 if (!err) {
                     console.log('Select one of the provider ids')
                     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.id}`))
                 }
             })
-            return 
+            return
         }
 
         content.service = { provider }
@@ -150,42 +150,44 @@ IntentoConnector.prototype.fullfill = function (slug, context = {}, fn) {
         path: getPath(slug, this.debug),
         content,
         method: 'POST',
-        fn
+        fn,
     })
 }
 
-
-IntentoConnector.prototype.getProviders = function (slug, params, fn) {
+IntentoConnector.prototype.getProviders = function(slug, params, fn) {
     if (params instanceof Function) {
         fn = params
         params = {}
     }
-        
+
     this.makeRequest({
         path: getPath(slug, this.debug),
         params,
         method: 'GET',
-        fn
+        fn,
     })
 }
 
-
-IntentoConnector.prototype.withStrategy = function (slug, strategy, context, fn) {
+IntentoConnector.prototype.withStrategy = function(
+    slug,
+    strategy,
+    context,
+    fn
+) {
     const content = {
         context,
         service: {
-            bidding: strategy
-        }
+            bidding: strategy,
+        },
     }
 
     this.makeRequest({
         path: getPath(slug, this.debug),
         content,
         method: 'POST',
-        fn
+        fn,
     })
 }
-
 
 // helpers
 
@@ -200,7 +202,9 @@ function getPath(slug, debug) {
     if (!path) {
         path = pathBySlug.translate
         if (debug) {
-            console.error(`getProviders: Unknown intent ${slug}. Translate intent will be used`)
+            console.error(
+                `getProviders: Unknown intent ${slug}. Translate intent will be used`
+            )
         }
     }
 
@@ -218,10 +222,10 @@ function defaultCallback(err, data) {
 function response_handler(response, fn) {
     response.setEncoding('utf8')
     let body = ''
-    response.on('data', function (chunk) {
+    response.on('data', function(chunk) {
         body += chunk
     })
-    response.on('end', function () {
+    response.on('end', function() {
         try {
             let data = null
             if (body.length > 0) {
@@ -232,7 +236,7 @@ function response_handler(response, fn) {
             fn(e, null)
         }
     })
-    response.on('error', function (e) {
+    response.on('error', function(e) {
         console.log('Error: ' + e.message)
     })
 }

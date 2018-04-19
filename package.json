@@ -6,11 +6,13 @@
   "author": "Intento Inc.",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "format": "prettier --config .prettierrc --write './**/*.js'"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.2",
     "eslint": "^4.19.1",
+    "prettier": "^1.12.1",
     "webpack": "^4.4.1",
     "webpack-cli": "^2.0.13"
   }
