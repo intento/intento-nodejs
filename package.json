@@ -2,7 +2,7 @@
   "name": "intento-nodejs",
   "version": "0.0.2",
   "main": "src/index.js",
-  "repository": "git@github.com:intento/intento-nodejs.git",
+  "repository": "intento/intento-nodejs",
   "author": "Intento Inc.",
   "license": "Apache-2.0",
   "scripts": {

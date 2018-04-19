@@ -10,32 +10,36 @@ In case you don't have a key to use Intento API, please feel free to mail hello@
 
 ## Installation
 
-```
+```bash
 npm install intento-nodejs
 ```
 
 or
-```
+
+```bash
 yarn add intento-nodejs
 ```
 
 ## Example usage
 
 ### Using `data` argument from a curl request directly
+
 For a `curl` instruction from [the docs](https://github.com/intento/intento-api)
+
 ```bash
 curl -XPOST -H 'apikey: YOUR_API_KEY' 'https://api.inten.to/ai/text/translate' -d '{
- "context": {
-  "text": "A sample text",
-  "to": "es"
- },
- "service": {
-  "provider": "ai.text.translate.microsoft.translator_text_api.2-0"
- }
+    "context": {
+        "text": "A sample text",
+        "to": "es"
+    },
+    "service": {
+        "provider": "ai.text.translate.microsoft.translator_text_api.2-0"
+    }
 }'
 ```
 
 try following:
+
 ```js
 const Intentor = require('intento-nodejs')
 
@@ -66,6 +70,7 @@ client.makeRequest({
 
 For example we'd like to translate the same text for different languages.
 One can make similar requests for each language like this:
+
 ```js
 const Intentor = require('intento-nodejs')
 
@@ -91,14 +96,17 @@ const options = {
                 text: 'A sample text',
                 to: lang,
             },
-        },    
+        },
     })
 })
 ```
+
 So you can pass a plain javascript object as a `content` parameter.
 
 ### More
+
 To get more examples:
+
 ```bash
 git clone git@github.com:intento/intento-nodejs.git
 cd intento-nodejs
@@ -113,38 +121,39 @@ Though for the latter you need to have `INTENTO_API_KEY` in your environment.
 
 Hardcode your keys in the script your are experimenting with :)
 
+### 1st option
 
-### 1st option 
 For Unix-like machines run:
 
-```bash 
+```bash
 INTENTO_API_KEY=YOUR_SECRET_KEY GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY node example.js
 ```
+
 For Windows machines run:
 
-```bash 
+```bash
 SET INTENTO_API_KEY=YOUR_SECRET_KEY GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY node example.js
 ```
-
 
 ### 2nd option
 
 Assuming your are in `intento-nodejs` folder run:
 
-```bash 
+```bash
 cp .env.example .env
 ```
+
 Then edit `.env`, **put your api keys there**.
 
 Make that environmental variables available in the current context
 
-```bash 
+```bash
 export $(cat .env) # once per terminal
 ```
 
 Run `example.js` script
 
-```bash 
+```bash
 node example.js
 ```
 
