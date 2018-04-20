@@ -31,22 +31,22 @@ function IntentoConnector(credentials = {}, debug = false) {
     this.ai = Object.freeze({
         text: {
             translate: {
-                fullfill: function(context, fn) {
-                    this.fullfill('translate', context, fn)
+                fulfill: function(context, fn) {
+                    this.fulfill('translate', context, fn)
                 }.bind(this),
-                getProviders: function(params, fn) {
-                    this.getProviders('translate', params, fn)
+                providers: function(params, fn) {
+                    this.providers('translate', params, fn)
                 }.bind(this),
                 withStrategy: function(strategy, context, fn) {
                     this.withStrategy('translate', strategy, context, fn)
                 }.bind(this),
             },
             sentiment: {
-                fullfill: function(context, fn) {
-                    this.fullfill('sentiment', context, fn)
+                fulfill: function(context, fn) {
+                    this.fulfill('sentiment', context, fn)
                 }.bind(this),
-                getProviders: function(params, fn) {
-                    this.getProviders('sentiment', params, fn)
+                providers: function(params, fn) {
+                    this.providers('sentiment', params, fn)
                 }.bind(this),
                 withStrategy: function(strategy, context, fn) {
                     if (this.debug) {
@@ -56,11 +56,11 @@ function IntentoConnector(credentials = {}, debug = false) {
                 }.bind(this),
             },
             dictionary: {
-                fullfill: function(context, fn) {
-                    this.fullfill('dictionary', context, fn)
+                fulfill: function(context, fn) {
+                    this.fulfill('dictionary', context, fn)
                 }.bind(this),
-                getProviders: function(params, fn) {
-                    this.getProviders('dictionary', params, fn)
+                providers: function(params, fn) {
+                    this.providers('dictionary', params, fn)
                 }.bind(this),
                 withStrategy: function(strategy, context, fn) {
                     if (this.debug) {
@@ -92,12 +92,8 @@ IntentoConnector.prototype.makeRequest = function({
             fn = function() {}
         }
     }
-    if (data && content) {
-        console.warn(
-            'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
-        )
-    }
     const urlParams = querystring.stringify(params)
+
     const settings = {
         ...this.options,
         path: path + (urlParams ? '?' + urlParams : ''),
@@ -106,7 +102,19 @@ IntentoConnector.prototype.makeRequest = function({
     if (this.debug) {
         console.log('\nAPI request settings\n', settings)
     }
+
+    if (data && content) {
+        console.warn(
+            'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
+        )
+    }
+    if (data && typeof data !== 'string') {
+        console.error('`data` must be a string')
+        console.log('No request will be made')
+        return
+    }
     const requestData = data || JSON.stringify(content) || ''
+
     if (this.debug && requestData) {
         console.log('\nAPI request data\n', requestData)
     }
@@ -116,25 +124,50 @@ IntentoConnector.prototype.makeRequest = function({
     req.end()
 }
 
-IntentoConnector.prototype.fullfill = function(slug, context = {}, fn) {
-    const provider = context.provider
-    delete context.provider
+IntentoConnector.prototype.fulfill = function(slug, parameters = {}, fn) {
+    const {
+        text,
+        to,
+        from,
+        lang,
+        category,
+        provider,
+        bidding,
+        failover,
+        failover_list,
+        auth,
+        multiple_translations,
+        input_format,
+        output_format,
+        pretty_print,
+    } = parameters
+    const content = {
+        context: { text, from, to, lang, category },
+        service: {
+            provider,
+            auth,
+            bidding,
+            failover,
+            failover_list,
+            multiple_translations,
+            input_format,
+            output_format,
+            pretty_print,
+        },
+    }
 
-    const content = { context }
-
-    if (slug === 'dictionary') {
-        content.service = {
-            provider: 'ai.text.dictionary.yandex.dictionary_api.1-0',
-        }
-    } else if (slug === 'sentiment') {
-        if (!provider) {
+    if (!content.service.provider) {
+        if (slug === 'dictionary') {
+            content.service.provider =
+                'ai.text.dictionary.yandex.dictionary_api.1-0'
+        } else if (slug === 'sentiment') {
             console.error('Please specify a provider')
             console.log(
-                'You can look up providers by calling `client.ai.text.sentiment.getProviders()`.',
-                '\nProvider `id` is needed to be specified as a provider'
+                'You can look up for providers by calling `client.ai.text.sentiment.providers()`.',
+                '\nProvider `id` is needed to be specified as a `provider` parameter'
             )
             console.log('No request will be made')
-            this.ai.text.sentiment.getProviders(function(err, data) {
+            this.ai.text.sentiment.providers(function(err, data) {
                 if (!err) {
                     console.log('Select one of the provider ids')
                     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.id}`))
@@ -142,8 +175,6 @@ IntentoConnector.prototype.fullfill = function(slug, context = {}, fn) {
             })
             return
         }
-
-        content.service = { provider }
     }
 
     this.makeRequest({
@@ -154,7 +185,7 @@ IntentoConnector.prototype.fullfill = function(slug, context = {}, fn) {
     })
 }
 
-IntentoConnector.prototype.getProviders = function(slug, params, fn) {
+IntentoConnector.prototype.providers = function(slug, params, fn) {
     if (params instanceof Function) {
         fn = params
         params = {}
@@ -203,7 +234,7 @@ function getPath(slug, debug) {
         path = pathBySlug.translate
         if (debug) {
             console.error(
-                `getProviders: Unknown intent ${slug}. Translate intent will be used`
+                `Unknown intent ${slug}. Translate intent will be used`
             )
         }
     }
