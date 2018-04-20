@@ -199,27 +199,6 @@ IntentoConnector.prototype.providers = function(slug, params, fn) {
     })
 }
 
-IntentoConnector.prototype.withStrategy = function(
-    slug,
-    strategy,
-    context,
-    fn
-) {
-    const content = {
-        context,
-        service: {
-            bidding: strategy,
-        },
-    }
-
-    this.makeRequest({
-        path: getPath(slug, this.debug),
-        content,
-        method: 'POST',
-        fn,
-    })
-}
-
 // helpers
 
 const pathBySlug = {

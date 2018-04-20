@@ -67,16 +67,13 @@ client.ai.text.dictionary.providers(prettyPrintProviders)
 
 /* Advanced usage */
 
-const sampleContext = {
-    text: "How's it going?",
-    from: 'en',
-    to: 'es',
-}
-
 // Translate with specific strategy
-client.ai.text.translate.withStrategy(
-    'best_price',
-    sampleContext,
+client.ai.text.translate.fulfill(
+    {
+        text: "How's it going?",
+        to: 'pt',
+        bidding: 'best_price',
+    },
     (err, data) => {
         console.log('\nTranslate with a "best_price" strategy \n')
         defaultCallback(err, data)
