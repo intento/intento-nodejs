@@ -32,41 +32,26 @@ function IntentoConnector(credentials = {}, debug = false) {
         text: {
             translate: {
                 fulfill: function(context, fn) {
-                    this.fulfill('translate', context, fn)
+                    return this.fulfill('translate', context, fn)
                 }.bind(this),
                 providers: function(params, fn) {
-                    this.providers('translate', params, fn)
-                }.bind(this),
-                withStrategy: function(strategy, context, fn) {
-                    this.withStrategy('translate', strategy, context, fn)
+                    return this.providers('translate', params, fn)
                 }.bind(this),
             },
             sentiment: {
                 fulfill: function(context, fn) {
-                    this.fulfill('sentiment', context, fn)
+                    return this.fulfill('sentiment', context, fn)
                 }.bind(this),
                 providers: function(params, fn) {
-                    this.providers('sentiment', params, fn)
-                }.bind(this),
-                withStrategy: function(strategy, context, fn) {
-                    if (this.debug) {
-                        console.warn('Experimental feature')
-                    }
-                    this.withStrategy('sentiment', strategy, context, fn)
+                    return this.providers('sentiment', params, fn)
                 }.bind(this),
             },
             dictionary: {
                 fulfill: function(context, fn) {
-                    this.fulfill('dictionary', context, fn)
+                    return this.fulfill('dictionary', context, fn)
                 }.bind(this),
                 providers: function(params, fn) {
-                    this.providers('dictionary', params, fn)
-                }.bind(this),
-                withStrategy: function(strategy, context, fn) {
-                    if (this.debug) {
-                        console.warn('Experimental feature')
-                    }
-                    this.withStrategy('dictionary', strategy, context, fn)
+                    return this.providers('dictionary', params, fn)
                 }.bind(this),
             },
         },
@@ -83,48 +68,49 @@ IntentoConnector.prototype.makeRequest = function({
     content,
     data,
     method = 'GET',
-    fn = defaultCallback,
 }) {
-    if (!(fn instanceof Function)) {
-        if (this.debug) {
-            fn = defaultCallback
-        } else {
-            fn = function() {}
+    return new Promise((resolve, reject) => {
+        const urlParams = querystring.stringify(params)
+
+        const requestOptions = {
+            ...this.options,
+            path: path + (urlParams ? '?' + urlParams : ''),
+            method,
         }
-    }
-    const urlParams = querystring.stringify(params)
+        if (this.debug) {
+            console.log('\nAPI request requestOptions\n', requestOptions)
+        }
 
-    const settings = {
-        ...this.options,
-        path: path + (urlParams ? '?' + urlParams : ''),
-        method,
-    }
-    if (this.debug) {
-        console.log('\nAPI request settings\n', settings)
-    }
+        if (data && content) {
+            console.warn(
+                'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
+            )
+        }
+        if (data && typeof data !== 'string') {
+            console.error('`data` must be a string')
+            console.log('No request will be made')
+            throw new Error('`data` must be a string')
+        }
+        if (this.debug) {
+            console.log('\nAPI request content\n', content)
+        }
+        const requestData = data || JSON.stringify(content) || ''
 
-    if (data && content) {
-        console.warn(
-            'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
+        if (this.debug && requestData) {
+            console.log('\nAPI request data\n', requestData)
+        }
+        const req = https.request(requestOptions, resp =>
+            response_handler(resp, resolve, reject)
         )
-    }
-    if (data && typeof data !== 'string') {
-        console.error('`data` must be a string')
-        console.log('No request will be made')
-        return
-    }
-    const requestData = data || JSON.stringify(content) || ''
 
-    if (this.debug && requestData) {
-        console.log('\nAPI request data\n', requestData)
-    }
-    const req = https.request(settings, resp => response_handler(resp, fn))
-    req.on('error', fn)
-    req.write(requestData)
-    req.end()
+        // do handle with Promise.prototype.catch
+        req.on('error', reject)
+        req.write(requestData)
+        req.end()
+    })
 }
 
-IntentoConnector.prototype.fulfill = function(slug, parameters = {}, fn) {
+IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     const {
         text,
         to,
@@ -173,29 +159,22 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}, fn) {
                     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.id}`))
                 }
             })
-            return
+            throw new Error('Please specify a provider')
         }
     }
 
-    this.makeRequest({
+    return this.makeRequest({
         path: getPath(slug, this.debug),
         content,
         method: 'POST',
-        fn,
     })
 }
 
-IntentoConnector.prototype.providers = function(slug, params, fn) {
-    if (params instanceof Function) {
-        fn = params
-        params = {}
-    }
-
-    this.makeRequest({
+IntentoConnector.prototype.providers = function(slug, params) {
+    return this.makeRequest({
         path: getPath(slug, this.debug),
         params,
         method: 'GET',
-        fn,
     })
 }
 
@@ -221,15 +200,11 @@ function getPath(slug, debug) {
     return path
 }
 
-function defaultCallback(err, data) {
-    if (err) {
-        console.log('\nerror:' + err.message)
-        return
+function response_handler(response, resolve, reject) {
+    if (response.status >= 400) {
+        reject(response)
     }
-    console.log('API response:\n', data, '\n\n')
-}
 
-function response_handler(response, fn) {
     response.setEncoding('utf8')
     let body = ''
     response.on('data', function(chunk) {
@@ -241,12 +216,10 @@ function response_handler(response, fn) {
             if (body.length > 0) {
                 data = JSON.parse(body)
             }
-            fn(null, data)
+            resolve(data)
         } catch (e) {
-            fn(e, null)
+            reject(e)
         }
     })
-    response.on('error', function(e) {
-        console.log('Error: ' + e.message)
-    })
+    response.on('error', reject)
 }
