@@ -31,27 +31,27 @@ function IntentoConnector(credentials = {}, debug = false) {
     this.ai = Object.freeze({
         text: {
             translate: {
-                fulfill: function(context, fn) {
-                    return this.fulfill('translate', context, fn)
+                fulfill: function(context) {
+                    return this.fulfill('translate', context)
                 }.bind(this),
-                providers: function(params, fn) {
-                    return this.providers('translate', params, fn)
+                providers: function(params) {
+                    return this.providers('translate', params)
                 }.bind(this),
             },
             sentiment: {
-                fulfill: function(context, fn) {
-                    return this.fulfill('sentiment', context, fn)
+                fulfill: function(context) {
+                    return this.fulfill('sentiment', context)
                 }.bind(this),
-                providers: function(params, fn) {
-                    return this.providers('sentiment', params, fn)
+                providers: function(params) {
+                    return this.providers('sentiment', params)
                 }.bind(this),
             },
             dictionary: {
-                fulfill: function(context, fn) {
-                    return this.fulfill('dictionary', context, fn)
+                fulfill: function(context) {
+                    return this.fulfill('dictionary', context)
                 }.bind(this),
-                providers: function(params, fn) {
-                    return this.providers('dictionary', params, fn)
+                providers: function(params) {
+                    return this.providers('dictionary', params)
                 }.bind(this),
             },
         },
