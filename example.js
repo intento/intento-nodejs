@@ -24,19 +24,19 @@ const client = new IntentoConnector({ apikey }, DEBUG)
 // Simple translate text `text` to language `to`.
 // - source language will be detected automatically
 // - provider for the translation will be smart-selected based on the Smart routing feature
-//   see more on that here https://github.com/intento/intento-api#smart-routing
+//   see more on that in the documentation here https://github.com/intento/intento-api#smart-routing
 client.ai.text.translate
     .fulfill({ text: "How's it going?", to: 'es' })
     .then(defaultCallback)
     .catch(prettyCatch)
 
-// Analyze text for sentiments
-// https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage
+// Analyze text for sentiments.
+// More on that in the documentation here https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage
 client.ai.text.sentiment
     .fulfill({
-        text: 'We love this',
+        text: 'We love this place',
         lang: 'en',
-        // provider: 'ai.text.sentiment.ibm.natural_language_understanding',
+        provider: 'ai.text.sentiment.ibm.natural_language_understanding',
     })
     .then(defaultCallback)
     .catch(prettyCatch)
@@ -44,7 +44,7 @@ client.ai.text.sentiment
 /* Get information on providers */
 
 client.ai.text.translate
-    .providers({})
+    .providers()
     .then(prettyPrintProviders)
     .catch(prettyCatch)
 
@@ -143,7 +143,7 @@ client
     })
     .catch(prettyCatch)
 
-// Specify request parameters as raw json passed as a `data` parameter
+// One can pass request parameters as raw json specified as a `data` parameter
 // Make sure your json is valid. For example one can validate json online  here https://jsonformatter.curiousconcept.com/
 client
     .makeRequest({
@@ -165,7 +165,7 @@ client
 /* helpers */
 
 function defaultCallback(data) {
-    console.log('API response:\n', data, '\n\n')
+    console.log('API response:\n', JSON.stringify(data, null, 4), '\n\n')
 }
 
 function prettyPrintProviders(data) {

@@ -6,7 +6,26 @@ To get more information check out [the site](https://inten.to/).
 
 [API User Manual](https://github.com/intento/intento-api)
 
-In case you don't have a key to use Intento API, please feel free to mail hello@inten.to
+In case you don't have a key to use Intento API, please register here [console.inten.to](https://console.inten.to)
+
+<!-- TOC depthFrom:2 -->
+
+- [Installation](#installation)
+- [Basic usage](#basic-usage)
+    - [Translation](#translation)
+    - [Sentiment analysys](#sentiment-analysys)
+    - [Text meanings](#text-meanings)
+- [Advanced Examples](#advanced-examples)
+    - [Dynamic parameters](#dynamic-parameters)
+    - [Using `data` argument from a curl request directly](#using-data-argument-from-a-curl-request-directly)
+    - [More](#more)
+- [How to pass your API keys to your environment](#how-to-pass-your-api-keys-to-your-environment)
+    - [zero option (dev only)](#zero-option-dev-only)
+    - [1st option](#1st-option)
+    - [2nd option](#2nd-option)
+    - [3rd option](#3rd-option)
+
+<!-- /TOC -->
 
 ## Installation
 
@@ -20,16 +39,110 @@ or
 yarn add intento-nodejs
 ```
 
-## Example usage
+## Basic usage
+
+Initialise the client
+
+```js
+const IntentoConnector = require('./src/index')
+const client = new IntentoConnector({ apikey: YOUR_INTENTO_KEY })
+```
+
+### Translation
+
+Simple translate text `text` to language `to`:
+
+    - source language will be detected automatically
+    - provider for the translation will be smart-selected based on the [Smart routing feature](https://github.com/intento/intento-api#smart-routing)
+
+```js
+client.ai.text.translate
+    .fulfill({ text: "How's it going?", to: 'es' })
+    .then(data => {
+        console.log('Translation results:\n', data, '\n\n')
+    })
+```
+
+### Sentiment analysys
+
+Analyze text for sentiments. More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage)
+
+```js
+client.ai.text.sentiment
+    .fulfill({
+        text: 'We love this place',
+        lang: 'en',
+        provider: 'ai.text.sentiment.ibm.natural_language_understanding',
+    })
+    .then(data => {
+        console.log('Sentiment analysys results:\n', data, '\n\n')
+    })
+```
+
+### Text meanings
+
+[Dictionary intent](https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md)
+
+```js
+client.ai.text.dictionary
+    .fulfill({
+        text: 'meaning',
+        from: 'en',
+        to: 'ru',
+    })
+    .then(data => {
+        console.log('Results:\n', JSON.stringify(data, null, 4), '\n')
+    })
+```
+
+## Advanced Examples
+
+### Dynamic parameters
+
+Describe `data` dynamicly through `content`
+
+For example we'd like to translate the same text for different languages.
+One can make similar requests for each language like this:
+
+```js
+const IntentoConnector = require('intento-nodejs')
+const client = new IntentoConnector({ apikey: process.env.INTENTO_API_KEY })
+
+const options = {
+    path: '/ai/text/translate',
+    method: 'POST',
+    // content: ...
+}
+
+['es', 'ru', 'da'].forEach(lang => {
+    client
+        .makeRequest({
+            ...options, // path, method
+            content: {
+                context: {
+                    text: 'A sample text',
+                    to: lang,
+                },
+            },
+        })
+        .then(console.info)
+        .catch(console.error)
+})
+```
+
+So you can pass a plain javascript object as a `content` parameter.
 
 ### Using `data` argument from a curl request directly
+
+One can pass request parameters as raw json specified as a `data` parameter.
+Make sure your json is valid. For example one can validate json online here https://jsonformatter.curiousconcept.com/
 
 For a `curl` instruction from [the docs](https://github.com/intento/intento-api)
 
 ```bash
 curl -XPOST -H 'apikey: YOUR_API_KEY' 'https://api.inten.to/ai/text/translate' -d '{
     "context": {
-        "text": "A sample text",
+        "text": "Validation is the king",
         "to": "es"
     },
     "service": {
@@ -38,70 +151,29 @@ curl -XPOST -H 'apikey: YOUR_API_KEY' 'https://api.inten.to/ai/text/translate' -
 }'
 ```
 
-try following:
+run following:
 
 ```js
-const Intentor = require('intento-nodejs')
+const IntentoConnector = require('intento-nodejs')
+const client = new IntentoConnector({ apikey: process.env.INTENTO_API_KEY })
 
-const api_key = process.env.INTENTO_API_KEY
-
-const client = new Intentor({ api_key: api_key })
-
-client.makeRequest({
-    path: '/ai/text/translate',
-    method: 'POST',
-    data: `{
-        "context": {
-            "text": "A sample text",
-            "to": "es"
-        },
-        "service": {
-            "provider": "ai.text.translate.microsoft.translator_text_api.2-0"
-        }
-    }`,
-    fn: (err, data) => {
-        if (err) console.log('error:' + err.message)
-        console.log(data)
-    },
-})
-```
-
-### Describe `data` dynamicly through `content`
-
-For example we'd like to translate the same text for different languages.
-One can make similar requests for each language like this:
-
-```js
-const Intentor = require('intento-nodejs')
-
-const api_key = process.env.INTENTO_API_KEY
-
-const client = new Intentor({ api_key: api_key })
-
-const options = {
-    path: '/ai/text/translate',
-    method: 'POST',
-    // content: ...
-    fn: (err, data) => {
-        if (err) console.log('error:' + err.message)
-        console.log(data)
-    },
-}
-
-['es', 'ru', 'da'].forEach(lang => {
-    client.makeRequest({
-        ...options, // path, method, callback fn
-        content: {
-            context: {
-                text: 'A sample text',
-                to: lang,
+client
+    .makeRequest({
+        path: '/ai/text/translate',
+        method: 'POST',
+        data: `{
+            "context": {
+                "text": "Validation is the king",
+                "to": "es"
             },
-        },
+            "service": {
+                "provider": "ai.text.translate.microsoft.translator_text_api.2-0"
+            }
+        }`,
     })
-})
+    .then(console.info)
+    .catch(console.error)
 ```
-
-So you can pass a plain javascript object as a `content` parameter.
 
 ### More
 
