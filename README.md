@@ -135,7 +135,7 @@ So you can pass a plain javascript object as a `content` parameter.
 ### Using `data` argument from a curl request directly
 
 One can pass request parameters as raw json specified as a `data` parameter.
-Make sure your json is valid. For example one can validate json online here https://jsonformatter.curiousconcept.com/
+Make sure your json is valid. For example one can [validate json online](https://jsonformatter.curiousconcept.com/)
 
 For a `curl` instruction from [the docs](https://github.com/intento/intento-api)
 
