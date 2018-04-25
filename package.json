@@ -1,10 +1,20 @@
 {
   "name": "intento-nodejs",
+  "description": "Intento API Client Library for Node.js",
   "version": "0.0.2",
   "main": "src/index.js",
   "repository": "intento/intento-nodejs",
   "author": "Intento Inc.",
   "license": "Apache-2.0",
+  "keywords": [
+    "intento api client",
+    "intento apis client",
+    "intento apis",
+    "intento api",
+    "translation",
+    "sentiment analysis",
+    "text meanings"
+  ],
   "scripts": {
     "build": "webpack",
     "test": "jest --coverage --collectCoverageFrom=src/*.js --forceExit",
