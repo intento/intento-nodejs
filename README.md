@@ -189,7 +189,7 @@ client.ai.text.translate
 
 #### Combine filters
 
-See more on ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
+Retrieve providers able to translate to Italian an array of segments at once detecting source language:
 
 ```js
 client.ai.text.translate
