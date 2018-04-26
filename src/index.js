@@ -29,10 +29,15 @@ function IntentoConnector(credentials = {}, debug = false) {
     }
 
     this.ai = Object.freeze({
+        settings: {
+            languages: function (params) {
+                return this.settingsLanguages(params)
+            }.bind(this),
+        },
         text: {
             translate: {
-                fulfill: function(context) {
-                    return this.fulfill('translate', context)
+                fulfill: function(params) {
+                    return this.fulfill('translate', params)
                 }.bind(this),
                 providers: function(params) {
                     return this.providers('translate', params)
@@ -40,10 +45,13 @@ function IntentoConnector(credentials = {}, debug = false) {
                 provider: function (providerId, params) {
                     return this.provider('translate', providerId, params)
                 }.bind(this),
+                languages: function (params) {
+                    return this.translationLanguages(params)
+                }.bind(this),
             },
             sentiment: {
-                fulfill: function(context) {
-                    return this.fulfill('sentiment', context)
+                fulfill: function(params) {
+                    return this.fulfill('sentiment', params)
                 }.bind(this),
                 providers: function(params) {
                     return this.providers('sentiment', params)
@@ -53,8 +61,8 @@ function IntentoConnector(credentials = {}, debug = false) {
                 }.bind(this),
             },
             dictionary: {
-                fulfill: function(context) {
-                    return this.fulfill('dictionary', context)
+                fulfill: function(params) {
+                    return this.fulfill('dictionary', params)
                 }.bind(this),
                 providers: function(params) {
                     return this.providers('dictionary', params)
@@ -188,13 +196,32 @@ IntentoConnector.prototype.providers = function(slug, params) {
 }
 
 IntentoConnector.prototype.provider = function (slug, providerId, params) {
-    const path = getPath(slug, this.debug) + '/' + providerId
-    console.log(path)
     return this.makeRequest({
-        // path: getPath(slug, this.debug) + '/' + providerId,
-        path,
+        path: getPath(slug, this.debug) + '/' + providerId,
         params,
         method: 'GET',
+    })
+}
+
+
+IntentoConnector.prototype.translationLanguages = function (params) {
+    const { language, locale } = params
+    let path = getPath('translate', this.debug) + '/languages'
+    if (language) {
+        path += '/' + language
+    }
+    return this.makeRequest({
+        path,
+        params: { locale },
+        method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.settingsLanguages = function (params) {
+    return this.makeRequest({
+        path: '/settings/languages',
+        params,
+        method: params ? 'POST' : 'GET',
     })
 }
 

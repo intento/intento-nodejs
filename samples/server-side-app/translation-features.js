@@ -39,3 +39,30 @@ client.ai.text.translate
     })
     .then(console.log)
     .catch(console.error)
+
+// Supported languages
+   
+// List of supported languages
+client.ai.text.translate
+    .languages({ locale: 'ru' })
+    .then(console.log)
+    .catch(console.error)
+
+// Full information on a supported language
+client.ai.text.translate
+    .languages({ language: 'he', locale: 'ru' })
+    .then(console.log)
+    .catch(console.error)
+
+// Setting your own language codes
+client.ai.settings
+    .languages({ aliasforen: 'en' })
+    .then(console.log)
+    .catch(console.error)
+
+// // All language settings
+client.ai.settings
+    .languages()
+    .then(console.log)
+    .catch(console.error)
+
