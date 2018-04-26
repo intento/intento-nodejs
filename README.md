@@ -15,6 +15,10 @@ In case you don't have a key to use Intento API, please register here [console.i
     - [Translation](#translation)
     - [Sentiment analysis](#sentiment-analysis)
     - [Text meanings](#text-meanings)
+- [Translation features](#translation-features)
+    - [Language detection mode](#language-detection-mode)
+    - [Bulk mode](#bulk-mode)
+    - [Translation domains (`category`)](#translation-domains-category)
 - [Explore providers](#explore-providers)
     - [Response structure](#response-structure)
     - [List all available providers](#list-all-available-providers)
@@ -104,6 +108,141 @@ client.ai.text.dictionary
     .then(data => {
         console.log('Results:\n', JSON.stringify(data, null, 4), '\n')
     })
+```
+
+## Translation features
+
+### Language detection mode
+
+This mode is used when `from` parameter is omitted.
+In that case providers which allow automatic source language detection will be used. The results of the detection will be returned.
+
+```js
+client.ai.text.translate
+    .fulfill({ text: "How's it going?", to: 'es' })
+    .then(console.log)
+```
+
+The response contains the translated text, service information and meta information (i.e. detected language):
+
+```json
+{
+    "results": [
+        "¿Cómo te va?"
+    ],
+    "meta": {
+        "detected_source_language": [
+            "en"
+        ]
+    },
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.google.translate_api.2-0",
+            "name": "Google Cloud Translation API"
+        }
+    }
+}
+```
+
+Depending on the provider, the result may contain either a single value (detected language for all the translated sentences) or an array of values (detected language for each of the translated sentences).
+
+### Bulk mode
+
+We provide a bulk fulfillment mode to translate an array of segments at once. The mode is activated by sending an array of strings to the `text` parameter. The bulk mode is supported for most of the providers.
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: ['A sample text', 'Hello world'],
+        from: 'en',
+        to: 'es',
+    })
+    .then(console.log)
+```
+
+The response contains the translated texts and a service information on which provider was used:
+
+```json
+{
+    "results": [
+        "Ein Beispieltext",
+        "Hallo Welt"
+    ],
+    "meta": {},
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
+            "name": "Microsoft Translator API"
+        }
+    }
+}
+```
+
+### Translation domains (`category`)
+
+Currently only Microsoft Translation Text API supports this feature.
+In the case of that provider the domains feature supports choice between _Statistical Machine Translation_ (`category: 'generalnn`) and _Neural Machine Translation_ (`category: 'general`). For Microsoft Translation, the default mode is _NMT_ - `category: 'generalnn'`.
+
+Compare the output.
+
+category **general**:
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: 'A sample text',
+        to: 'es',
+        category: 'general', // <-- specify a domain
+        provider: 'ai.text.translate.microsoft.translator_text_api.2-0',
+    })
+    .then(console.log)
+```
+
+Response:
+
+```sh
+{
+    "results": [
+        "Un texto de muestra"
+    ],
+    "meta": {},
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
+            "name": "Microsoft Translator API"
+        }
+    }
+}
+```
+
+category **generalnn**:
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: 'A sample text',
+        to: 'es',
+        category: 'generalnn', // <-- specify a domain
+        provider: 'ai.text.translate.microsoft.translator_text_api.2-0',
+    })
+    .then(console.log)
+```
+
+Response:
+
+```sh
+{
+    "results": [
+        "Un texto de ejemplo"
+    ],
+    "meta": {},
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
+            "name": "Microsoft Translator API"
+        }
+    }
+}
 ```
 
 ## Explore providers

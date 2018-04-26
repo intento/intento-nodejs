@@ -48,7 +48,7 @@ function printProvidersInfo(data) {
 // eslint-disable-next-line no-unused-vars
 function printProvidersAsTable(data) {
     console.log(`\nThere are overall ${data.length} providers:`)
-    
+
     console.table(
         data.map(({ id, name, symmetric, pairs }) => ({
             name,
