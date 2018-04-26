@@ -25,6 +25,14 @@ client.ai.text.translate
     .then(data => data.forEach(p => console.info(p.name)))
     .catch(console.error)
 
+// Getting information about a provider
+client.ai.text.translate
+    .provider('ai.text.translate.google.translate_api.2-0')
+    .then(console.log)
+    .catch(console.error)
+
+// helpers
+
 function printProviderNames(data) {
     console.log(`\nThere are overall ${data.length} providers:`)
     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.name}`))

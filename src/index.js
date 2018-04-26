@@ -37,6 +37,9 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('translate', params)
                 }.bind(this),
+                provider: function (providerId, params) {
+                    return this.provider('translate', providerId, params)
+                }.bind(this),
             },
             sentiment: {
                 fulfill: function(context) {
@@ -45,6 +48,9 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('sentiment', params)
                 }.bind(this),
+                provider: function (providerId, params) {
+                    return this.provider('translate', providerId, params)
+                }.bind(this),
             },
             dictionary: {
                 fulfill: function(context) {
@@ -52,6 +58,9 @@ function IntentoConnector(credentials = {}, debug = false) {
                 }.bind(this),
                 providers: function(params) {
                     return this.providers('dictionary', params)
+                }.bind(this),
+                provider: function (providerId, params) {
+                    return this.provider('translate', providerId, params)
                 }.bind(this),
             },
         },
@@ -173,6 +182,17 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
 IntentoConnector.prototype.providers = function(slug, params) {
     return this.makeRequest({
         path: getPath(slug, this.debug),
+        params,
+        method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.provider = function (slug, providerId, params) {
+    const path = getPath(slug, this.debug) + '/' + providerId
+    console.log(path)
+    return this.makeRequest({
+        // path: getPath(slug, this.debug) + '/' + providerId,
+        path,
         params,
         method: 'GET',
     })

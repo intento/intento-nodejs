@@ -15,21 +15,28 @@ In case you don't have a key to use Intento API, please register here [console.i
     - [Translation](#translation)
     - [Sentiment analysis](#sentiment-analysis)
     - [Text meanings](#text-meanings)
-- [Translation features](#translation-features)
-    - [Language detection mode](#language-detection-mode)
-    - [Bulk mode](#bulk-mode)
-    - [Translation domains (`category`)](#translation-domains-category)
-- [Explore providers](#explore-providers)
+- [Explore providers (basics)](#explore-providers-basics)
     - [Response structure](#response-structure)
     - [List all available providers](#list-all-available-providers)
         - [Translation providers](#translation-providers)
         - [Sentiment analysis providers](#sentiment-analysis-providers)
         - [Text meanings providers](#text-meanings-providers)
+- [Translation features](#translation-features)
+    - [Language detection mode](#language-detection-mode)
+    - [Bulk mode](#bulk-mode)
+    - [Translation domains (`category`)](#translation-domains-category)
+- [Explore translation providers](#explore-translation-providers)
     - [Filter providers by available features](#filter-providers-by-available-features)
         - [Providers with language detect feature](#providers-with-language-detect-feature)
         - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
-        - [Providers able translate to Afrikaans](#providers-able-translate-to-afrikaans)
+        - [Providers able to translate to Afrikaans](#providers-able-to-translate-to-afrikaans)
         - [Combine filters](#combine-filters)
+    - [Getting information about a provider](#getting-information-about-a-provider)
+    - [Supported languages](#supported-languages)
+        - [List of supported languages](#list-of-supported-languages)
+        - [Full information on a supported language](#full-information-on-a-supported-language)
+    - [Setting your own language codes](#setting-your-own-language-codes)
+    - [All language settings](#all-language-settings)
 - [Advanced Examples](#advanced-examples)
     - [Dynamic parameters](#dynamic-parameters)
     - [Using `data` argument from a curl request directly](#using-data-argument-from-a-curl-request-directly)
@@ -108,6 +115,56 @@ client.ai.text.dictionary
     .then(data => {
         console.log('Results:\n', JSON.stringify(data, null, 4), '\n')
     })
+```
+
+## Explore providers (basics)
+
+### Response structure
+
+In all cases a response object is a list of objects. Each object in that list describes one provider. The structure of the description is following:
+
+```js
+{
+    id: 'provider.id',
+    name: 'Provider Name',
+    score: 0,
+    price: 0,
+    symmetric: [...],
+    pairs: [...],
+}
+```
+
+`symmetric` - is a list of language codes for which translation in both directions is available.
+
+`pairs` - is a list of plain objects with structure `{ from: 'lang-code-1', to: 'lang-code-2' }`. It means that for current provider translation from `lang-code-1` to `lang-code-2` is available.
+
+### List all available providers
+
+#### Translation providers
+
+```js
+client.ai.text.translate
+    .providers()
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+#### Sentiment analysis providers
+
+```js
+client.ai.text.sentiment
+    .providers()
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+#### Text meanings providers
+
+```js
+client.ai.text.dictionary
+    .providers()
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
 ```
 
 ## Translation features
@@ -245,54 +302,16 @@ Response:
 }
 ```
 
-## Explore providers
+## Explore translation providers
 
-### Response structure
+Response structure is the same for all requests dealing with providers
 
-In all cases a response object is a list of objects. Each object in that list describes one provider. The structure of the description is following:
-
-```js
-{
-    id: 'provider.id',
-    name: 'Provider Name',
-    score: 0,
-    price: 0,
-    symmetric: [...],
-    pairs:[...],
-}
-```
-
-`symmetric` - is a list of language codes for which translation in both directions is available.
-
-`pairs` - is a list of plain objects with structure `{ from: 'lang-code-1', to: 'lang-code-2' }`. It means that for current provider translation from `lang-code-1` to `lang-code-2` is available.
-
-### List all available providers
-
-#### Translation providers
+List all providers as mentioned [above](#translation-providers)
 
 ```js
 client.ai.text.translate
     .providers()
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
-```
-
-#### Sentiment analysis providers
-
-```js
-client.ai.text.sentiment
-    .providers()
-    .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
-```
-
-#### Text meanings providers
-
-```js
-client.ai.text.dictionary
-    .providers()
-    .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
 ### Filter providers by available features
@@ -303,7 +322,6 @@ client.ai.text.dictionary
 client.ai.text.translate
     .providers({ lang_detect: true })
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
 #### Provider supporting bulk translation
@@ -312,10 +330,9 @@ client.ai.text.translate
 client.ai.text.translate
     .providers({ bulk: true })
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
-#### Providers able translate to Afrikaans
+#### Providers able to translate to Afrikaans
 
 See more on ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
 
@@ -323,7 +340,6 @@ See more on ([language codes](http://www.loc.gov/standards/iso639-2/php/code_lis
 client.ai.text.translate
     .providers({ to: 'af' })
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
 #### Combine filters
@@ -334,7 +350,148 @@ Retrieve providers able to translate to Italian an array of segments at once det
 client.ai.text.translate
     .providers({ to: 'it', bulk: true, lang_detect: true })
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
+```
+
+### Getting information about a provider
+
+To get information about a provider pass provider id to `client.ai.text.translate.provider`.
+
+```js
+client.ai.text.translate
+    .provider('ai.text.translate.google.translate_api.2-0')
+    .then(console.log)
+```
+
+The response contains a list of the metadata fields and values available for the provider:
+
+```json
+{
+    "id": "ai.text.translate.google.translate_api.2-0",
+    "name": "Google Cloud Translation API",
+    "logo": "https://inten.to/img/api/ggl_translate.png",
+    "billing": true,
+    "bulk": true,
+    "languages": {
+        "symmetric": [
+            "gu",
+            "gd",
+            "ga",
+            "gl",
+            "lb"
+        ],
+        "pairs": [
+            [
+                [
+                    "en",
+                    "de"
+                ],
+                [
+                    "fr",
+                    "en"
+                ]
+            ]
+        ]
+    }
+}
+```
+
+### Supported languages
+
+#### List of supported languages
+
+Will return an array of supported languages, for each language:
+
+- iso name
+- localized name (if `locale` parameter is provided); if there is no localized name, `null` is returned
+- intento code
+- client code (if the client calling the method has its own codes)
+
+```js
+client.ai.text.translate
+    .languages({ locale: 'ru' })
+    .then(console.log)
+```
+
+```json
+[
+    {
+        "iso_name": "Hebrew (modern)",
+        "name": "иврит",
+        "intento_code": "he",
+        "client_code": "hebr"
+    }
+]
+```
+
+#### Full information on a supported language
+
+For a given language code (intento internal or client’s) will show full metadata:
+
+- iso name
+- localized name (if `locale` parameter is provided); if there is no localized name, `null` is returned
+- intento code
+- iso codes (ones which are applicable)
+- providers’ codes (which map to this internal code)
+- client code (if the client calling the method has its own codes)
+
+```js
+client.ai.text.translate
+    .languages({ language: 'he', locale: 'ru' })
+    .then(console.log)
+```
+
+Response:
+
+```json
+{
+    "iso_name": "Hebrew (modern)",
+    "name": "иврит",
+    "intento_code": "he",
+    "iso_639_1_code": "he",
+    "iso_639_2t_code": "heb",
+    "iso_639_2b_code": "heb",
+    "iso_639_3_code": "heb",
+    "provider_codes": {
+        "ai.text.translate.google.translate_api.2-0": "iw"
+    },
+    "client_code": "hebr"
+}
+```
+
+### Setting your own language codes
+
+To define your aliases to language codes call `client.ai.settings.languages`. After 60 seconds, you can start using them.
+
+```js
+client.ai.settings
+    .languages({ aliasforen: 'en' })
+    .then(console.log)
+```
+
+Response:
+
+```json
+{
+    "aliasforen": "en"
+}
+```
+
+### All language settings
+
+Settings can be retrieved by calling `client.ai.settings.languages` without parameters
+
+```js
+client.ai.settings
+    .languages()
+    .then(console.log)
+```
+
+Response:
+
+```json
+{
+    "aliasforen": "en"
+}
 ```
 
 ## Advanced Examples
