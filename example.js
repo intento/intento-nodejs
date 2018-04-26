@@ -41,7 +41,7 @@ client.ai.text.sentiment
     .then(defaultCallback)
     .catch(prettyCatch)
 
-/* Get information on providers */
+/* Explore providers */
 
 client.ai.text.translate
     .providers()

@@ -15,6 +15,9 @@ In case you don't have a key to use Intento API, please register here [console.i
     - [Translation](#translation)
     - [Sentiment analysys](#sentiment-analysys)
     - [Text meanings](#text-meanings)
+- [Explore providers](#explore-providers)
+    - [List all available providers](#list-all-available-providers)
+    - [Filter providers by available features](#filter-providers-by-available-features)
 - [Advanced Examples](#advanced-examples)
     - [Dynamic parameters](#dynamic-parameters)
     - [Using `data` argument from a curl request directly](#using-data-argument-from-a-curl-request-directly)
@@ -93,6 +96,66 @@ client.ai.text.dictionary
     .then(data => {
         console.log('Results:\n', JSON.stringify(data, null, 4), '\n')
     })
+```
+
+## Explore providers
+
+### List all available providers
+
+Translation providers
+
+```js
+client.ai.text.translate
+    .providers()
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+Sentiment analysis providers
+
+```js
+client.ai.text.sentiment
+    .providers()
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+Text meanings providers
+
+```js
+client.ai.text.dictionary
+    .providers()
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+### Filter providers by available features
+
+Providers with language detect feature
+
+```js
+client.ai.text.translate
+    .providers({ lang_detect: true })
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+Provider supporting bulk translation
+
+```js
+client.ai.text.translate
+    .providers({ bulk: true })
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+Providers able translate to Afrikaans ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
+
+```js
+client.ai.text.translate
+    .providers({ to: 'af' })
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
 ```
 
 ## Advanced Examples
