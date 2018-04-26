@@ -13,15 +13,23 @@ In case you don't have a key to use Intento API, please register here [console.i
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
     - [Translation](#translation)
-    - [Sentiment analysys](#sentiment-analysys)
+    - [Sentiment analysis](#sentiment-analysis)
     - [Text meanings](#text-meanings)
 - [Explore providers](#explore-providers)
+    - [Response structure](#response-structure)
     - [List all available providers](#list-all-available-providers)
+        - [Translation providers](#translation-providers)
+        - [Sentiment analysis providers](#sentiment-analysis-providers)
+        - [Text meanings providers](#text-meanings-providers)
     - [Filter providers by available features](#filter-providers-by-available-features)
+        - [Providers with language detect feature](#providers-with-language-detect-feature)
+        - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
+        - [Providers able translate to Afrikaans](#providers-able-translate-to-afrikaans)
+        - [Combine filters](#combine-filters)
 - [Advanced Examples](#advanced-examples)
     - [Dynamic parameters](#dynamic-parameters)
     - [Using `data` argument from a curl request directly](#using-data-argument-from-a-curl-request-directly)
-    - [More](#more)
+    - [More examples](#more-examples)
 - [How to pass your API keys to your environment](#how-to-pass-your-api-keys-to-your-environment)
     - [zero option (dev only)](#zero-option-dev-only)
     - [1st option](#1st-option)
@@ -66,7 +74,7 @@ client.ai.text.translate
     })
 ```
 
-### Sentiment analysys
+### Sentiment analysis
 
 Analyze text for sentiments. More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage)
 
@@ -78,7 +86,7 @@ client.ai.text.sentiment
         provider: 'ai.text.sentiment.ibm.natural_language_understanding',
     })
     .then(data => {
-        console.log('Sentiment analysys results:\n', data, '\n\n')
+        console.log('Sentiment analysis results:\n', data, '\n\n')
     })
 ```
 
@@ -100,9 +108,28 @@ client.ai.text.dictionary
 
 ## Explore providers
 
+### Response structure
+
+In all cases a response object is a list of objects. Each object in that list describes one provider. The structure of the description is following:
+
+```js
+{
+    id: 'provider.id',
+    name: 'Provider Name',
+    score: 0,
+    price: 0,
+    symmetric: [...],
+    pairs:[...],
+}
+```
+
+`symmetric` - is a list of language codes for which translation in both directions is available.
+
+`pairs` - is a list of plain objects with structure `{ from: 'lang-code-1', to: 'lang-code-2' }`. It means that for current provider translation from `lang-code-1` to `lang-code-2` is available.
+
 ### List all available providers
 
-Translation providers
+#### Translation providers
 
 ```js
 client.ai.text.translate
@@ -111,7 +138,7 @@ client.ai.text.translate
     .catch(console.error)
 ```
 
-Sentiment analysis providers
+#### Sentiment analysis providers
 
 ```js
 client.ai.text.sentiment
@@ -120,7 +147,7 @@ client.ai.text.sentiment
     .catch(console.error)
 ```
 
-Text meanings providers
+#### Text meanings providers
 
 ```js
 client.ai.text.dictionary
@@ -131,7 +158,7 @@ client.ai.text.dictionary
 
 ### Filter providers by available features
 
-Providers with language detect feature
+#### Providers with language detect feature
 
 ```js
 client.ai.text.translate
@@ -140,7 +167,7 @@ client.ai.text.translate
     .catch(console.error)
 ```
 
-Provider supporting bulk translation
+#### Provider supporting bulk translation
 
 ```js
 client.ai.text.translate
@@ -149,11 +176,24 @@ client.ai.text.translate
     .catch(console.error)
 ```
 
-Providers able translate to Afrikaans ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
+#### Providers able translate to Afrikaans
+
+See more on ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
 
 ```js
 client.ai.text.translate
     .providers({ to: 'af' })
+    .then(data => data.forEach(p => console.info(p.name)))
+    .catch(console.error)
+```
+
+#### Combine filters
+
+See more on ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
+
+```js
+client.ai.text.translate
+    .providers({ to: 'it', bulk: true, lang_detect: true })
     .then(data => data.forEach(p => console.info(p.name)))
     .catch(console.error)
 ```
@@ -238,7 +278,7 @@ client
     .catch(console.error)
 ```
 
-### More
+### More examples
 
 To get more examples:
 

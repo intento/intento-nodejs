@@ -68,7 +68,7 @@ client.ai.text.translate
     })
     .catch(prettyCatch)
 
-// Providers for sentiment analysys
+// Providers for sentiment analysis
 client.ai.text.sentiment
     .providers()
     .then(prettyPrintProviders)
