@@ -158,7 +158,7 @@ client.ai.text.dictionary
 
 ## Translation features
 
-More information in [ai.text.translation.md](./ai.text.translation.md)
+More information in [ai.text.translate.md](./ai.text.translate.md)
 
 ## Sentiment features
 
