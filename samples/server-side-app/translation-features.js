@@ -60,7 +60,7 @@ client.ai.settings
     .then(console.log)
     .catch(console.error)
 
-// // All language settings
+// All language settings
 client.ai.settings
     .languages()
     .then(console.log)

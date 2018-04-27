@@ -29,6 +29,8 @@ describe('Basic', () => {
         expect(client.ai.text.translate).toBeDefined()
         expect(client.ai.text.sentiment).toBeDefined()
         expect(client.ai.text.dictionary).toBeDefined()
+        expect(client.ai.settings).toBeDefined()
+        expect(typeof client.ai.settings.languages).toBe('function')
     })
 })
 
@@ -39,6 +41,14 @@ describe('Translation Intent', () => {
     })
     it('Providers returns a promise', () => {
         const ret = client.ai.text.translate.providers()
+        expect(ret instanceof Promise).toBe(true)
+    })
+    it('Provider returns a promise', () => {
+        const ret = client.ai.text.translate.provider('')
+        expect(ret instanceof Promise).toBe(true)
+    })
+    it('Languages returns a promise', () => {
+        const ret = client.ai.text.translate.languages()
         expect(ret instanceof Promise).toBe(true)
     })
 })
@@ -54,6 +64,10 @@ describe('Sentiment Intent', () => {
         const ret = client.ai.text.sentiment.providers()
         expect(ret instanceof Promise).toBe(true)
     })
+    it('Provider returns a promise', () => {
+        const ret = client.ai.text.sentiment.provider('')
+        expect(ret instanceof Promise).toBe(true)
+    })
 })
 
 describe('Dictionary Intent', () => {
@@ -63,6 +77,14 @@ describe('Dictionary Intent', () => {
     })
     it('Providers returns a promise', () => {
         const ret = client.ai.text.dictionary.providers()
+        expect(ret instanceof Promise).toBe(true)
+    })
+    it('Provider returns a promise', () => {
+        const ret = client.ai.text.dictionary.provider('')
+        expect(ret instanceof Promise).toBe(true)
+    })
+    it('Languages returns a promise', () => {
+        const ret = client.ai.text.dictionary.languages()
         expect(ret instanceof Promise).toBe(true)
     })
 })

@@ -46,7 +46,7 @@ function IntentoConnector(credentials = {}, debug = false) {
                     return this.provider('translate', providerId, params)
                 }.bind(this),
                 languages: function (params) {
-                    return this.translationLanguages(params)
+                    return this.languages('translate', params)
                 }.bind(this),
             },
             sentiment: {
@@ -57,7 +57,7 @@ function IntentoConnector(credentials = {}, debug = false) {
                     return this.providers('sentiment', params)
                 }.bind(this),
                 provider: function (providerId, params) {
-                    return this.provider('translate', providerId, params)
+                    return this.provider('sentiment', providerId, params)
                 }.bind(this),
             },
             dictionary: {
@@ -68,7 +68,10 @@ function IntentoConnector(credentials = {}, debug = false) {
                     return this.providers('dictionary', params)
                 }.bind(this),
                 provider: function (providerId, params) {
-                    return this.provider('translate', providerId, params)
+                    return this.provider('dictionary', providerId, params)
+                }.bind(this),
+                languages: function (params) {
+                    return this.languages('dictionary', params)
                 }.bind(this),
             },
         },
@@ -204,9 +207,9 @@ IntentoConnector.prototype.provider = function (slug, providerId, params) {
 }
 
 
-IntentoConnector.prototype.translationLanguages = function (params) {
+IntentoConnector.prototype.languages = function (slug, params = {}) {
     const { language, locale } = params
-    let path = getPath('translate', this.debug) + '/languages'
+    let path = getPath(slug, this.debug) + '/languages'
     if (language) {
         path += '/' + language
     }
