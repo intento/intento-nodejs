@@ -26,9 +26,24 @@ describe('Basic', () => {
     it('has correct structure', () => {
         expect(client.ai).toBeDefined()
         expect(client.ai.text).toBeDefined()
+
         expect(client.ai.text.translate).toBeDefined()
+        expect(typeof client.ai.text.translate.fulfill).toBe('function')
+        expect(typeof client.ai.text.translate.providers).toBe('function')
+        expect(typeof client.ai.text.translate.provider).toBe('function')
+        expect(typeof client.ai.text.translate.languages).toBe('function')
+
         expect(client.ai.text.sentiment).toBeDefined()
+        expect(typeof client.ai.text.sentiment.fulfill).toBe('function')
+        expect(typeof client.ai.text.sentiment.providers).toBe('function')
+        expect(typeof client.ai.text.sentiment.provider).toBe('function')
+
         expect(client.ai.text.dictionary).toBeDefined()
+        expect(typeof client.ai.text.dictionary.fulfill).toBe('function')
+        expect(typeof client.ai.text.dictionary.providers).toBe('function')
+        expect(typeof client.ai.text.dictionary.provider).toBe('function')
+        expect(typeof client.ai.text.dictionary.languages).toBe('function')
+
         expect(client.ai.settings).toBeDefined()
         expect(typeof client.ai.settings.languages).toBe('function')
     })
