@@ -189,7 +189,10 @@ In all cases a response object is a list of objects. Each object in that list de
 {
     "id": "provider-id",
     "name": "Provider Name",
-    "logo": "https://utrl/to/logo.png",
+    "logo": "https://url/to/logo.png",
+    "auth": {
+        "key": "YOUR_KEY"
+    },
     "billing": true,
     "languages": {
         "lang": [...]
