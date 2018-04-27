@@ -24,6 +24,7 @@ function IntentoConnector(credentials = {}, debug = false) {
     this.options = {
         host: 'api.inten.to',
         headers: {
+            'User-Agent': 'NodeJS SDK client',
             apikey,
         },
     }
