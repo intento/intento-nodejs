@@ -66,12 +66,14 @@ const client = new IntentoConnector({ apikey: YOUR_INTENTO_KEY })
 
 This is an intent to translate text from one language to another.
 
-More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.translate.md)
+Related [documentation](https://github.com/intento/intento-api/blob/master/ai.text.translate.md)
+
+More examples in [the sample app](./sample/server-side-app/ai.text.translate.js)
 
 Simple translate text `text` to language `to`:
 
-    - source language will be detected automatically
-    - provider for the translation will be smart-selected based on the [Smart routing feature](https://github.com/intento/intento-api#smart-routing)
+- source language will be detected automatically
+- provider for the translation will be smart-selected based on the [Smart routing feature](https://github.com/intento/intento-api#smart-routing)
 
 ```js
 client.ai.text.translate
@@ -85,7 +87,9 @@ client.ai.text.translate
 
 This is an intent to analyze the sentiment of the provided text.
 
-More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md)
+Related [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md)
+
+More examples in [the sample app](./sample/server-side-app/ai.text.sentiment.js)
 
 ```js
 client.ai.text.sentiment
@@ -103,7 +107,9 @@ client.ai.text.sentiment
 
 This is an intent to get meanings of text in selected language.
 
-[Dictionary intent](https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md)
+Related [documentation](https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md)
+
+More examples in [the sample app](./sample/server-side-app/ai.text.dictionary.js)
 
 ```js
 client.ai.text.dictionary
