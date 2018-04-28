@@ -58,13 +58,18 @@ client.ai.text.translate
 
 // Setting your own language codes (to be bind to the current Intento api key)
 client.ai.settings
-    .languages({ aliasforen: 'en' })
-    .then(console.log)
+    .languages({ 'alias-for-es': 'es' })
+    .then(res => {
+        console.log('set alias', res)
+    })
     .catch(console.error)
 
-// All language settings related to the current Intento api key
-client.ai.settings
-    .languages()
-    .then(console.log)
-    .catch(console.error)
+setTimeout(() => {
+    // All language settings related to the current Intento api key
+    client.ai.settings
+        .languages()
+        .then(res => {
+            console.log('all aliases', res)
+        })
+}, 3000)
 
