@@ -30,7 +30,7 @@ function IntentoConnector(credentials = {}, debug = false) {
     }
 
     this.settings = Object.freeze({
-        languages: function (params) {
+        languages: function(params) {
             return this.settingsLanguages(params)
         }.bind(this),
     })
