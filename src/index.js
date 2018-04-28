@@ -31,7 +31,7 @@ function IntentoConnector(credentials = {}, debug = false) {
 
     this.ai = Object.freeze({
         settings: {
-            languages: function (params) {
+            languages: function(params) {
                 return this.settingsLanguages(params)
             }.bind(this),
         },
@@ -43,10 +43,10 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('translate', params)
                 }.bind(this),
-                provider: function (providerId, params) {
+                provider: function(providerId, params) {
                     return this.provider('translate', providerId, params)
                 }.bind(this),
-                languages: function (params) {
+                languages: function(params) {
                     return this.languages('translate', params)
                 }.bind(this),
             },
@@ -57,7 +57,7 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('sentiment', params)
                 }.bind(this),
-                provider: function (providerId, params) {
+                provider: function(providerId, params) {
                     return this.provider('sentiment', providerId, params)
                 }.bind(this),
             },
@@ -68,10 +68,10 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('dictionary', params)
                 }.bind(this),
-                provider: function (providerId, params) {
+                provider: function(providerId, params) {
                     return this.provider('dictionary', providerId, params)
                 }.bind(this),
-                languages: function (params) {
+                languages: function(params) {
                     return this.languages('dictionary', params)
                 }.bind(this),
             },
@@ -199,7 +199,7 @@ IntentoConnector.prototype.providers = function(slug, params) {
     })
 }
 
-IntentoConnector.prototype.provider = function (slug, providerId, params) {
+IntentoConnector.prototype.provider = function(slug, providerId, params) {
     return this.makeRequest({
         path: getPath(slug, this.debug) + '/' + providerId,
         params,
@@ -207,8 +207,7 @@ IntentoConnector.prototype.provider = function (slug, providerId, params) {
     })
 }
 
-
-IntentoConnector.prototype.languages = function (slug, params = {}) {
+IntentoConnector.prototype.languages = function(slug, params = {}) {
     const { language, locale } = params
     let path = getPath(slug, this.debug) + '/languages'
     if (language) {
@@ -221,7 +220,7 @@ IntentoConnector.prototype.languages = function (slug, params = {}) {
     })
 }
 
-IntentoConnector.prototype.settingsLanguages = function (params) {
+IntentoConnector.prototype.settingsLanguages = function(params) {
     return this.makeRequest({
         path: '/settings/languages',
         content: params,

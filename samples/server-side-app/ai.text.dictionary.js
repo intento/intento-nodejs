@@ -24,7 +24,7 @@ const client = require('./index')
 // // more examples on exploring providers in ./explore-providers.js
 
 // // Supported languages
-   
+
 // // List of supported languages
 // client.ai.text.dictionary
 //     .languages({ locale: 'ru' })
@@ -39,7 +39,7 @@ const client = require('./index')
 
 // Setting your own language codes (to be bind to the current Intento api key)
 client.ai.settings
-    .languages({ 'hebr': 'he' })
+    .languages({ hebr: 'he' })
     .then(res => {
         console.log('set alias', res)
     })
@@ -47,9 +47,7 @@ client.ai.settings
 
 setTimeout(() => {
     // All language settings related to the current Intento api key
-    client.ai.settings
-        .languages()
-        .then(res => {
-            console.log('all aliases', res)
-        })
+    client.ai.settings.languages().then(res => {
+        console.log('all aliases', res)
+    })
 }, 3000)

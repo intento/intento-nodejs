@@ -16,7 +16,7 @@ client.ai.text.translate
     .then(console.log)
     .catch(console.error)
 
-// Translation domains 
+// Translation domains
 
 // category `general`
 client.ai.text.translate
@@ -43,7 +43,7 @@ client.ai.text.translate
 // more examples on exploring providers in ./explore-providers.js
 
 // Supported languages
-   
+
 // List of supported languages
 client.ai.text.translate
     .languages({ locale: 'ru' })
@@ -66,10 +66,7 @@ client.ai.settings
 
 setTimeout(() => {
     // All language settings related to the current Intento api key
-    client.ai.settings
-        .languages()
-        .then(res => {
-            console.log('all aliases', res)
-        })
+    client.ai.settings.languages().then(res => {
+        console.log('all aliases', res)
+    })
 }, 3000)
-

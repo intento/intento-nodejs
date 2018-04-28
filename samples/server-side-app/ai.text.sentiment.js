@@ -8,14 +8,11 @@ client.ai.text.sentiment
         provider: 'ai.text.sentiment.meaningcloud.sentiment_analysis_api.2-1',
     })
     .then(console.log)
-    // .catch(console.error)
+// .catch(console.error)
 
-
-client.ai.text.sentiment
-    .providers({ bulk: true })
-    .then(console.log)
-    // .then(data => data.forEach(p => console.info(p.name)))
-    // .catch(console.error)
+client.ai.text.sentiment.providers({ bulk: true }).then(console.log)
+// .then(data => data.forEach(p => console.info(p.name)))
+// .catch(console.error)
 
 // // Bulk mode
 // client.ai.text.sentiment
@@ -44,5 +41,5 @@ client.ai.text.sentiment
 //     })
 //     .then(console.log)
 //     // .catch(console.error)
-    
+
 // more examples on exploring providers in ./explore-providers.js

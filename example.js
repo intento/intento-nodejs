@@ -45,7 +45,11 @@ client.ai.text.dictionary
         to: 'ru',
     })
     .then(data => {
-        console.log('Dictionary results:\n', JSON.stringify(data, null, 4), '\n')
+        console.log(
+            'Dictionary results:\n',
+            JSON.stringify(data, null, 4),
+            '\n'
+        )
     })
 
 /* Explore providers */
