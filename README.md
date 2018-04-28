@@ -24,6 +24,11 @@ In case you don't have a key to use Intento API, please register here [console.i
 - [Translation capabilities](#translation-capabilities)
 - [Sentiment analysis capabilities](#sentiment-analysis-capabilities)
 - [Text meanings capabilities (dictionary)](#text-meanings-capabilities-dictionary)
+- [Smart routing](#smart-routing)
+    - [Basic smart routing](#basic-smart-routing)
+    - [Specifying the bidding strategy](#specifying-the-bidding-strategy)
+- [Failover mode](#failover-mode)
+- [Using a service provider with your own keys](#using-a-service-provider-with-your-own-keys)
 - [Advanced Examples](#advanced-examples)
     - [Dynamic parameters](#dynamic-parameters)
     - [Using `data` argument from a curl request directly](#using-data-argument-from-a-curl-request-directly)
@@ -173,6 +178,161 @@ More information in [ai.text.sentiment.md](./ai.text.sentiment.md)
 ## Text meanings capabilities (dictionary)
 
 More information in [ai.text.dictionary.md](./ai.text.dictionary.md)
+
+## Smart routing
+
+Intento provides the smart routing feature, so that the translation request is automatically routed to the best provider. The best provider is determined based on the following information:
+
+- apriori benchmark on the standard dataset
+- provider usage statistics, collected by Intento, including user feedback signals (the post-editing complexity for Machine Translation).
+
+### Basic smart routing
+
+To use the smart routing, just omit the `provider` parameter:
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: 'A sample text',
+        to: 'es'
+    })
+    .then(console.log)
+```
+
+Response:
+
+```json
+{
+    "results": [
+        "Un texto de ejemplo"
+    ],
+    "meta": {},
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
+            "name": "Microsoft Translator API"
+        }
+    }
+}
+```
+
+### Specifying the bidding strategy
+
+By default, when the provider is missing, requests are routed to a provider with the best expected price/performance ratio. This behavior may be controlled by specifying the desired bidding strategy in the `bidding` parameter. Supported values are:
+
+- `best` (default)
+- `best_quality` - the best expected quality regardless of the price
+- `best_price` - the cheapest provider
+- `random` - a randomly chosen provider
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: 'A sample text',
+        to: 'es',
+        bidding: 'best_quality',
+    })
+    .then(console.log)
+```
+
+## Failover mode
+
+Both for smart routing mode and basic mode, a failover is supported. By default, the failover is off, thus when the selected provider fails, an error is returned. To enable the failover mode, set the `failover` to `true`. By default, failover is governed by the default bidding strategy (`best`). To control this behavior, another bidding strategy may be specified via `bidding` parameter. Alternatively, you may specify a list of providers to consider for the failover (`failover_list`). This option overrides the bidding strategy for the failover procedure.
+
+In the following example we set the provider, but specify the list of alternatives to control the failover:
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: 'A sample text',
+        to: 'es',
+        provider: 'ai.text.translate.microsoft.translator_text_api.2-0',
+        failover: true,
+        failover_list: [
+            'ai.text.translate.google.translate_api.2-0',
+            'ai.text.translate.yandex.translate_api.1-5'
+        ]
+    })
+    .then(console.log)
+```
+
+## Using a service provider with your own keys
+
+Intento supports two modes of using 3rd party services:
+
+- full proxy: 3rd party service used via Intento and paid to the Intento (available for some of the services).
+- tech proxy: 3rd party service used via our user's own credentials and billed towards the user's account at the third-party service (available for all services).
+
+In the tech proxy mode, the custom credentials are passed in the `auth` service field. `auth` field is a dictionary, it's keys are provider IDs. For each ID specify your own key(s) you want to use and values set to a list of keys for the specified provider. There could be more than one key for the provider in the case you want to work with a pool of keys (more on this advanced feature later).
+
+```js
+client.ai.text.translate
+    .fullfill({
+        text: "A sample text",
+        to: 'es',
+        provider: 'some-provider-id',
+        auth: {
+            'some-provider-id': [
+                { ... custom auth structure with 'YOUR_KEY_TO_SOME_PROVIDER_1' ... },
+                { ... custom auth structure with 'YOUR_KEY_TO_SOME_PROVIDER_2' ... },
+            ],
+            'another-provider-id': [
+                { ... another custom auth structure with 'YOUR_KEY_TO_ANOTHER_PROVIDER_1' ... },
+                { ... another custom auth structure with 'YOUR_KEY_TO_ANOTHER_PROVIDER_2' ... },
+            ]
+
+    })
+    .then(console.log)
+```
+
+Auth object structure is different for different providers and may be obtained together with other provider details by requesting info for this provider:
+
+```js
+client.ai.text.translate
+    .provider('ai.text.translate.google.translate_api.2-0')
+    .then(console.log)
+    .catch(console.error)
+```
+
+For example for google translate custom auth structure is `{ key: YOUR_GOOGLE_KEY }`.
+
+```js
+client.ai.text.translate
+    .fullfill({
+        text: "A sample text",
+        to: 'es',
+        provider: 'ai.text.translate.google.translate_api.2-0',
+        auth: {
+            'ai.text.translate.google.translate_api.2-0': [
+                {
+                    key: process.env.YOUR_GOOGLE_KEY
+                }
+            ]
+        }
+    })
+    .then(console.log)
+```
+
+Response:
+
+```json
+{
+    "results": [
+        "Un texto de muestra"
+    ],
+    "meta": {
+        "detected_source_language": [
+            "en"
+        ]
+    },
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.google.translate_api.2-0",
+            "name": "Google Cloud Translation API"
+        }
+    }
+}
+```
 
 ## Advanced Examples
 
