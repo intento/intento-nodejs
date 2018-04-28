@@ -7,7 +7,7 @@ More on that in the [documentation](https://github.com/intento/intento-api/blob/
 <!-- TOC depthFrom:2 -->
 
 - [Basic usage](#basic-usage)
-- [Explore translation providers](#explore-translation-providers)
+- [Explore dictionary providers](#explore-dictionary-providers)
     - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers able to extract meanings from Afrikaans to Italian](#providers-able-to-extract-meanings-from-afrikaans-to-italian)
@@ -25,7 +25,7 @@ More on that in the [documentation](https://github.com/intento/intento-api/blob/
 To extract meanings from a text, specify the source text, source and target languages and the desired provider in JSON body of the request as in the following example:
 
 ```js
-client.ai.text.sentiment
+client.ai.text.dictionary
     .fulfill({
         text: 'kick',
         from: 'en',
@@ -72,7 +72,7 @@ If the provider doesn't have capabilities (e.g. language pairs) to process reque
 }
 ```
 
-## Explore translation providers
+## Explore dictionary providers
 
 List all providers:
 
@@ -104,9 +104,9 @@ In all cases a response object is a list of objects. Each object in that list de
 }
 ```
 
-`symmetric` - is a list of language codes for which translation in both directions is available.
+`symmetric` - is a list of language codes for which text meanings extraction in both directions is available.
 
-`pairs` - is a list of plain objects with structure `{ from: 'lang-code-1', to: 'lang-code-2' }`. It means that for current provider translation from `lang-code-1` to `lang-code-2` is available.
+`pairs` - is a list of plain objects with structure `{ from: 'lang-code-1', to: 'lang-code-2' }`. It means that for current provider text meanings extaction from `lang-code-1` to `lang-code-2` is available.
 
 ## Filtering providers by capabilities
 
@@ -117,14 +117,14 @@ The list of providers may be further constrained by adding desired parameter val
 See more on ([language codes](http://www.loc.gov/standards/iso639-2/php/code_list.php) -- see ISO 639-1 Code)
 
 ```js
-client.ai.text.sentiment
+client.ai.text.dictionary
     .providers({ from: 'af', to: 'it' })
     .then(data => data.forEach(p => console.info(p.name)))
 ```
 
 ## Getting information about a provider
 
-To get information about a provider pass provider id to `client.ai.text.sentiment.provider`.
+To get information about a provider pass provider id to `client.ai.text.dictionary.provider`.
 
 ```js
 client.ai.text.dictionary
@@ -222,16 +222,14 @@ Response:
 
 ```json
 {
-    "iso_name": "Hebrew (modern)",
+    "iso_name": "Hebrew",
     "name": "иврит",
     "intento_code": "he",
     "iso_639_1_code": "he",
     "iso_639_2t_code": "heb",
     "iso_639_2b_code": "heb",
     "iso_639_3_code": "heb",
-    "provider_codes": {
-        "ai.text.dictionary.google.translate_api.2-0": "iw"
-    },
+    "provider_codes": {},
     "client_code": "hebr"
 }
 ```
