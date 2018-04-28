@@ -21,9 +21,9 @@ In case you don't have a key to use Intento API, please register here [console.i
         - [Translation providers](#translation-providers)
         - [Sentiment analysis providers](#sentiment-analysis-providers)
         - [Text meanings providers](#text-meanings-providers)
-- [Translation features](#translation-features)
-- [Sentiment features](#sentiment-features)
-- [Text meanings features (dictionary)](#text-meanings-features-dictionary)
+- [Translation capabilities](#translation-capabilities)
+- [Sentiment analysis capabilities](#sentiment-analysis-capabilities)
+- [Text meanings capabilities (dictionary)](#text-meanings-capabilities-dictionary)
 - [Advanced Examples](#advanced-examples)
     - [Dynamic parameters](#dynamic-parameters)
     - [Using `data` argument from a curl request directly](#using-data-argument-from-a-curl-request-directly)
@@ -59,6 +59,10 @@ const client = new IntentoConnector({ apikey: YOUR_INTENTO_KEY })
 
 ### Translation
 
+This is an intent to translate text from one language to another.
+
+More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.translate.md)
+
 Simple translate text `text` to language `to`:
 
     - source language will be detected automatically
@@ -76,7 +80,7 @@ client.ai.text.translate
 
 This is an intent to analyze the sentiment of the provided text.
 
-More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage)
+More on that in the [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md)
 
 ```js
 client.ai.text.sentiment
@@ -92,6 +96,8 @@ client.ai.text.sentiment
 
 ### Text meanings
 
+This is an intent to get meanings of text in selected language.
+
 [Dictionary intent](https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md)
 
 ```js
@@ -102,7 +108,7 @@ client.ai.text.dictionary
         to: 'ru',
     })
     .then(data => {
-        console.log('Results:\n', JSON.stringify(data, null, 4), '\n')
+        console.log('Dictionary results:\n', JSON.stringify(data, null, 4), '\n')
     })
 ```
 
@@ -156,15 +162,15 @@ client.ai.text.dictionary
     .catch(console.error)
 ```
 
-## Translation features
+## Translation capabilities
 
 More information in [ai.text.translate.md](./ai.text.translate.md)
 
-## Sentiment features
+## Sentiment analysis capabilities
 
 More information in [ai.text.sentiment.md](./ai.text.sentiment.md)
 
-## Text meanings features (dictionary)
+## Text meanings capabilities (dictionary)
 
 More information in [ai.text.dictionary.md](./ai.text.dictionary.md)
 

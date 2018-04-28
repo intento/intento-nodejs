@@ -40,6 +40,8 @@ client.ai.text.translate
     .then(console.log)
     .catch(console.error)
 
+// more examples on exploring providers in ./explore-providers.js
+
 // Supported languages
    
 // List of supported languages
@@ -54,13 +56,13 @@ client.ai.text.translate
     .then(console.log)
     .catch(console.error)
 
-// Setting your own language codes
+// Setting your own language codes (to be bind to the current Intento api key)
 client.ai.settings
     .languages({ aliasforen: 'en' })
     .then(console.log)
     .catch(console.error)
 
-// All language settings
+// All language settings related to the current Intento api key
 client.ai.settings
     .languages()
     .then(console.log)

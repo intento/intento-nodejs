@@ -2,7 +2,6 @@
 
 const IntentoConnector = require('./src/index')
 
-const DEBUG = false
 const apikey = process.env.INTENTO_API_KEY
 const google_api_key = process.env.GOOGLE_API_KEY
 
@@ -17,21 +16,17 @@ if (!google_api_key) {
     console.warn('Missing Google api key. Some examples might not work.')
 }
 
-const client = new IntentoConnector({ apikey }, DEBUG)
-// in debug mode there will be more information related to API requests during API calls
-// also sample callback will be used to visialize responses
+const client = new IntentoConnector({ apikey })
 
-// Simple translate text `text` to language `to`.
-// - source language will be detected automatically
-// - provider for the translation will be smart-selected based on the Smart routing feature
-//   see more on that in the documentation here https://github.com/intento/intento-api#smart-routing
+// This is an intent to translate text from one language to another.
+// More on that in the documentation here https://github.com/intento/intento-api/blob/master/ai.text.translate.md
 client.ai.text.translate
     .fulfill({ text: "How's it going?", to: 'es' })
     .then(defaultCallback)
     .catch(prettyCatch)
 
-// Analyze text for sentiments.
-// More on that in the documentation here https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#basic-usage
+// This is an intent to analyze the sentiment of the provided text.
+// More on that in the documentation here https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md
 client.ai.text.sentiment
     .fulfill({
         text: 'We love this place',
@@ -41,31 +36,27 @@ client.ai.text.sentiment
     .then(defaultCallback)
     .catch(prettyCatch)
 
+// This is an intent to get meanings of text in selected language.
+// More on that in the documentation here https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md
+client.ai.text.dictionary
+    .fulfill({
+        text: 'meaning',
+        from: 'en',
+        to: 'ru',
+    })
+    .then(data => {
+        console.log('Dictionary results:\n', JSON.stringify(data, null, 4), '\n')
+    })
+
 /* Explore providers */
 
+// Documentation on providers:
+//   - Translation: https://github.com/intento/intento-api/blob/master/ai.text.translate.md#getting-available-providers
+//   - Sentiment analysis: https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md#getting-available-providers
+//   - Text meanings: https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md#getting-available-providers
 client.ai.text.translate
     .providers()
     .then(prettyPrintProviders)
-    .catch(prettyCatch)
-
-// More on providers https://github.com/intento/intento-api/blob/master/ai.text.translate.md#advanced-usage
-client.ai.text.translate
-    .providers({ lang_detect: true })
-    .then(data => {
-        console.log('\nProvider with language detect feature')
-        prettyPrintProviders(data)
-    })
-    .catch(prettyCatch)
-
-// Also source language (`from`), target language(`to`) and bulk mode feature availability (`bulk: true`) can be specified as params
-client.ai.text.translate
-    .providers({ to: 'ru', bulk: true, lang_detect: true })
-    .then(data => {
-        console.log(
-            '\nProvider supporting bulk translation to russian with language detect feature'
-        )
-        prettyPrintProviders(data)
-    })
     .catch(prettyCatch)
 
 // Providers for sentiment analysis
@@ -79,6 +70,8 @@ client.ai.text.dictionary
     .providers()
     .then(prettyPrintProviders)
     .catch(prettyCatch)
+
+// more examples with exploring providers here https://github.com/intento/intento-nodejs/blob/master/samples/server-side-app/explore-providers.js
 
 /* Advanced usage */
 
