@@ -9,11 +9,11 @@ More on that in the [documentation](https://github.com/intento/intento-api/blob/
 - [Basic usage](#basic-usage)
 - [Bulk mode](#bulk-mode)
     - [:lock: Multi mode](#lock-multi-mode)
-- [Explore translation providers](#explore-translation-providers)
+- [Explore sentiment analysis providers](#explore-sentiment-analysis-providers)
     - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers with language detect feature](#providers-with-language-detect-feature)
-    - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
+    - [Provider supporting bulk sentiment analysis](#provider-supporting-bulk-sentiment-analysis)
     - [Providers able to analyze sentiment in Afrikaans](#providers-able-to-analyze-sentiment-in-afrikaans)
     - [Combine filters](#combine-filters)
 - [Getting information about a provider](#getting-information-about-a-provider)
@@ -73,7 +73,7 @@ If the provider doesn't have capabilities (e.g. does not support a specific lang
 
 ## Bulk mode
 
-We provide a bulk fulfillment mode to process an array of texts at once. The mode is activated by sending an array of strings to the `text` parameter. The bulk mode is supported for some of the providers (see [Provider supporting bulk translation](#provider-supporting-bulk-translation) section).
+We provide a bulk fulfillment mode to process an array of texts at once. The mode is activated by sending an array of strings to the `text` parameter. The bulk mode is supported for some of the providers (see [Provider supporting bulk sentiment analysis](#provider-supporting-bulk-sentiment-analysis) section).
 
 ```js
 client.ai.text.sentiment
@@ -171,7 +171,7 @@ The response contains the analyzed text and a service information:          ↑
 ]
 ```
 
-## Explore translation providers
+## Explore sentiment analysis providers
 
 List all providers:
 
@@ -202,7 +202,7 @@ In all cases a response object is a list of objects. Each object in that list de
 }
 ```
 
-`lang` - is a list of language codes for which translation in both directions is available.
+`lang` - is a list of language codes for which sentiment analysis in both directions is available.
 
 ## Filtering providers by capabilities
 
@@ -216,7 +216,7 @@ client.ai.text.sentiment
     .then(data => data.forEach(p => console.info(p.name)))
 ```
 
-### Provider supporting bulk translation
+### Provider supporting bulk sentiment analysis
 
 ```js
 client.ai.text.sentiment
