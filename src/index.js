@@ -224,7 +224,7 @@ IntentoConnector.prototype.languages = function (slug, params = {}) {
 IntentoConnector.prototype.settingsLanguages = function (params) {
     return this.makeRequest({
         path: '/settings/languages',
-        params,
+        content: params,
         method: params ? 'POST' : 'GET',
     })
 }
