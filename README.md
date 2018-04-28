@@ -152,7 +152,6 @@ In all cases a response object is a list of objects. Each object in that list de
 client.ai.text.translate
     .providers()
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
 #### Sentiment analysis providers
@@ -161,7 +160,6 @@ client.ai.text.translate
 client.ai.text.sentiment
     .providers()
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
 #### Text meanings providers
@@ -170,7 +168,6 @@ client.ai.text.sentiment
 client.ai.text.dictionary
     .providers()
     .then(data => data.forEach(p => console.info(p.name)))
-    .catch(console.error)
 ```
 
 ## Translation capabilities
@@ -297,7 +294,6 @@ Auth object structure is different for different providers and may be obtained t
 client.ai.text.translate
     .provider('ai.text.translate.google.translate_api.2-0')
     .then(console.log)
-    .catch(console.error)
 ```
 
 For example for google translate custom auth structure is `{ key: YOUR_GOOGLE_KEY }`.
@@ -371,7 +367,6 @@ const options = {
             },
         })
         .then(console.info)
-        .catch(console.error)
 })
 ```
 
@@ -417,7 +412,6 @@ client
         }`,
     })
     .then(console.info)
-    .catch(console.error)
 ```
 
 ### More examples
