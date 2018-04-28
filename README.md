@@ -68,7 +68,7 @@ This is an intent to translate text from one language to another.
 
 Related [documentation](https://github.com/intento/intento-api/blob/master/ai.text.translate.md)
 
-More examples in [the sample app](./sample/server-side-app/ai.text.translate.js)
+More examples in [the sample app](./samples/server-side-app/ai.text.translate.js)
 
 Simple translate text `text` to language `to`:
 
@@ -89,7 +89,7 @@ This is an intent to analyze the sentiment of the provided text.
 
 Related [documentation](https://github.com/intento/intento-api/blob/master/ai.text.sentiment.md)
 
-More examples in [the sample app](./sample/server-side-app/ai.text.sentiment.js)
+More examples in [the sample app](./samples/server-side-app/ai.text.sentiment.js)
 
 ```js
 client.ai.text.sentiment
@@ -109,7 +109,7 @@ This is an intent to get meanings of text in selected language.
 
 Related [documentation](https://github.com/intento/intento-api/blob/master/ai.text.dictionary.md)
 
-More examples in [the sample app](./sample/server-side-app/ai.text.dictionary.js)
+More examples in [the sample app](./samples/server-side-app/ai.text.dictionary.js)
 
 ```js
 client.ai.text.dictionary
