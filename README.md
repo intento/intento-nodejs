@@ -16,7 +16,7 @@ In case you don't have a key to use Intento API, please register here [console.i
     - [Sentiment analysis](#sentiment-analysis)
     - [Text meanings](#text-meanings)
 - [Explore providers (basics)](#explore-providers-basics)
-    - [Response structure](#response-structure)
+    - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
     - [List all available providers](#list-all-available-providers)
         - [Translation providers](#translation-providers)
         - [Sentiment analysis providers](#sentiment-analysis-providers)
@@ -125,7 +125,7 @@ client.ai.text.dictionary
 
 ## Explore providers (basics)
 
-### Response structure
+### Response structure for provider-related requests
 
 In all cases a response object is a list of objects. Each object in that list describes one provider. The structure of the description is following:
 

@@ -8,7 +8,7 @@ More on that in the [documentation](https://github.com/intento/intento-api/blob/
 
 - [Basic usage](#basic-usage)
 - [Explore translation providers](#explore-translation-providers)
-    - [Response structure](#response-structure)
+    - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers able to extract meanings from Afrikaans to Italian](#providers-able-to-extract-meanings-from-afrikaans-to-italian)
 - [Getting information about a provider](#getting-information-about-a-provider)
@@ -82,7 +82,7 @@ client.ai.text.dictionary
     .then(data => data.forEach(p => console.info(p.name)))
 ```
 
-### Response structure
+### Response structure for provider-related requests
 
 In all cases a response object is a list of objects. Each object in that list describes one provider. The structure of the description is following:
 

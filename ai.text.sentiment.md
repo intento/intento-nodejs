@@ -10,7 +10,7 @@ More on that in the [documentation](https://github.com/intento/intento-api/blob/
 - [Bulk mode](#bulk-mode)
     - [:lock: Multi mode](#lock-multi-mode)
 - [Explore translation providers](#explore-translation-providers)
-    - [Response structure](#response-structure)
+    - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers with language detect feature](#providers-with-language-detect-feature)
     - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
@@ -181,7 +181,7 @@ client.ai.text.sentiment
     .then(data => data.forEach(p => console.info(p.name)))
 ```
 
-### Response structure
+### Response structure for provider-related requests
 
 In all cases a response object is a list of objects. Each object in that list describes one provider. The structure of the description is following:
 
