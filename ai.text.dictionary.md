@@ -29,7 +29,7 @@ client.ai.text.sentiment
     .fulfill({
         text: 'kick',
         from: 'en',
-        to: 'ru',
+        to: 'it',
         provider: 'ai.text.dictionary.yandex.dictionary_api.1-0',
     })
     .then(data => {
@@ -44,10 +44,10 @@ The response contains the dictionary results grouped by part of speech and a ser
     "results": [
         {
             "noun": [
-                "\u043f\u0438\u043d\u043e\u043a"
+                "calcio"
             ],
             "verb": [
-                "\u043f\u0438\u043d\u0430\u0442\u044c"
+                "calciare"
             ]
         }
     ],
