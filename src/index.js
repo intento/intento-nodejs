@@ -29,12 +29,13 @@ function IntentoConnector(credentials = {}, debug = false) {
         },
     }
 
+    this.settings = Object.freeze({
+        languages: function (params) {
+            return this.settingsLanguages(params)
+        }.bind(this),
+    })
+
     this.ai = Object.freeze({
-        settings: {
-            languages: function(params) {
-                return this.settingsLanguages(params)
-            }.bind(this),
-        },
         text: {
             translate: {
                 fulfill: function(params) {

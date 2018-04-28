@@ -238,10 +238,10 @@ Response:
 
 ## Setting your own language codes
 
-To define your aliases to language codes call `client.ai.settings.languages`. After 60 seconds, you can start using them.
+To define your aliases to language codes call `client.settings.languages`. After 60 seconds, you can start using them.
 
 ```js
-client.ai.settings
+client.settings
     .languages({ aliasforen: 'en' })
     .then(console.log)
 ```
@@ -256,10 +256,10 @@ Response:
 
 ## All language settings
 
-Settings can be retrieved by calling `client.ai.settings.languages` without parameters
+Settings can be retrieved by calling `client.settings.languages` without parameters
 
 ```js
-client.ai.settings
+client.settings
     .languages()
     .then(console.log)
 ```

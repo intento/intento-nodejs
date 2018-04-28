@@ -44,8 +44,8 @@ describe('Basic', () => {
         expect(typeof client.ai.text.dictionary.provider).toBe('function')
         expect(typeof client.ai.text.dictionary.languages).toBe('function')
 
-        expect(client.ai.settings).toBeDefined()
-        expect(typeof client.ai.settings.languages).toBe('function')
+        expect(client.settings).toBeDefined()
+        expect(typeof client.settings.languages).toBe('function')
     })
 })
 
