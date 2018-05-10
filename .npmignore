@@ -22,6 +22,7 @@ coverage
 
 build/
 node_modules/
+src/
 .npm
 
 # Optional eslint cache
@@ -36,7 +37,14 @@ node_modules/
 # dotenv environment variables file
 .env*
 
+.babelrc
+.editorconfig
+.gitignore
 .eslintrc
+.markdownlint.json
+.prettierignore
+.prettierrc
+.vscode
 yarn.lock
 
 example.js

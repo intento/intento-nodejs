@@ -22,6 +22,7 @@ coverage
 
 build/
 node_modules/
+lib/
 .npm
 
 # Optional eslint cache

@@ -1,0 +1,26 @@
+{
+    "env": {
+        "development": {
+            "presets": [
+                "env"
+            ],
+            "plugins": [
+                "transform-es2015-destructuring",
+                "transform-object-rest-spread",
+                "add-module-exports"
+            ]
+        },
+        "production": {
+            "presets": [
+                "es2015",
+                "env",
+                "minify"
+            ],
+            "plugins": [
+                "transform-es2015-destructuring",
+                "transform-object-rest-spread",
+                "add-module-exports"
+            ]
+        }
+    }
+}
