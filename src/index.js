@@ -3,7 +3,9 @@
 const https = require('https')
 const querystring = require('querystring')
 
-function IntentoConnector(credentials = {}, debug = false) {
+const HOST = 'api.inten.to'
+
+function IntentoConnector(credentials = {}, host = HOST, debug = false) {
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -22,7 +24,7 @@ function IntentoConnector(credentials = {}, debug = false) {
     }
 
     this.options = {
-        host: 'api.inten.to',
+        host,
         headers: {
             'User-Agent': 'NodeJS SDK client',
             apikey,
@@ -39,16 +41,28 @@ function IntentoConnector(credentials = {}, debug = false) {
         text: {
             translate: {
                 fulfill: function(params) {
+                    // POST /ai/text/translate with params
+                    // Example params: `from`, `to`, `text
                     return this.fulfill('translate', params)
                 }.bind(this),
                 providers: function(params) {
+                    // GET /ai/text/translate with params
+                    // Example param: `lang_detect`
                     return this.providers('translate', params)
                 }.bind(this),
                 provider: function(providerId, params) {
+                    // GET /ai/text/translate/{id} without params, may accept params in the future
                     return this.provider('translate', providerId, params)
                 }.bind(this),
                 languages: function(params) {
+                    // GET /ai/text/translate/languages with params
+                    // Example param: `locale`
                     return this.languages('translate', params)
+                }.bind(this),
+                language: function(langCode, params) {
+                    // GET /ai/text/translate/languages/{id} with params
+                    // Example param: `locale`
+                    return this.language('translate', langCode, params)
                 }.bind(this),
             },
             sentiment: {
@@ -58,8 +72,8 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('sentiment', params)
                 }.bind(this),
-                provider: function(providerId, params) {
-                    return this.provider('sentiment', providerId, params)
+                provider: function(providerId) {
+                    return this.provider('sentiment', providerId)
                 }.bind(this),
             },
             dictionary: {
@@ -69,8 +83,8 @@ function IntentoConnector(credentials = {}, debug = false) {
                 providers: function(params) {
                     return this.providers('dictionary', params)
                 }.bind(this),
-                provider: function(providerId, params) {
-                    return this.provider('dictionary', providerId, params)
+                provider: function(providerId) {
+                    return this.provider('dictionary', providerId)
                 }.bind(this),
                 languages: function(params) {
                     return this.languages('dictionary', params)
@@ -203,6 +217,14 @@ IntentoConnector.prototype.providers = function(slug, params) {
 IntentoConnector.prototype.provider = function(slug, providerId, params) {
     return this.makeRequest({
         path: getPath(slug, this.debug) + '/' + providerId,
+        params,
+        method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.language = function(slug, langCode, params) {
+    return this.makeRequest({
+        path: getPath(slug, this.debug) + '/languages/' + langCode,
         params,
         method: 'GET',
     })

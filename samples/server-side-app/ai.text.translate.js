@@ -52,7 +52,7 @@ client.ai.text.translate
 
 // Full information on a supported language
 client.ai.text.translate
-    .languages({ language: 'he', locale: 'ru' })
+    .languagE('he', { locale: 'ru' })
     .then(console.log)
     .catch(console.error)
 

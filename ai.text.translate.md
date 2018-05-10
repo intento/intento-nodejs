@@ -327,7 +327,7 @@ For a given language code (intento internal or client’s) will show full metada
 
 ```js
 client.ai.text.translate
-    .languages({ language: 'he', locale: 'ru' })
+    .language('he', { locale: 'ru' })
     .then(console.log)
 ```
 
