@@ -1,6 +1,8 @@
 # Intento nodejs
 
-An adapter to query Intento Collective Intelligence API.
+An adapter to query Intento API.
+
+Intento provides a single API to Cognitive AI services from many vendors.
 
 To get more information check out [the site](https://inten.to/).
 
