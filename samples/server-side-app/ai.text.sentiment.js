@@ -12,7 +12,6 @@ client.ai.text.sentiment
 
 client.ai.text.sentiment
     .providers({ bulk: true })
-    .then(console.log)
     .then(data => data.forEach(p => console.info(p.name)))
     .catch(console.error)
 
