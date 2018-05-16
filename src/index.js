@@ -3,9 +3,9 @@
 const https = require('https')
 const querystring = require('querystring')
 
-const HOST = 'api.inten.to'
+const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
-function IntentoConnector(credentials = {}, host = HOST, debug = false) {
+function IntentoConnector(credentials = {}, debug = false) {
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -14,7 +14,7 @@ function IntentoConnector(credentials = {}, host = HOST, debug = false) {
 
     this.debug = debug
 
-    const { apikey } = this.credentials
+    const { apikey, host = HOST } = this.credentials
 
     if (!apikey) {
         console.error('Missing Intento API key')
