@@ -101,36 +101,37 @@ module.exports.default = Object.assign({}, module.exports)
 IntentoConnector.prototype.makeRequest = function(options = {}) {
     const { path = '', params, content, data, method = 'GET' } = options
 
+    const urlParams = querystring.stringify(params)
+
+    const requestOptions = {
+        ...this.options,
+        path: path + (urlParams ? '?' + urlParams : ''),
+        method,
+    }
+    if (this.debug) {
+        console.log('\nAPI request requestOptions\n', requestOptions)
+    }
+
+    if (data && content) {
+        console.warn(
+            'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
+        )
+    }
+    if (data && typeof data !== 'string') {
+        console.error('`data` must be a string')
+        console.log('No request will be made')
+        throw new Error('`data` must be a string')
+    }
+    if (this.debug) {
+        console.log('\nAPI request content\n', content)
+    }
+    const requestData = data || JSON.stringify(content) || ''
+
+    if (this.debug) {
+        console.log('\nAPI request data\n', requestData)
+    }
+
     return new Promise((resolve, reject) => {
-        const urlParams = querystring.stringify(params)
-
-        const requestOptions = {
-            ...this.options,
-            path: path + (urlParams ? '?' + urlParams : ''),
-            method,
-        }
-        if (this.debug) {
-            console.log('\nAPI request requestOptions\n', requestOptions)
-        }
-
-        if (data && content) {
-            console.warn(
-                'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
-            )
-        }
-        if (data && typeof data !== 'string') {
-            console.error('`data` must be a string')
-            console.log('No request will be made')
-            throw new Error('`data` must be a string')
-        }
-        if (this.debug) {
-            console.log('\nAPI request content\n', content)
-        }
-        const requestData = data || JSON.stringify(content) || ''
-
-        if (this.debug) {
-            console.log('\nAPI request data\n', requestData)
-        }
         const req = https.request(requestOptions, resp =>
             response_handler(resp, resolve, reject, this.debug)
         )
