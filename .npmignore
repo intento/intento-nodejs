@@ -23,6 +23,9 @@ coverage
 build/
 node_modules/
 src/
+samples/
+test/
+ai.*.md
 .npm
 
 # Optional eslint cache
