@@ -32,63 +32,63 @@ function IntentoConnector(credentials = {}, debug = false) {
     }
 
     this.settings = Object.freeze({
-        languages: function(params) {
+        languages: params => {
             return this.settingsLanguages(params)
-        }.bind(this),
+        },
     })
 
     this.ai = Object.freeze({
         text: {
             translate: {
-                fulfill: function(params) {
+                fulfill: params => {
                     // POST /ai/text/translate with params
                     // Example params: `from`, `to`, `text
                     return this.fulfill('translate', params)
-                }.bind(this),
-                providers: function(params) {
+                },
+                providers: params => {
                     // GET /ai/text/translate with params
                     // Example param: `lang_detect`
                     return this.providers('translate', params)
-                }.bind(this),
-                provider: function(providerId, params) {
+                },
+                provider: (providerId, params) => {
                     // GET /ai/text/translate/{id} without params, may accept params in the future
                     return this.provider('translate', providerId, params)
-                }.bind(this),
-                languages: function(params) {
+                },
+                languages: params => {
                     // GET /ai/text/translate/languages with params
                     // Example param: `locale`
                     return this.languages('translate', params)
-                }.bind(this),
-                language: function(langCode, params) {
+                },
+                language: (langCode, params) => {
                     // GET /ai/text/translate/languages/{id} with params
                     // Example param: `locale`
                     return this.language('translate', langCode, params)
-                }.bind(this),
+                },
             },
             sentiment: {
-                fulfill: function(params) {
+                fulfill: params => {
                     return this.fulfill('sentiment', params)
-                }.bind(this),
-                providers: function(params) {
+                },
+                providers: params => {
                     return this.providers('sentiment', params)
-                }.bind(this),
-                provider: function(providerId) {
-                    return this.provider('sentiment', providerId)
-                }.bind(this),
+                },
+                provider: (providerId, params) => {
+                    return this.provider('sentiment', providerId, params)
+                },
             },
             dictionary: {
-                fulfill: function(params) {
+                fulfill: params => {
                     return this.fulfill('dictionary', params)
-                }.bind(this),
-                providers: function(params) {
+                },
+                providers: params => {
                     return this.providers('dictionary', params)
-                }.bind(this),
-                provider: function(providerId) {
-                    return this.provider('dictionary', providerId)
-                }.bind(this),
-                languages: function(params) {
+                },
+                provider: (providerId, params) => {
+                    return this.provider('dictionary', providerId, params)
+                },
+                languages: params => {
                     return this.languages('dictionary', params)
-                }.bind(this),
+                },
             },
         },
     })
@@ -98,13 +98,9 @@ module.exports = IntentoConnector
 
 module.exports.default = Object.assign({}, module.exports)
 
-IntentoConnector.prototype.makeRequest = function({
-    path = '',
-    params,
-    content,
-    data,
-    method = 'GET',
-}) {
+IntentoConnector.prototype.makeRequest = function(options = {}) {
+    const { path = '', params, content, data, method = 'GET' } = options
+
     return new Promise((resolve, reject) => {
         const urlParams = querystring.stringify(params)
 
@@ -132,15 +128,13 @@ IntentoConnector.prototype.makeRequest = function({
         }
         const requestData = data || JSON.stringify(content) || ''
 
-        if (this.debug && requestData) {
+        if (this.debug) {
             console.log('\nAPI request data\n', requestData)
         }
         const req = https.request(requestOptions, resp =>
-            response_handler(resp, resolve, reject)
+            response_handler(resp, resolve, reject, this.debug)
         )
 
-        // do handle with Promise.prototype.catch
-        req.on('error', reject)
         req.write(requestData)
         req.end()
     })
@@ -273,8 +267,8 @@ function getPath(slug, debug) {
     return path
 }
 
-function response_handler(response, resolve, reject) {
-    if (response.status >= 400) {
+function response_handler(response, resolve, reject, debug) {
+    if (response.statusCode >= 400) {
         reject(response)
     }
 
@@ -291,8 +285,9 @@ function response_handler(response, resolve, reject) {
             }
             resolve(data)
         } catch (e) {
-            reject(e)
+            if (debug) {
+                console.error('Failed reading response body', body)
+            }
         }
     })
-    response.on('error', reject)
 }

@@ -32,6 +32,7 @@ describe('Basic', () => {
         expect(typeof client.ai.text.translate.providers).toBe('function')
         expect(typeof client.ai.text.translate.provider).toBe('function')
         expect(typeof client.ai.text.translate.languages).toBe('function')
+        expect(typeof client.ai.text.translate.language).toBe('function')
 
         expect(client.ai.text.sentiment).toBeDefined()
         expect(typeof client.ai.text.sentiment.fulfill).toBe('function')
@@ -46,6 +47,8 @@ describe('Basic', () => {
 
         expect(client.settings).toBeDefined()
         expect(typeof client.settings.languages).toBe('function')
+
+        expect(typeof client.makeRequest).toBe('function')
     })
 })
 
@@ -64,6 +67,10 @@ describe('Translation Intent', () => {
     })
     it('Languages returns a promise', () => {
         const ret = client.ai.text.translate.languages()
+        expect(ret instanceof Promise).toBe(true)
+    })
+    it('Language returns a promise', () => {
+        const ret = client.ai.text.translate.language()
         expect(ret instanceof Promise).toBe(true)
     })
 })
