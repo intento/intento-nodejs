@@ -191,8 +191,22 @@ In all cases a response object is a list of objects. Each object in that list de
     },
     "billing": true,
     "languages": {
-        "symmetric": ["list", "of", "lang", "codes"],
-        "pairs": [{"from": "en", "to": "es" }, { "from": "lang", "to": "another_lang" }]
+        "symmetric": [
+            "list",
+            "of",
+            "lang",
+            "codes"
+        ],
+        "pairs": [
+            {
+                "from": "en",
+                "to": "es"
+            },
+            {
+                "from": "lang",
+                "to": "another_lang"
+            }
+        ]
     },
     "lang_detect": false,
     "bulk": false
