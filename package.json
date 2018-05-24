@@ -18,12 +18,14 @@
   "scripts": {
     "clean": "rimraf lib",
     "lint": "eslint src test",
+    "jest": "jest",
     "test": "jest --coverage --collectCoverageFrom=src/*.js --forceExit",
     "build": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
+    "format_ex": "prettier --config .prettierrc --write '*.js'",
     "format_source": "prettier --config .prettierrc --write './src/*.js'",
     "format_samples": "prettier --config .prettierrc --write './samples/**/*.js'",
-    "format": "yarn format_source && yarn format_samples"
+    "format": "yarn format_source && yarn format_samples && yarn format_ex"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
