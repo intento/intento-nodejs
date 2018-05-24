@@ -2,6 +2,10 @@
 
 const IntentoConnector = require('./src/index')
 
+// Quickly load .env files into the environment
+// The next line requires `dotenv` installed (`yarn add -D dotenv` or `npm install --save-dev dotenv`)
+//require('dotenv').load()
+
 const apikey = process.env.INTENTO_API_KEY
 const google_api_key = process.env.GOOGLE_API_KEY
 
