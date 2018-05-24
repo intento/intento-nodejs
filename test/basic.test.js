@@ -56,22 +56,27 @@ describe('Translation Intent', () => {
     it('Fulfill returns a promise', () => {
         const ret = client.ai.text.translate.fulfill()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Providers returns a promise', () => {
         const ret = client.ai.text.translate.providers()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Provider returns a promise', () => {
         const ret = client.ai.text.translate.provider('')
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Languages returns a promise', () => {
         const ret = client.ai.text.translate.languages()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Language returns a promise', () => {
         const ret = client.ai.text.translate.language()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
 })
 
@@ -81,14 +86,17 @@ describe('Sentiment Intent', () => {
             provider: 'a-provider',
         })
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Providers returns a promise', () => {
         const ret = client.ai.text.sentiment.providers()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Provider returns a promise', () => {
         const ret = client.ai.text.sentiment.provider('')
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
 })
 
@@ -96,17 +104,25 @@ describe('Dictionary Intent', () => {
     it('Fulfill returns a promise', () => {
         const ret = client.ai.text.dictionary.fulfill()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Providers returns a promise', () => {
         const ret = client.ai.text.dictionary.providers()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Provider returns a promise', () => {
         const ret = client.ai.text.dictionary.provider('')
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
     it('Languages returns a promise', () => {
         const ret = client.ai.text.dictionary.languages()
         expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
     })
 })
+
+function prettyCatch(errorResponse) {
+    console.log('\nError: ', errorResponse.statusCode, errorResponse.statusMessage)
+}
