@@ -19,7 +19,7 @@
     "clean": "rimraf lib",
     "lint": "eslint src test",
     "jest": "jest",
-    "test": "jest --coverage --collectCoverageFrom=src/*.js --forceExit",
+    "test": "export $(cat .env) && jest --coverage --collectCoverageFrom=src/*.js --forceExit",
     "build": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
