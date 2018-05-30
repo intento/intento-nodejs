@@ -147,6 +147,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         to,
         from,
         lang,
+        format,
         category,
         provider,
         bidding,
@@ -159,7 +160,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         pretty_print,
     } = parameters
     const content = {
-        context: { text, from, to, lang, category },
+        context: { text, from, to, lang, category, format },
         service: {
             provider,
             auth,

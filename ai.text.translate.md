@@ -18,19 +18,12 @@ client.ai.text.translate
 - [Language detection mode](#language-detection-mode)
 - [Bulk mode](#bulk-mode)
 - [Translation domains (`category`)](#translation-domains-category)
+- [Supported input formats](#supported-input-formats)
 - [Explore translation providers](#explore-translation-providers)
     - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers with language detect feature](#providers-with-language-detect-feature)
-    - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
-    - [Providers able to translate to Afrikaans](#providers-able-to-translate-to-afrikaans)
-    - [Combine filters](#combine-filters)
-- [Getting information about a provider](#getting-information-about-a-provider)
-- [Supported languages](#supported-languages)
-    - [List of supported languages](#list-of-supported-languages)
-    - [Full information on a supported language](#full-information-on-a-supported-language)
-- [Setting your own language codes](#setting-your-own-language-codes)
-- [All language settings](#all-language-settings)
+    - [Providers supporting html input](#providers-supporting-html-input)
 
 <!-- /TOC -->
 
@@ -167,6 +160,40 @@ Response:
 }
 ```
 
+## Supported input formats
+
+By default the translation engines process input texts as a plain text and do not take tags into account. Many providers support text formats other than plain text. Currently supported formats are: `text` (is the default, plain text), `html`, `xml`.
+
+To translate a text using a specified format just add a `format` field into `context` parameters:
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: '<p>A <div>sample</div> text</p>',
+        to: 'ru',
+        format: 'html', // <-- specify input format
+        provider: 'ai.text.translate.google.translate_api.2-0',
+    })
+    .then(console.log)
+```
+
+The response contains the translated text with preserved formatting:
+
+```json
+{
+    "results": ["<p> <div> \u043e\u0431\u0440\u0430\u0437\u0435\u0446 </div> \u0442\u0435\u043a\u0441\u0442 </p>"],
+    "meta": {
+        "detected_source_language": ["en"]
+    },
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.google.translate_api.2-0",
+            "name": "Google Cloud Translation API"
+        }
+    }
+}
+```
+
 ## Explore translation providers
 
 List all providers:
@@ -227,6 +254,36 @@ The list of providers may be further constrained by adding desired parameter val
 client.ai.text.translate
     .providers({ lang_detect: true })
     .then(data => data.forEach(p => console.info(p.name)))
+```
+
+### Providers supporting html input
+
+One can filter providers supporting a specified format in the same way as for other capabilities. Currently supported formats are: `text` (is the default, plain text), `html`, `xml`. The following call will return a list of providers supporting HTML format:
+
+```js
+client.ai.text.translate
+    .providers({ format: 'html' })
+    .then(data => data.forEach(p => console.info(p.name)))
+```
+
+Response:
+
+```json
+[
+    {
+        "id": "ai.text.translate.microsoft.translator_text_api.3-0",
+        "name": "Microsoft Translator API v3.0",
+        "score": 0,
+        "price": 0
+    },
+    {
+        "id": "ai.text.translate.google.translate_api.2-0",
+        "name": "Google Cloud Translation API",
+        "score": 0,
+        "price": 0
+    },
+    ...
+]
 ```
 
 ### Provider supporting bulk translation
