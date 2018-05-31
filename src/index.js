@@ -120,10 +120,20 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
             'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
         )
     }
-    if (data && typeof data !== 'string') {
-        console.error('`data` must be a string')
-        console.log('No request will be made')
-        throw new Error('`data` must be a string')
+    if (data) {
+        if (typeof data === 'string') {
+            try {
+                JSON.parse(data)
+            } catch ({ message }) {
+                console.error(message)
+                console.log('No request will be made')
+                return Promise.resolve({ error: message })
+            }
+        } else {
+            console.error('`data` must be a string')
+            console.log('No request will be made')
+            return Promise.resolve({ error: '`data` must be a string' })
+        }
     }
     if (this.debug) {
         console.log('\nAPI request content\n', content)
