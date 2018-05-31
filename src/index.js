@@ -35,6 +35,9 @@ function IntentoConnector(credentials = {}, debug = false) {
         languages: params => {
             return this.settingsLanguages(params)
         },
+        processingRules: params => {
+            return this.processingRules(params)
+        },
     })
 
     this.ai = Object.freeze({
@@ -117,10 +120,20 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
             'Specify either `data` or `content` to pass data to POST request. \n For now `data` will be used.'
         )
     }
-    if (data && typeof data !== 'string') {
-        console.error('`data` must be a string')
-        console.log('No request will be made')
-        throw new Error('`data` must be a string')
+    if (data) {
+        if (typeof data === 'string') {
+            try {
+                JSON.parse(data)
+            } catch ({ message }) {
+                console.error(message)
+                console.log('No request will be made')
+                return Promise.resolve({ error: message })
+            }
+        } else {
+            console.error('`data` must be a string')
+            console.log('No request will be made')
+            return Promise.resolve({ error: '`data` must be a string' })
+        }
     }
     if (this.debug) {
         console.log('\nAPI request content\n', content)
@@ -147,6 +160,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         to,
         from,
         lang,
+        format,
         category,
         provider,
         bidding,
@@ -159,7 +173,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         pretty_print,
     } = parameters
     const content = {
-        context: { text, from, to, lang, category },
+        context: { text, from, to, lang, category, format },
         service: {
             provider,
             auth,
@@ -243,6 +257,14 @@ IntentoConnector.prototype.settingsLanguages = function(params) {
         path: '/settings/languages',
         content: params,
         method: params ? 'POST' : 'GET',
+    })
+}
+
+IntentoConnector.prototype.processingRules = function (params) {
+    return this.makeRequest({
+        path: '/settings/processing-rules',
+        params,
+        method: 'GET',
     })
 }
 

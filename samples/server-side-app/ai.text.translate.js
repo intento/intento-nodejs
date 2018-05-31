@@ -40,6 +40,16 @@ client.ai.text.translate
     .then(console.log)
     .catch(console.error)
 
+// Specified input format
+client.ai.text.translate
+    .fulfill({
+        text: '<p>A <div>sample</div> text</p>',
+        to: 'ru',
+        format: 'html', // <-- specify input format
+        provider: 'ai.text.translate.google.translate_api.2-0',
+    })
+    .then(console.log)
+
 // more examples on exploring providers in ./explore-providers.js
 
 // Supported languages

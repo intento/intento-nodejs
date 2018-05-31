@@ -16,6 +16,15 @@ client.ai.text.dictionary
     .catch(console.error)
 
 client.ai.text.translate
+    .providers({ format: 'xml' })
+    .then(data => {
+        console.log('Translation providers supporting xml input')
+        printProviderNames(data)
+        console.log('')
+    })
+    .catch(console.error)
+
+client.ai.text.translate
     .providers({ to: 'af' })
     .then(printProviderNames)
     .catch(console.error)
@@ -34,12 +43,12 @@ client.ai.text.translate
 // helpers
 
 function printProviderNames(data) {
-    console.log(`\nThere are overall ${data.length} providers:`)
+    console.log(`There are overall ${data.length} providers:`)
     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.name}`))
 }
 
 function printProvidersInfo(data) {
-    console.log(`\nThere are overall ${data.length} providers:`)
+    console.log(`There are overall ${data.length} providers:`)
     console.info(
         data.map(provider => ({
             ...provider,
