@@ -19,11 +19,21 @@ client.ai.text.translate
 - [Bulk mode](#bulk-mode)
 - [Translation domains (`category`)](#translation-domains-category)
 - [Supported input formats](#supported-input-formats)
+- [Content processing](#content-processing)
 - [Explore translation providers](#explore-translation-providers)
     - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers with language detect feature](#providers-with-language-detect-feature)
     - [Providers supporting html input](#providers-supporting-html-input)
+    - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
+    - [Providers able to translate to Afrikaans](#providers-able-to-translate-to-afrikaans)
+    - [Combine filters](#combine-filters)
+- [Getting information about a provider](#getting-information-about-a-provider)
+- [Supported languages](#supported-languages)
+    - [List of supported languages](#list-of-supported-languages)
+    - [Full information on a supported language](#full-information-on-a-supported-language)
+- [Setting your own language codes](#setting-your-own-language-codes)
+- [All language settings](#all-language-settings)
 
 <!-- /TOC -->
 
@@ -192,6 +202,34 @@ The response contains the translated text with preserved formatting:
         }
     }
 }
+```
+
+## Content processing
+
+Sometimes it's more convenient to preprocess or postprocess text after translation, e.g. eliminate spaces before punctuation. You can easily delegate it to Intento API with `processing` tag. This tag includes a set of rules.
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: 'A sample text',
+        to: 'es'
+        processing: {
+            pre: [
+                'punctuation_set'
+            ],
+            post: [
+                'punctuation_set'
+            ]
+        },
+    })
+    .then(console.log)
+```
+
+More information about processing rules:
+
+```js
+client.settings.processingRules()
+    .then(console.log)
 ```
 
 ## Explore translation providers

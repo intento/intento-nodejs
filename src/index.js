@@ -35,6 +35,9 @@ function IntentoConnector(credentials = {}, debug = false) {
         languages: params => {
             return this.settingsLanguages(params)
         },
+        processingRules: params => {
+            return this.processingRules(params)
+        },
     })
 
     this.ai = Object.freeze({
@@ -244,6 +247,14 @@ IntentoConnector.prototype.settingsLanguages = function(params) {
         path: '/settings/languages',
         content: params,
         method: params ? 'POST' : 'GET',
+    })
+}
+
+IntentoConnector.prototype.processingRules = function (params) {
+    return this.makeRequest({
+        path: '/settings/processing-rules',
+        params,
+        method: 'GET',
     })
 }
 
