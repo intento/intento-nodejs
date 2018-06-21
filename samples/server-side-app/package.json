@@ -4,7 +4,5 @@
   "description": "sample nodejs application using intento api",
   "main": "index.js",
   "license": "MIT",
-  "dependencies": {
-    "intento-nodejs": "^0.1.0"
-  }
+  "dependencies": {}
 }
