@@ -49,7 +49,7 @@ node index.js -k YOUR_API_KEY \
 
 `Error from provider: [access] Request had invalid authentication credentials. Expected OAuth 2 access token.`
 
-Because this provider requires credentials to use your custom model
+Because this provider requires credentials to use your custom model.
 
 ```sh
 node index.js -k YOUR_API_KEY \

@@ -291,8 +291,9 @@ function getPath(slug, debug) {
 }
 
 function response_handler(response, resolve, reject, debug) {
-    if (response.statusCode >= 400) {
-        reject(response)
+    if (response.statusCode >= 500) {
+        console.log(response.statusCode)
+        console.log(response.statusMessage)
     }
 
     response.setEncoding('utf8')

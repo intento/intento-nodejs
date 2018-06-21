@@ -75,8 +75,6 @@ function defaultCallback(data) {
 }
 
 function prettyCatch(errorResponse) {
-    console.log(Object.keys(errorResponse))
-
     if (errorResponse.message) {
         console.log('\nError: ' + errorResponse.message)
         console.log('\n\n')
