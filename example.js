@@ -176,6 +176,6 @@ function prettyPrintProviders(data) {
 }
 
 function prettyCatch(errorResponse) {
-    console.log('\nError:' + errorResponse.message)
+    console.log('\nError: ' + errorResponse.message)
     console.log('\n\n')
 }

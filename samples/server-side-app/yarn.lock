@@ -2,6 +2,6 @@
 # yarn lockfile v1
 
 
-intento-nodejs@^0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/intento-nodejs/-/intento-nodejs-0.0.7.tgz#8fe53257dd9faa8049efc10fe4318ab424f1a6c9"
+intento-nodejs@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/intento-nodejs/-/intento-nodejs-0.1.0.tgz#5b4f3828566feee03b47278deea7604aa6520519"
