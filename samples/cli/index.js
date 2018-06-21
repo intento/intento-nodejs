@@ -63,12 +63,25 @@ if (intent === 'translate') {
 /* helpers */
 
 function defaultCallback(data) {
-    console.log('API response:\n', JSON.stringify(data, null, 4), '\n\n')
+    if (data.message) {
+        console.log('\nError: ' + data.message)
+        console.log('\n\n')
+    } else  if (data.error) {
+        console.log('\nError from provider: ' + data.error.message)
+        console.log('\n\n')
+    } else {
+        console.log('API response:\n', JSON.stringify(data, null, 4), '\n\n')
+    }
 }
 
 function prettyCatch(errorResponse) {
+    console.log(Object.keys(errorResponse))
+
     if (errorResponse.message) {
         console.log('\nError: ' + errorResponse.message)
+        console.log('\n\n')
+    } else if (errorResponse.error) {
+        console.log('\nError: ' + errorResponse.error.message)
         console.log('\n\n')
     } else {
         errorResponse.setEncoding('utf8')
