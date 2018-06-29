@@ -198,11 +198,10 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
                 '\nProvider `id` is needed to be specified as a `provider` parameter'
             )
             console.log('No request will be made')
-            this.ai.text.sentiment.providers(function(err, data) {
-                if (!err) {
-                    console.log('Select one of the provider ids')
-                    data.forEach((p, i) => console.log(`  ${i + 1}. ${p.id}`))
-                }
+            this.ai.text.sentiment.providers().then(data => {
+                console.log('Select one of the provider ids')
+                data.forEach(p => console.log(`    ${p.id}`))
+                console.log(`(total ${data.length} providers)`)
             })
             throw new Error('Please specify a provider')
         }
