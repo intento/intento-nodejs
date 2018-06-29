@@ -30,6 +30,7 @@ const {
     h, // eslint-disable-line no-unused-vars
     i, // eslint-disable-line no-unused-vars
     _ = [],
+    provider,
     ...rest
 } = argv
 
@@ -93,9 +94,20 @@ try {
             options.text = _
         }
     }
+
     if (async) {
         options.async = async
     }
+
+    if (provider) {
+        const providerList = provider.split(',')
+        if (providerList.length === 1) {
+            options.provider = providerList[0]
+        } else {
+            options.provider = providerList
+        }
+    }
+
     intentProcessor({ ...options, ...rest })
         .then(errorFriendlyCallback)
         .catch(prettyCatch)
