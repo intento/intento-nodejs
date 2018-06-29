@@ -29,6 +29,7 @@ In case you don't have a key to use Intento API, please register here [console.i
 - [Smart routing](#smart-routing)
     - [Basic smart routing](#basic-smart-routing)
     - [Specifying the bidding strategy](#specifying-the-bidding-strategy)
+    - [Async mode](#async-mode)
 - [Failover mode](#failover-mode)
 - [Using a service provider with your own keys](#using-a-service-provider-with-your-own-keys)
 - [Advanced Examples](#advanced-examples)
@@ -238,6 +239,95 @@ client.ai.text.translate
         bidding: 'best_quality',
     })
     .then(console.log)
+```
+
+### Async mode
+
+If the server responded with a status of 413 (Request Entity Too Large), then the request data is too large for the synchronous processing. In this case, you should switch to the asynchronous mode by adding `async: true` to the parameters. The current approach to handling the oversized requests [is described in a separate document](https://github.com/intento/intento-api/blob/master/processing-oversized-requests.md).
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: [
+            'A sample text',
+            'Another sample text'
+        ],
+        from: 'en',
+        to: 'es',
+        async: true,
+        provider: [
+            'ai.text.translate.google.translate_api.2-0',
+            'ai.text.translate.yandex.translate_api.1-5'
+        ]
+    })
+    .then(console.log)
+```
+
+The response contains `id` of the operation:
+
+```json
+{
+    "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda"
+}
+```
+
+Wait for processing to complete. To retrieve the result of the operation, call
+
+```js
+client.operations
+    .fulfill({
+        id: "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda"
+    })
+    .then(console.log)
+```
+
+TTL of the resource is 30 days.
+
+The response
+
+```json
+{
+    "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "Un texto de ejemplo 1",
+                "Un texto de ejemplo 2"
+            ],
+            "meta": {},
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.microsoft.translator_text_api.2-0",
+                    "name": "Microsoft Translator API"
+                }
+            }
+        },
+        {
+            "results": [
+                "Un texto de ejemplo 1",
+                "Un texto de ejemplo 2"
+            ],
+            "meta": {},
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.yandex.translate_api.1-5",
+                    "name": "Yandex Translate API"
+                }
+            }
+        }
+    ]
+}
+```
+
+If the operation is not completed the value of `done` is false. Wait and make request later.
+
+```json
+{
+    "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda",
+    "done": false,
+    "response": null
+}
 ```
 
 ## Failover mode
