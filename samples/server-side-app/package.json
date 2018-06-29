@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "description": "sample nodejs application using intento api",
   "main": "index.js",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {}
 }
