@@ -1,7 +1,6 @@
 'use strict'
 
 const parseArgs = require('minimist')
-// const IntentoConnector = require('intento-nodejs')
 const IntentoConnector = require('../../src/index')
 
 const argv = parseArgs(process.argv.slice(2), {
