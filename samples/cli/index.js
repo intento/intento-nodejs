@@ -15,7 +15,11 @@ const argv = parseArgs(process.argv.slice(2), {
         intent: ['i'],
     },
 })
-const { debug = false, verbose = false, apikey, host, intent, _ = [], ...rest } = argv
+const {
+    debug = false, verbose = false, apikey, host, intent,
+    d, v, k, key, h, i, // eslint-disable-line no-unused-vars
+    _ = [], ...rest
+} = argv
 
 const DEBUG = debug
 let VERBOSE = verbose
@@ -27,47 +31,64 @@ if (!apikey) {
     process.exit(1)
 }
 
+if (!intent) {
+    console.error('No intent specified. For example, add `--intent=translate` or `-i translate`')
+    process.exit(1)
+}
+
 if (!host && (DEBUG || VERBOSE)) {
     console.warn('No host specified. Default host will be used')
 }
 
 const client = new IntentoConnector({ apikey, host }, DEBUG)
 
-const intentMap = {
+const intentShortcuts = {
     translate: client.ai.text.translate,
     sentiment: client.ai.text.sentiment,
     dictionary: client.ai.text.dictionary,
-    settings: client.settings,
-    usage: client.usage,
+    settings: client.settings.languages,
 }
 
-const validIntents = Object.keys(intentMap)
+const intentProcessor = getIntentProcessor(intent)
 
-if (!intent || validIntents.indexOf(intent) === -1) {
-    if (intent) {
-        console.error('Unknown intent: ', intent, '. Valid intents are ', validIntents.join(', '))
-    } else {
-        console.error('No intent specified. For example, add `--intent=translate` or `-i translate`')
-    }
+const validIntents = Object.keys(intentShortcuts)
+
+if (!intentProcessor) {
+    console.error('Unknown intent: ', intent, '. Valid intent examples are ', validIntents.join(', '), ' or settings.processingRules, ai/text/translate, etc.')
+    process.exit(1)
 }
 
-if (intent === 'translate') {
-    const text = _[0]
+const text = _[0]
 
-    client.ai.text.translate
-        .fulfill({ text, ...rest })
+try {
+    intentProcessor({ text, ...rest })
         .then(defaultCallback)
         .catch(prettyCatch)
+} catch (e) {
+    console.error(e.message)
 }
 
 /* helpers */
+
+// more here https://github.com/intento/intento-api/blob/master/README.md#errors
+const errorCodes = {
+    401: "Auth key is missing",
+    403: "Auth key is invalid",
+    404: "Intent/Provider not found",
+    413: "Capabilities mismatch for the chosen provider (too long text, unsupported languages, etc)",
+    429: "API rate limit exceeded",
+}
 
 function defaultCallback(data) {
     if (data.message) {
         console.log('\nError: ' + data.message)
         console.log('\n\n')
     } else  if (data.error) {
-        console.log('\nError from provider: ' + data.error.message)
+        if (data.error.code === 400) {
+            console.log('\nError from provider: ' + data.error.message)
+        } else {
+            console.log(`\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${data.error.message}`)
+        }
         console.log('\n\n')
     } else {
         console.log('API response:\n', JSON.stringify(data, null, 4), '\n\n')
@@ -104,3 +125,41 @@ function prettyCatch(errorResponse) {
     }
 }
 
+function getIntentProcessor(value) {
+    let shortcut = intentShortcuts[value]
+    if (shortcut) {
+        if (shortcut.hasOwnProperty('fulfill')) {
+            shortcut = shortcut.fulfill
+        }
+        return shortcut
+    }
+
+    let resultFn = client
+    const elements = value.split(/[./]/)
+
+    var MethodDoesntExist = {}
+
+    try {
+        elements.forEach(element => {
+            if (resultFn.hasOwnProperty(element)) {
+                resultFn = resultFn[element]
+            } else {
+                throw MethodDoesntExist
+            }
+        })
+    } catch (e) {
+        if (e !== MethodDoesntExist) {
+            throw e
+        }
+    }
+
+    if (resultFn.hasOwnProperty('fulfill')) {
+        resultFn = resultFn.fulfill
+    }
+
+    if (typeof resultFn === 'function') {
+        return resultFn
+    }
+
+    return
+}
