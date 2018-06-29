@@ -2,8 +2,8 @@
 
 Simple translate text `text` to language `to`:
 
-    - source language will be detected automatically
-    - provider for the translation will be smart-selected based on the [Smart routing feature](https://github.com/intento/intento-api#smart-routing)
+- source language will be detected automatically
+- provider for the translation will be smart-selected based on the [Smart routing feature](https://github.com/intento/intento-api#smart-routing)
 
 ```js
 client.ai.text.translate

@@ -1,6 +1,6 @@
 'use strict'
 
-const IntentoConnector = require('intento-nodejs')
+const IntentoConnector = require('../../src')
 const apikey = process.env.INTENTO_API_KEY
 const client = new IntentoConnector({ apikey })
 
