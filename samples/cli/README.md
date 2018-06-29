@@ -21,6 +21,18 @@ node index.js -k YOUR_API_KEY \
     "During simulation, genotypes induce patterns of subsystem activities"
 ```
 
+### Multiple providers and async mode
+
+```sh
+node index.js -k YOUR_API_KEY \
+    -i translate \
+    --from 'en' \
+    --to 'fr' \
+    --provider ai.text.translate.microsoft.translator_text_api.3-0,ai.text.translate.google.translate_api.2-0 \
+    --async \
+    "During simulation, genotypes induce patterns of subsystem activities"
+```
+
 ### Error: Invalid authentication credentials
 
 ```sh

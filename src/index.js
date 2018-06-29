@@ -95,6 +95,12 @@ function IntentoConnector(credentials = {}, debug = false) {
             },
         },
     })
+
+    this.operations = Object.freeze({
+        fulfill: params => {
+            return this.asyncOperations(params)
+        },
+    })
 }
 
 module.exports = IntentoConnector
@@ -167,6 +173,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         failover,
         failover_list,
         auth,
+        async,
         multiple_translations,
         input_format,
         output_format,
@@ -177,6 +184,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         service: {
             provider,
             auth,
+            async,
             bidding,
             failover,
             failover_list,
@@ -214,7 +222,15 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.providers = function(slug, params) {
+IntentoConnector.prototype.providers = function(slug, options) {
+    const validParams = ['from', 'to', 'bulk', 'lang_detect']
+    const params = {}
+    validParams.forEach(p => {
+        if (options[p]) {
+            params[p] = p
+        }
+    })
+
     return this.makeRequest({
         path: getPath(slug, this.debug),
         params,
@@ -259,10 +275,18 @@ IntentoConnector.prototype.settingsLanguages = function(params) {
     })
 }
 
-IntentoConnector.prototype.processingRules = function (params) {
+IntentoConnector.prototype.processingRules = function(params) {
     return this.makeRequest({
         path: '/settings/processing-rules',
         params,
+        method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.asyncOperations = function(params) {
+    const { id } = params
+    return this.makeRequest({
+        path: '/operations/' + id,
         method: 'GET',
     })
 }
