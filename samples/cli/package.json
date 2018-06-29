@@ -2,9 +2,8 @@
   "name": "cli",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
-    "intento-nodejs": "^0.1.0",
     "minimist": "^1.2.0"
   }
 }
