@@ -67,6 +67,7 @@ const intentShortcuts = {
     sentiment: client.ai.text.sentiment,
     dictionary: client.ai.text.dictionary,
     settings: client.settings.languages,
+    usage: client.usage.intento,
 }
 
 const intentProcessor = getIntentProcessor(intent)

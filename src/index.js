@@ -101,6 +101,28 @@ function IntentoConnector(credentials = {}, debug = false) {
             return this.asyncOperations(params)
         },
     })
+
+    this.usage = Object.freeze({
+        intento: params => {
+            return this.usageFulfill(
+                '/usage/intento',
+                params, // --> range: obj, filter: obj
+            )
+        },
+        provider: params => {
+            return this.usageFulfill(
+                '/usage/provider',
+                params, // --> range: obj, filter: obj
+            )
+        },
+        distinct: params => {
+            return this.usageFulfill(
+                '/usage/distinct',
+                params, // --> range: obj, fields: list
+            )
+        },
+    })
+
 }
 
 module.exports = IntentoConnector
@@ -288,6 +310,37 @@ IntentoConnector.prototype.asyncOperations = function(params) {
     return this.makeRequest({
         path: '/operations/' + id,
         method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
+    const {
+        from,
+        to =  Math.ceil(Date.now() / 1000),
+        bucket,
+        provider,
+        fields,
+    } = parameters
+    const content = {
+        range: { from, to, bucket },
+    }
+
+    if (provider) {
+        content.filter = { provider }
+    }
+
+    if (fields && path.indexOf('distinct') !== -1) {
+        if (Array.isArray(fields)) {
+            content.fields = fields
+        } else if (typeof fields === 'string') {
+            content.fields = [fields]
+        }
+    }
+
+    return this.makeRequest({
+        path,
+        content,
+        method: 'POST',
     })
 }
 
