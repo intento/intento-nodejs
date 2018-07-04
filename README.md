@@ -13,6 +13,7 @@ In case you don't have a key to use Intento API, please register here [console.i
 <!-- TOC depthFrom:2 -->
 
 - [Installation](#installation)
+- [Command line interface](#command-line-interface)
 - [Basic usage](#basic-usage)
     - [Translation](#translation)
     - [Sentiment analysis](#sentiment-analysis)
@@ -55,6 +56,10 @@ or
 ```bash
 yarn add intento-nodejs
 ```
+
+## Command line interface
+
+See [CLI example](https://github.com/intento/intento-nodejs/tree/master/samples/cli) as one of the ways to use this SDK.
 
 ## Basic usage
 

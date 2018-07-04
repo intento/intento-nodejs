@@ -11,7 +11,10 @@ node index.js -k YOUR_API_KEY \
     "During simulation, genotypes induce patterns of subsystem activities"
 ```
 
-### Specify provider
+### Specify a provider
+
+By default a provider for the job is smart-seleted. Find out more about it in the [docs](https://intento.github.io/intento-api/#smart-routing).
+In the same time a provider can be specified explicitly:
 
 ```sh
 node index.js -k YOUR_API_KEY \
@@ -21,7 +24,11 @@ node index.js -k YOUR_API_KEY \
     "During simulation, genotypes induce patterns of subsystem activities"
 ```
 
+Check out an example with several providers specified in the next section.
+
 ### Multiple providers and async mode
+
+More on async mode im the [docs](https://intento.github.io/intento-api/#async-mode)
 
 ```sh
 node index.js -k YOUR_API_KEY \
@@ -33,7 +40,11 @@ node index.js -k YOUR_API_KEY \
     "During simulation, genotypes induce patterns of subsystem activities"
 ```
 
-### Error: Invalid authentication credentials
+Notice a `--from` parameter. In this case (with `--async true`) it is required.
+
+### Error messages
+
+#### Error: Invalid authentication credentials
 
 ```sh
 node index.js -k some_invalid_key \
@@ -44,7 +55,7 @@ node index.js -k some_invalid_key \
     "epigenetics markers for cancer and bowel syndrome treatment in a hospital setting"
 ```
 
-### Error from provider: [bad_data] Model URL was not found
+#### Error from provider: [bad_data] Model URL was not found
 
 Because this provider requires `category` (custom model)
 
@@ -57,7 +68,7 @@ node index.js -k YOUR_API_KEY \
     "epigenetics markers for cancer and bowel syndrome treatment in a hospital setting"
 ```
 
-### Error from provider: [access] Request had invalid authentication credentials
+#### Error from provider: [access] Request had invalid authentication credentials
 
 `Error from provider: [access] Request had invalid authentication credentials. Expected OAuth 2 access token.`
 
