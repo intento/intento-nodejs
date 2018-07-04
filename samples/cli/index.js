@@ -435,6 +435,7 @@ function getIntentProcessor(connector, value) {
         dictionary: connector.ai.text.dictionary,
         ['dictionary.providers']: connector.ai.text.dictionary.providers,
         settings: connector.settings.languages,
+        usage: connector.usage.intento,
     }
 
     let shortcut = intentShortcuts[value]
