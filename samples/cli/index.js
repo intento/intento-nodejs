@@ -31,11 +31,16 @@ const {
     i, // eslint-disable-line no-unused-vars
     _ = [],
     provider,
+    input,
+    // output,
+    encoding = 'utf-8',
     ...rest
 } = argv
 
 const DEBUG = debug
 const VERBOSE = verbose
+
+const PROVIDERS_EXAMPLE = 'https://github.com/intento/intento-nodejs/tree/master/samples/cli#list-available-providers'
 
 if (!apikey) {
     console.error(
@@ -98,8 +103,57 @@ if (!intentProcessor) {
     process.exit(1)
 }
 
-try {
-    const options = {}
+const options = {}
+
+if (async) {
+    options.async = async
+}
+
+if (provider) {
+    const providerList = provider.split(',')
+    if (providerList.length === 1) {
+        options.provider = providerList[0]
+    } else {
+        options.provider = providerList
+    }
+}
+
+if (input) {
+    options.async = true // force async?
+    if (options.async && !provider) {
+        console.error(
+            "Smart mode for async operations currently isn't supported"
+        )
+        console.log('Please specify a provider with `--provider` option.')
+        console.log(`To get available providers try an example ${PROVIDERS_EXAMPLE}`)
+
+        process.exit(1)
+    }
+
+    const fs = require('fs')
+    const path = require('path')
+    let filePath
+    try {
+        filePath = path.join(__dirname, input)
+    } catch (e) {
+        console.error(e.message)
+    }
+
+    fs.readFile(filePath, { encoding }, (err, data) => {
+        if (!err) {
+            options.text = data
+            try {
+                intentProcessor({ ...options, ...rest })
+                    .then(errorFriendlyCallback)
+                    .catch(prettyCatch)
+            } catch (e) {
+                console.error(e.message)
+            }
+        } else {
+            console.log(`Error reading ${input} file\n`, err)
+        }
+    })
+} else {
     if (_.length > 0) {
         if (_.length === 1) {
             // avoid errors from providers without bulk support
@@ -109,24 +163,13 @@ try {
         }
     }
 
-    if (async) {
-        options.async = async
+    try {
+        intentProcessor({ ...options, ...rest })
+            .then(errorFriendlyCallback)
+            .catch(prettyCatch)
+    } catch (e) {
+        console.error(e.message)
     }
-
-    if (provider) {
-        const providerList = provider.split(',')
-        if (providerList.length === 1) {
-            options.provider = providerList[0]
-        } else {
-            options.provider = providerList
-        }
-    }
-
-    intentProcessor({ ...options, ...rest })
-        .then(errorFriendlyCallback)
-        .catch(prettyCatch)
-} catch (e) {
-    console.error(e.message)
 }
 
 /* helpers */
@@ -164,6 +207,10 @@ function errorFriendlyCallback(data) {
             }
             responseAsIs(data)
         }
+    }
+
+    if (debug) {
+        console.error(data)
     }
 }
 
