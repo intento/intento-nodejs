@@ -20,8 +20,8 @@ const {
     verbose = false,
     apikey,
     host,
-    intent,
-    output = 'responseAsIs',
+    intent = 'translate',
+    responseMapper,
     async,
     d, // eslint-disable-line no-unused-vars
     v, // eslint-disable-line no-unused-vars
@@ -37,11 +37,6 @@ const {
 const DEBUG = debug
 const VERBOSE = verbose
 
-const outputFn = {
-    responseAsIs,
-    listIdsFromResponse,
-}[output]
-
 if (!apikey) {
     console.error(
         'Missing Intento API key. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment'
@@ -56,16 +51,35 @@ if (!intent) {
     process.exit(1)
 }
 
-if (!host && (DEBUG || VERBOSE)) {
+if (!host && DEBUG) {
     console.warn('No host specified. Default host will be used')
 }
 
-const client = new IntentoConnector({ apikey, host }, DEBUG)
+let responseMapperFnName = responseMapper
+if (!responseMapperFnName) {
+    if (intent.indexOf('providers') === -1) {
+        // not requesting for providers
+        responseMapperFnName = 'responseAsIs'
+    } else {
+        responseMapperFnName = 'listIdsFromResponse'
+    }
+}
+const outputFn = {
+    responseAsIs,
+    listIdsFromResponse,
+}[responseMapperFnName]
+
+
+const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE })
 
 const intentShortcuts = {
     translate: client.ai.text.translate,
+    providers: client.ai.text.translate.providers,
+    ['translate.providers']: client.ai.text.translate.providers,
     sentiment: client.ai.text.sentiment,
+    ['sentiment.providers']: client.ai.text.sentiment.providers,
     dictionary: client.ai.text.dictionary,
+    ['dictionary.providers']: client.ai.text.dictionary.providers,
     settings: client.settings.languages,
 }
 
@@ -146,7 +160,7 @@ function errorFriendlyCallback(data) {
             outputFn(data)
         } else {
             if (DEBUG) {
-                console.log('Output results using default output')
+                console.log('Output results using default responseMapper')
             }
             responseAsIs(data)
         }
