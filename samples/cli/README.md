@@ -17,6 +17,7 @@ Get more information about other intents in [our docs](https://intento.github.io
 
 - [TL;DR](#tldr)
 - [Start using CLI](#start-using-cli)
+    - [Update](#update)
 - [Examples](#examples)
     - [List available providers](#list-available-providers)
     - [Specify a provider](#specify-a-provider)
@@ -42,6 +43,13 @@ yarn install # or `npm install`
 node index.js --key=INTENTO_API_KEY \
     --to=ru \
     "sample text"
+```
+
+### Update
+
+```sh
+cd intento-nodejs/samples/cli
+git pull
 ```
 
 ## Examples
