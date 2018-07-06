@@ -206,9 +206,32 @@ function errorFriendlyCallback(data) {
     } else {
         if (output) {
             try {
-                fs.writeFile(output, data.results.join(''), { encoding }, () => {
-                    console.log(`Results were written to the ${output} file`)
-                })
+                if (async && data.id) {
+                    // async job was registered with `id`
+                    console.log('\noperation id', data.id)
+                    console.log(`\nRequest operation results later with a command`)
+                    if (output) {
+                        console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output}`)
+                    } else {
+                        console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=output.txt`)
+                    }
+                    fs.writeFile(`${input}_operation_id.txt`, data.id, { encoding }, () => {
+                        console.log(`\nOperation id was written to the ${input}_operation_id.txt file`)
+                    })
+                } else if (data.id && !data.done) {
+                    console.log(`Operation ${data.id} is still in progress`)
+                } else if (data.id && data.done) {
+                    data.response.forEach(resp => {
+                        const outputFileName = output.replace(/(\.txt|\.md|\.csv)/, `_${resp.service.provider.id}$1`)
+                        fs.writeFile(outputFileName, resp.results.join('\n'), { encoding }, () => {
+                            console.log(`Results were written to the ${outputFileName} file`)
+                            if (VERBOSE || DEBUG) {
+                                console.log('meta', resp.meta)
+                                console.log('service', resp.service)
+                            }
+                        })
+                    })
+                }
             } catch (e) {
                 console.error(`Errors while writing to the ${output} file`)
                 console.log('Response:\n', data)
