@@ -13,6 +13,24 @@ node index.js --key=INTENTO_API_KEY \
 This instruction sends a request to Intento API. If no `--intent` specified, translation intent is used.
 Get more information about other intents in [our docs](https://intento.github.io/intento-api/#basic-usage)
 
+<!-- TOC depthFrom:2 -->
+
+- [TL;DR](#tldr)
+- [Start using CLI](#start-using-cli)
+- [Examples](#examples)
+    - [List available providers](#list-available-providers)
+    - [Specify a provider](#specify-a-provider)
+    - [Multiple providers and async mode](#multiple-providers-and-async-mode)
+    - [Translate a file](#translate-a-file)
+    - [Translate a file, write results to another file](#translate-a-file-write-results-to-another-file)
+    - [Translate a large file, write results to another file](#translate-a-large-file-write-results-to-another-file)
+    - [Error messages](#error-messages)
+        - [Error: Invalid authentication credentials](#error-invalid-authentication-credentials)
+        - [Error from provider: [bad_data] Model URL was not found](#error-from-provider-bad_data-model-url-was-not-found)
+        - [Error from provider: [access] Request had invalid authentication credentials](#error-from-provider-access-request-had-invalid-authentication-credentials)
+
+<!-- /TOC -->
+
 ## Start using CLI
 
 Fastest way to start experimenting is following:
