@@ -1,5 +1,6 @@
 'use strict'
 
+const fs = require('fs')
 const parseArgs = require('minimist')
 const IntentoConnector = require('../../src/index')
 
@@ -32,7 +33,7 @@ const {
     _ = [],
     provider,
     input,
-    // output,
+    output,
     encoding = 'utf-8',
     ...rest
 } = argv
@@ -119,7 +120,6 @@ if (provider) {
 }
 
 if (input) {
-    options.async = true // force async?
     if (options.async && !provider) {
         console.error(
             "Smart mode for async operations currently isn't supported"
@@ -130,7 +130,6 @@ if (input) {
         process.exit(1)
     }
 
-    const fs = require('fs')
     const path = require('path')
     let filePath
     try {
@@ -187,6 +186,9 @@ function errorFriendlyCallback(data) {
     if (data.message) {
         console.log('\nError: ' + data.message)
         console.log('\n\n')
+        if (DEBUG) {
+            console.error(data)
+        }
     } else if (data.error) {
         if (data.error.code === 400) {
             console.log('\nError from provider: ' + data.error.message)
@@ -198,8 +200,20 @@ function errorFriendlyCallback(data) {
             )
         }
         console.log('\n\n')
+        if (DEBUG) {
+            console.error(data)
+        }
     } else {
-        if (typeof outputFn === 'function') {
+        if (output) {
+            try {
+                fs.writeFile(output, data.results.join(''), { encoding }, () => {
+                    console.log(`Results were written to the ${output} file`)
+                })
+            } catch (e) {
+                console.error(`Errors while writing to the ${output} file`)
+                console.log('Response:\n', data)
+            }
+        } else if (typeof outputFn === 'function') {
             outputFn(data)
         } else {
             if (DEBUG) {
@@ -209,9 +223,6 @@ function errorFriendlyCallback(data) {
         }
     }
 
-    if (debug) {
-        console.error(data)
-    }
 }
 
 function responseAsIs(data) {
