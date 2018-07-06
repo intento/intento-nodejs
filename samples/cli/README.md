@@ -88,6 +88,149 @@ node index.js --key=INTENTO_API_KEY \
 
 Notice a `--from` parameter. In this case (with `--async true`) it is required.
 
+### Translate a file
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --to=fr \
+    --input=sample.txt
+```
+
+This command 1) will guess `from` language 2) will smart-select a provider 3) will write response to your console
+
+Example response:
+
+```sh
+API response:
+ {
+    "results": [
+        "...translated text from sample.txt..."
+    ],
+    "meta": {
+        "detected_source_language": [
+            "en"
+        ]
+    },
+    "service": {
+        "provider": {
+            "id": "ai.text.translate.deepl.api",
+            "name": "DeepL API"
+        }
+    }
+}
+```
+
+If `sample.txt`is too big, you'll see an error from that smart-selected provider.
+Example error response:
+
+```sh
+Error: 413 Capabilities mismatch for the chosen provider (too long text, unsupported languages, etc)
+Provider ai.text.translate.yandex.translate_api.1-5 constraint(s) violated: Constraint violated for parameter text: max-item-length=10000, passed value length=33546
+Consider using --async option
+```
+
+### Translate a file, write results to another file
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --to=fr \
+    --input=sample.txt \
+    --output=sample_results.txt
+```
+
+This command 1) will guess `from` language 2) will smart-select a provider 3) will write response to a file.
+
+Example output:
+
+```sh
+Results were written to the ssample_results_smart.selected.provider.txt file
+```
+
+If `sample.txt`is too big, you'll see an error from that smart-selected provider.
+Example error response:
+
+```sh
+Error: 413 Capabilities mismatch for the chosen provider (too long text, unsupported languages, etc)
+Provider ai.text.translate.deepl.api constraint(s) violated: Constraint violated for maximum request length: max-request-length=30000, passed value length=35250
+Consider using --async option
+```
+
+### Translate a large file, write results to another file
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --to=fr \
+    --async \
+    --input=large_sample.txt \
+    --output=large_sample_results.txt
+```
+
+Example output:
+
+```sh
+Smart mode for async operations currently isn't supported
+Please specify a provider with `--provider` option.
+To get available providers try an example https://github.com/intento/intento-nodejs/tree/master/samples/cli#list-available-providers
+```
+
+Choose a provider (or several providers)
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --to=fr \
+    --async \
+    --provider=ai.text.translate.google.translate_api.2-0 \
+    --input=large_sample.txt \
+    --output=large_sample_results.txt
+```
+
+Example output:
+
+```sh
+Error: 413 Capabilities mismatch for the chosen provider (too long text, unsupported languages, etc)
+Parameter 'from' is required when using async mode
+```
+
+Just add `--from=en` assuming large_sample.txt is in English
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --from=en \
+    --to=fr \
+    --async \
+    --provider=ai.text.translate.google.translate_api.2-0 \
+    --input=large_sample.txt \
+    --output=large_sample_results.txt
+```
+
+Example output:
+
+```sh
+operation id unique-operation-id-number
+
+Request operation results later with a command
+    node index.js --key=ada4cfb262d74dbf8d7938cfacf3a8a3 --intent=operations --id=unique-operation-id-number --output=large_sample_results.txt
+
+Operation id was written to the large_sample_operation_id.txt file
+```
+
+Wait for a while and run that command:
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --intent=operations \
+    --id=unique-operation-id-number \
+    --output=large_sample_results.txt
+```
+
+Example output:
+
+```sh
+Results were written to the large_sample_ai.text.translate.google.translate_api.2-0.txt file
+```
+
+Try the same with several providers (`--provider=providerA,providerB`)
+
 ### Error messages
 
 #### Error: Invalid authentication credentials

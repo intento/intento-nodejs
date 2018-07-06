@@ -198,43 +198,69 @@ function errorFriendlyCallback(data) {
                     data.error.message
                 }`
             )
+            if (input && !async) {
+                console.log('Consider using --async option')
+            }
         }
-        console.log('\n\n')
+        console.log('\n')
         if (DEBUG) {
             console.error(data)
         }
     } else {
         if (output) {
             try {
-                if (async && data.id) {
-                    // async job was registered with `id`
-                    console.log('\noperation id', data.id)
-                    console.log(`\nRequest operation results later with a command`)
-                    if (output) {
-                        console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output}`)
+                if (data.id && !data.done) {
+                    if (intent.indexOf('operations') === -1) {
+                        // async job was registered with `id`
+                        console.log('\noperation id', data.id)
+                        console.log(`\nRequest operation results later with a command`)
+                        if (output) {
+                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output}`)
+                        } else {
+                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=output.txt`)
+                        }
+                        fs.writeFile(`${input}_operation_id.txt`, data.id, { encoding }, () => {
+                            console.log(`\nOperation id was written to the ${input}_operation_id.txt file`)
+                        })
                     } else {
-                        console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=output.txt`)
+                        // it is an operation/id request with empty response ~ same as done = false
+                        console.log(`Operation ${data.id} is still in progress`)
                     }
-                    fs.writeFile(`${input}_operation_id.txt`, data.id, { encoding }, () => {
-                        console.log(`\nOperation id was written to the ${input}_operation_id.txt file`)
+                }
+
+                if (data.results) {
+                    const outputFileName = output.replace(/(\.txt|\.md|\.csv)/, `_${data.service.provider.id}$1`)
+                    fs.writeFile(outputFileName, data.results.join('\n'), { encoding }, () => {
+                        console.log(`Results were written to the ${outputFileName} file`)
+                        if (VERBOSE || DEBUG) {
+                            console.log('meta', data.meta)
+                            console.log('service', data.service)
+                        }
                     })
-                } else if (data.id && !data.done) {
-                    console.log(`Operation ${data.id} is still in progress`)
                 } else if (data.id && data.done) {
+                    // it is an operation/id request with response ~ same as done = true
                     data.response.forEach(resp => {
                         const outputFileName = output.replace(/(\.txt|\.md|\.csv)/, `_${resp.service.provider.id}$1`)
                         fs.writeFile(outputFileName, resp.results.join('\n'), { encoding }, () => {
-                            console.log(`Results were written to the ${outputFileName} file`)
+                            console.log(`\nResults were written to the ${outputFileName} file\n`)
                             if (VERBOSE || DEBUG) {
                                 console.log('meta', resp.meta)
                                 console.log('service', resp.service)
                             }
                         })
                     })
+                } else {
+                    if (VERBOSE) {
+                        console.log(data)
+                    }
                 }
             } catch (e) {
                 console.error(`Errors while writing to the ${output} file`)
                 console.log('Response:\n', data)
+            } finally {
+                if (DEBUG) {
+                    console.log(data)
+                }
             }
         } else if (typeof outputFn === 'function') {
             outputFn(data)
