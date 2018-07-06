@@ -20,7 +20,7 @@ Fastest way to start experimenting is following:
 ```sh
 git clone git@github.com:intento/intento-nodejs.git
 cd intento-nodejs/samples/cli
-yarn install
+yarn install # or `npm install`
 node index.js --key=INTENTO_API_KEY \
     --to=ru \
     "sample text"
