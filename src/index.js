@@ -226,7 +226,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.providers = function(slug, options) {
+IntentoConnector.prototype.providers = function(slug, options = {}) {
     const validParams = ['from', 'to', 'bulk', 'lang_detect']
     const params = {}
     validParams.forEach(p => {
@@ -318,12 +318,15 @@ function getPath(slug, debug = false, verbose = false) {
 }
 
 function response_handler(response, resolve, reject, debug = false, verbose = false) {
+    response.setEncoding('utf8')
+
     if (response.statusCode >= 500) {
-        console.log(response.statusCode)
-        console.log(response.statusMessage)
+        if (debug) {
+            console.log(response.statusCode, response.statusMessage)
+        }
+        reject(response)
     }
 
-    response.setEncoding('utf8')
     let body = ''
     response.on('data', function(chunk) {
         body += chunk
@@ -332,13 +335,25 @@ function response_handler(response, resolve, reject, debug = false, verbose = fa
         try {
             let data = null
             if (body.length > 0) {
-                data = JSON.parse(body)
+                if (body[0] === '{') {
+                    data = JSON.parse(body)
+                } else if (body[0] === '<') {
+                    if (response.statusCode >= 400) {
+                        throw new Error('HTML 4xx response: ' + body)
+                    } else {
+                        throw new Error('Unexpected 2xx or 3xx response: ' + body)
+                    }
+                } else {
+                    throw new Error('Unexpected response: ' + body)
+                }
             }
             resolve(data)
         } catch (e) {
             if (debug || verbose) {
-                console.error('Failed reading response body', body)
+                console.error(e)
+                console.log(response.statusCode, response.statusMessage)
             }
+            reject(response)
         }
     })
 }

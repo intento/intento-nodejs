@@ -7,7 +7,7 @@ require('dotenv').load()
 const apikey = process.env.INTENTO_API_KEY
 
 const DEBUG = false
-const client = new IntentoConnector({ apikey }, DEBUG)
+const client = new IntentoConnector({ apikey }, { debug: DEBUG })
 
 describe('Export', () => {
     it('loads', () => {
@@ -47,6 +47,10 @@ describe('Basic', () => {
 
         expect(client.settings).toBeDefined()
         expect(typeof client.settings.languages).toBe('function')
+        expect(typeof client.settings.processingRules).toBe('function')
+
+        expect(client.operations).toBeDefined()
+        expect(typeof client.operations.fulfill).toBe('function')
 
         expect(typeof client.makeRequest).toBe('function')
     })
