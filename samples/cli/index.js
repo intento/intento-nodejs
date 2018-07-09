@@ -6,17 +6,18 @@ const IntentoConnector = require('../../src/index')
 
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
-    boolean: ['debug', 'verbose', 'async'],
+    boolean: ['debug', 'verbose', 'async', 'help'],
     alias: {
+        help: ['h'],
         debug: ['d'],
         verbose: ['v'],
         apikey: ['k', 'key'],
-        host: ['h'],
         intent: ['i'],
     },
 })
 
 const {
+    help = false,
     debug = false,
     verbose = false,
     apikey,
@@ -24,19 +25,42 @@ const {
     intent = 'translate',
     responseMapper,
     async,
+    h = false, // eslint-disable-line no-unused-vars
     d, // eslint-disable-line no-unused-vars
     v, // eslint-disable-line no-unused-vars
     k, // eslint-disable-line no-unused-vars
     key, // eslint-disable-line no-unused-vars
-    h, // eslint-disable-line no-unused-vars
     i, // eslint-disable-line no-unused-vars
     _ = [],
     provider,
     input,
     output,
     encoding = 'utf-8',
+    pre_processing,
+    post_processing,
     ...rest
 } = argv
+
+if (help) {
+    console.info('Command Line Interface for Intento API')
+    console.info('  more examples here https://github.com/intento/intento-nodejs/tree/master/samples/cli#examples')
+    console.info('\nUSAGE')
+    console.info('  node index.js [ARGUMENTS] [text to process]')
+    console.info('\nARGUMENTS')
+    console.info('  --key              [REQUIRED] your intento API key (visit https://console.inten.to to get one)')
+    console.info('  --intent           (string) any available intent like translate (default) or sentiment or ai.text.translate or ai/text/dictionary (more in docs https://github.com/intento/intento-api#intents)')
+    console.info('  --to               (language code)')
+    console.info('  --from             (language code)')
+    console.info('  --async            (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
+    console.info('  --provider         (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
+    console.info("  --input            (string) relative path to a file you'd like to process")
+    console.info('  --output           (string) relative path to a file where results will be stored')
+    console.info('  --post_processing  (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
+    console.info("  --format           ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
+    console.info('  --id               (string) job id for `--intent=operations`')
+    console.info('')
+    process.exit(1)
+}
 
 const DEBUG = debug
 const VERBOSE = verbose
@@ -116,6 +140,16 @@ if (provider) {
         options.provider = providerList[0]
     } else {
         options.provider = providerList
+    }
+}
+
+if (pre_processing || post_processing) {
+    options.processing = options.processing || {}
+    if (pre_processing) {
+        options.processing.pre = pre_processing.split(',')
+    }
+    if (post_processing) {
+        options.processing.post = post_processing.split(',')
     }
 }
 

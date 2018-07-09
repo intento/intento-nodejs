@@ -25,6 +25,8 @@ Get more information about other intents in [our docs](https://intento.github.io
     - [Translate a file](#translate-a-file)
     - [Translate a file, write results to another file](#translate-a-file-write-results-to-another-file)
     - [Translate a large file, write results to another file](#translate-a-large-file-write-results-to-another-file)
+    - [Specifying input format](#specifying-input-format)
+    - [post-processing results](#post-processing-results)
     - [Error messages](#error-messages)
         - [Error: Invalid authentication credentials](#error-invalid-authentication-credentials)
         - [Error from provider: [bad_data] Model URL was not found](#error-from-provider-bad_data-model-url-was-not-found)
@@ -65,9 +67,7 @@ Response may look like this
 
 ```sh
 API response:
-ai.text.translate.systran.pnmt
 ai.text.translate.microsoft.translator_text_api.3-0
-ai.text.translate.sdl.language_cloud_translation_toolkit
 ai.text.translate.deepl.api
 ai.text.translate.amazon.translate
 ai.text.translate.baidu.translate_api
@@ -256,6 +256,52 @@ Results were written to the large_sample_ai.text.translate.google.translate_api.
 ```
 
 Try the same with several providers (`--provider=providerA,providerB`)
+
+### Specifying input format
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --intent=translate \
+    --to=de \
+    --provider=ai.text.translate.google.translate_api.2-0 \
+    --format=html \
+    "<p>A sample <b>text</b></p>"
+```
+
+Example output (compare with results without `--format`):
+
+```sh
+API response:
+ {
+    "results": [
+        "<p> Ein <b>Beispieltext</b> </p>"
+    ],
+    ...
+}
+```
+
+### post-processing results
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --intent=translate \
+    --to=fr \
+    --provider=ai.text.translate.microsoft.translator_text_api.2-0 \
+    --post_processing=punctuation_set \
+    " Sample text  ..   "
+```
+
+Example output (notice trimmed spaces):
+
+```sh
+API response:
+ {
+    "results": [
+        "Exemple de texte..."
+    ],
+    ...
+}
+```
 
 ### Error messages
 

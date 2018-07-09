@@ -182,6 +182,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         input_format,
         output_format,
         pretty_print,
+        processing,
     } = parameters
     const content = {
         context: { text, from, to, lang, category, format },
@@ -196,6 +197,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             input_format,
             output_format,
             pretty_print,
+            processing,
         },
     }
 
