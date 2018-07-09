@@ -224,17 +224,13 @@ function errorFriendlyCallback(data) {
             console.error(data)
         }
     } else if (data.error) {
-        if (data.error.code === 400) {
-            console.log('\nError from provider: ' + data.error.message)
-        } else {
-            console.log(
-                `\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${
-                    data.error.message
-                }`
-            )
-            if (input && !async) {
-                console.log('Consider using --async option')
-            }
+        console.log(
+            `\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${
+                data.error.message
+            }`
+        )
+        if (input && !async) {
+            console.log('Consider using --async option')
         }
         console.log('\n')
         if (DEBUG) {
