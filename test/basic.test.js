@@ -47,6 +47,10 @@ describe('Basic', () => {
 
         expect(client.settings).toBeDefined()
         expect(typeof client.settings.languages).toBe('function')
+        expect(typeof client.settings.processingRules).toBe('function')
+
+        expect(client.operations).toBeDefined()
+        expect(typeof client.operations.fulfill).toBe('function')
 
         expect(typeof client.makeRequest).toBe('function')
     })
