@@ -226,7 +226,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.providers = function(slug, options) {
+IntentoConnector.prototype.providers = function(slug, options = {}) {
     const validParams = ['from', 'to', 'bulk', 'lang_detect']
     const params = {}
     validParams.forEach(p => {
