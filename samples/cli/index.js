@@ -35,6 +35,8 @@ const {
     input,
     output,
     encoding = 'utf-8',
+    pre_processing,
+    post_processing,
     ...rest
 } = argv
 
@@ -116,6 +118,16 @@ if (provider) {
         options.provider = providerList[0]
     } else {
         options.provider = providerList
+    }
+}
+
+if (pre_processing || post_processing) {
+    options.processing = options.processing || {}
+    if (pre_processing) {
+        options.processing.pre = pre_processing.split(',')
+    }
+    if (post_processing) {
+        options.processing.post = post_processing.split(',')
     }
 }
 
