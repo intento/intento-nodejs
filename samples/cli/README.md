@@ -67,9 +67,7 @@ Response may look like this
 
 ```sh
 API response:
-ai.text.translate.systran.pnmt
 ai.text.translate.microsoft.translator_text_api.3-0
-ai.text.translate.sdl.language_cloud_translation_toolkit
 ai.text.translate.deepl.api
 ai.text.translate.amazon.translate
 ai.text.translate.baidu.translate_api
