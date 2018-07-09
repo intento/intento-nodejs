@@ -47,6 +47,7 @@ if (help) {
     console.info('\nUSAGE')
     console.info('  node index.js [ARGUMENTS] [text to process]')
     console.info('\nARGUMENTS')
+    console.info('  --help             (boolean) display help')
     console.info('  --key              [REQUIRED] your intento API key (visit https://console.inten.to to get one)')
     console.info('  --intent           (string) any available intent like translate (default) or sentiment or ai.text.translate or ai/text/dictionary (more in docs https://github.com/intento/intento-api#intents)')
     console.info('  --to               (language code)')
