@@ -5,7 +5,7 @@ const querystring = require('querystring')
 
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
-function IntentoConnector(credentials = {}, debug = false) {
+function IntentoConnector(credentials = {}, { debug = false, verbose = false }) {
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -13,6 +13,7 @@ function IntentoConnector(credentials = {}, debug = false) {
     }
 
     this.debug = debug
+    this.verbose = verbose
 
     const { apikey, host = HOST } = this.credentials
 
@@ -142,6 +143,9 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     if (this.debug) {
         console.log('\nAPI request requestOptions\n', requestOptions)
     }
+    if (this.verbose) {
+        console.log(`\nAPI request\n 'apikey: ${requestOptions.headers.apikey}' https://${requestOptions.host}${requestOptions.path}`)
+    }
 
     if (data && content) {
         console.warn(
@@ -168,13 +172,13 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     }
     const requestData = data || JSON.stringify(content) || ''
 
-    if (this.debug) {
-        console.log('\nAPI request data\n', requestData)
+    if (this.debug || this.verbose) {
+        console.log(`\nAPI request data\n${requestData}\n`)
     }
 
     return new Promise((resolve, reject) => {
         const req = https.request(requestOptions, resp =>
-            response_handler(resp, resolve, reject, this.debug)
+            response_handler(resp, resolve, reject, this.debug, this.verbose)
         )
 
         req.write(requestData)
@@ -200,6 +204,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         input_format,
         output_format,
         pretty_print,
+        processing,
     } = parameters
     const content = {
         context: { text, from, to, lang, category, format },
@@ -214,6 +219,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             input_format,
             output_format,
             pretty_print,
+            processing,
         },
     }
 
@@ -238,13 +244,13 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     }
 
     return this.makeRequest({
-        path: getPath(slug, this.debug),
+        path: getPath(slug, this.debug, this.verbose),
         content,
         method: 'POST',
     })
 }
 
-IntentoConnector.prototype.providers = function(slug, options) {
+IntentoConnector.prototype.providers = function(slug, options = {}) {
     const validParams = ['from', 'to', 'bulk', 'lang_detect']
     const params = {}
     validParams.forEach(p => {
@@ -254,7 +260,7 @@ IntentoConnector.prototype.providers = function(slug, options) {
     })
 
     return this.makeRequest({
-        path: getPath(slug, this.debug),
+        path: getPath(slug, this.debug, this.verbose),
         params,
         method: 'GET',
     })
@@ -262,7 +268,7 @@ IntentoConnector.prototype.providers = function(slug, options) {
 
 IntentoConnector.prototype.provider = function(slug, providerId, params) {
     return this.makeRequest({
-        path: getPath(slug, this.debug) + '/' + providerId,
+        path: getPath(slug, this.debug, this.verbose) + '/' + providerId,
         params,
         method: 'GET',
     })
@@ -270,7 +276,7 @@ IntentoConnector.prototype.provider = function(slug, providerId, params) {
 
 IntentoConnector.prototype.language = function(slug, langCode, params) {
     return this.makeRequest({
-        path: getPath(slug, this.debug) + '/languages/' + langCode,
+        path: getPath(slug, this.debug, this.verbose) + '/languages/' + langCode,
         params,
         method: 'GET',
     })
@@ -278,7 +284,7 @@ IntentoConnector.prototype.language = function(slug, langCode, params) {
 
 IntentoConnector.prototype.languages = function(slug, params = {}) {
     const { language, locale } = params
-    let path = getPath(slug, this.debug) + '/languages'
+    let path = getPath(slug, this.debug, this.verbose) + '/languages'
     if (language) {
         path += '/' + language
     }
@@ -352,11 +358,11 @@ const pathBySlug = {
     dictionary: '/ai/text/dictionary',
 }
 
-function getPath(slug, debug) {
+function getPath(slug, debug = false, verbose = false) {
     let path = pathBySlug[slug]
     if (!path) {
         path = pathBySlug.translate
-        if (debug) {
+        if (debug || verbose) {
             console.error(
                 `Unknown intent ${slug}. Translate intent will be used`
             )
@@ -366,13 +372,16 @@ function getPath(slug, debug) {
     return path
 }
 
-function response_handler(response, resolve, reject, debug) {
+function response_handler(response, resolve, reject, debug = false, verbose = false) {
+    response.setEncoding('utf8')
+
     if (response.statusCode >= 500) {
-        console.log(response.statusCode)
-        console.log(response.statusMessage)
+        if (debug) {
+            console.log(response.statusCode, response.statusMessage)
+        }
+        reject(response)
     }
 
-    response.setEncoding('utf8')
     let body = ''
     response.on('data', function(chunk) {
         body += chunk
@@ -381,13 +390,25 @@ function response_handler(response, resolve, reject, debug) {
         try {
             let data = null
             if (body.length > 0) {
-                data = JSON.parse(body)
+                if (body[0] === '{') {
+                    data = JSON.parse(body)
+                } else if (body[0] === '<') {
+                    if (response.statusCode >= 400) {
+                        throw new Error('HTML 4xx response: ' + body)
+                    } else {
+                        throw new Error('Unexpected 2xx or 3xx response: ' + body)
+                    }
+                } else {
+                    throw new Error('Unexpected response: ' + body)
+                }
             }
             resolve(data)
         } catch (e) {
-            if (debug) {
-                console.error('Failed reading response body', body)
+            if (debug || verbose) {
+                console.error(e)
+                console.log(response.statusCode, response.statusMessage)
             }
+            reject(response)
         }
     })
 }
