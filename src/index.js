@@ -349,7 +349,7 @@ function response_handler(
         try {
             let data = null
             if (body.length > 0) {
-                if (body[0] === '{') {
+                if (body[0] === '{' || body[0] === '[') {
                     data = JSON.parse(body)
                 } else if (body[0] === '<') {
                     if (response.statusCode >= 400) {
