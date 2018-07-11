@@ -20,14 +20,11 @@ describe('ai.text.translate', () => {
         }
         const content2 = {
             ...content,
-            processing: { // spaces are trimmed
-                pre: [
-                    "punctuation_set"
-                ],
-                post: [
-                    "punctuation_set"
-                ]
-            }
+            processing: {
+                // spaces are trimmed
+                pre: ['punctuation_set'],
+                post: ['punctuation_set'],
+            },
         }
 
         const response = await client.ai.text.translate.fulfill(content)
