@@ -5,18 +5,70 @@ const IntentoConnector = require('../src/index')
 // Quickly load .env files into the environment
 require('dotenv').load()
 const apikey = process.env.INTENTO_API_KEY
+let client
 
 const DEBUG = false
-const client = new IntentoConnector({ apikey }, { debug: DEBUG })
 
-describe('Export', () => {
+describe('Imports', () => {
     it('loads', () => {
         expect(IntentoConnector).toBeDefined()
         expect(apikey).toBeDefined()
     })
 })
 
-describe('Basic', () => {
+describe('Initialization', () => {
+    it('without apikey', () => {
+        client = new IntentoConnector()
+        expect(client.error).toBeDefined()
+        expect(client.apikey).toBeUndefined()
+    })
+    it('with plain apikey', () => {
+        client = new IntentoConnector('apikey')
+        expect(client.error).toBeUndefined()
+        expect(client.apikey).toEqual('apikey')
+        expect(client.host).toEqual('api.inten.to')
+        expect(client.debug).toEqual(false)
+        expect(client.verbose).toEqual(false)
+    })
+    it('with apikey as credentials', () => {
+        client = new IntentoConnector({ apikey: 'apikey' })
+        expect(client.error).toBeUndefined()
+        expect(client.apikey).toEqual('apikey')
+        expect(client.host).toEqual('api.inten.to')
+        expect(client.debug).toEqual(false)
+        expect(client.verbose).toEqual(false)
+    })
+    it('with incorrect options', () => {
+        client = new IntentoConnector('apikey', 'foo')
+        expect(client.error).toBeUndefined()
+        expect(client.apikey).toEqual('apikey')
+        expect(client.host).toEqual('api.inten.to')
+        expect(client.debug).toEqual(false)
+        expect(client.verbose).toEqual(false)
+    })
+    it('with full options', () => {
+        client = new IntentoConnector('apikey', { debug: true, verbose: true })
+        expect(client.error).toBeUndefined()
+        expect(client.apikey).toEqual('apikey')
+        expect(client.host).toEqual('api.inten.to')
+        expect(client.debug).toEqual(true)
+        expect(client.verbose).toEqual(true)
+    })
+    it('with custom host', () => {
+        client = new IntentoConnector({ apikey: 'apikey', host: 'custom.host' })
+        expect(client.error).toBeUndefined()
+        expect(client.apikey).toEqual('apikey')
+        expect(client.host).toEqual('custom.host')
+        expect(client.debug).toEqual(false)
+        expect(client.verbose).toEqual(false)
+    })
+})
+
+describe('Structure', () => {
+    beforeAll(() => {
+        client = new IntentoConnector({ apikey }, { debug: DEBUG })
+    })
+
     it('instantiated', () => {
         expect(client).toBeDefined()
         expect(client.credentials).toBeDefined()
