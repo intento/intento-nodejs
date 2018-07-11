@@ -5,7 +5,8 @@ const querystring = require('querystring')
 
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
-function IntentoConnector(credentials = {}, { debug = false, verbose = false }) {
+function IntentoConnector(credentials = {}, options = {}) {
+    const { debug = false, verbose = false } = options
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -18,19 +19,15 @@ function IntentoConnector(credentials = {}, { debug = false, verbose = false }) 
     const { apikey, host = HOST } = this.credentials
 
     if (!apikey) {
-        console.error('Missing Intento API key')
-        return {
-            error: 'No Intento API key provided',
+        if (debug || verbose) {
+            console.error('Missing Intento API key')
         }
+        this.error = 'No Intento API key provided'
+        return
     }
 
-    this.options = {
-        host,
-        headers: {
-            'User-Agent': 'NodeJS SDK client',
-            apikey,
-        },
-    }
+    this.apikey = apikey
+    this.host = host
 
     this.settings = Object.freeze({
         languages: params => {
@@ -114,7 +111,11 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     const urlParams = querystring.stringify(params)
 
     const requestOptions = {
-        ...this.options,
+        host: this.host,
+        headers: {
+            'User-Agent': 'NodeJS SDK client',
+            apikey: this.apikey,
+        },
         path: path + (urlParams ? '?' + urlParams : ''),
         method,
     }
@@ -122,7 +123,11 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
         console.log('\nAPI request requestOptions\n', requestOptions)
     }
     if (this.verbose) {
-        console.log(`\nAPI request\n 'apikey: ${requestOptions.headers.apikey}' https://${requestOptions.host}${requestOptions.path}`)
+        console.log(
+            `\nAPI request\n 'apikey: ${
+                requestOptions.headers.apikey
+            }' https://${requestOptions.host}${requestOptions.path}`
+        )
     }
 
     if (data && content) {
@@ -254,7 +259,8 @@ IntentoConnector.prototype.provider = function(slug, providerId, params) {
 
 IntentoConnector.prototype.language = function(slug, langCode, params) {
     return this.makeRequest({
-        path: getPath(slug, this.debug, this.verbose) + '/languages/' + langCode,
+        path:
+            getPath(slug, this.debug, this.verbose) + '/languages/' + langCode,
         params,
         method: 'GET',
     })
@@ -319,7 +325,13 @@ function getPath(slug, debug = false, verbose = false) {
     return path
 }
 
-function response_handler(response, resolve, reject, debug = false, verbose = false) {
+function response_handler(
+    response,
+    resolve,
+    reject,
+    debug = false,
+    verbose = false
+) {
     response.setEncoding('utf8')
 
     if (response.statusCode >= 500) {
@@ -343,7 +355,9 @@ function response_handler(response, resolve, reject, debug = false, verbose = fa
                     if (response.statusCode >= 400) {
                         throw new Error('HTML 4xx response: ' + body)
                     } else {
-                        throw new Error('Unexpected 2xx or 3xx response: ' + body)
+                        throw new Error(
+                            'Unexpected 2xx or 3xx response: ' + body
+                        )
                     }
                 } else {
                     throw new Error('Unexpected response: ' + body)

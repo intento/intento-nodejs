@@ -9,18 +9,21 @@ const IntentoConnector = require('./src/index')
 const apikey = process.env.INTENTO_API_KEY
 const google_api_key = process.env.GOOGLE_API_KEY
 
-if (!apikey) {
-    console.error(
-        'Missing Intento API key in the environment. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment'
-    )
-    process.exit(1)
-}
-
 if (!google_api_key) {
     console.warn('Missing Google api key. Some examples might not work.')
 }
 
 const client = new IntentoConnector({ apikey })
+
+if (client.error) {
+    console.error(client.error)
+    if (!apikey) {
+        console.error(
+            'Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment'
+        )
+    }
+    process.exit(1)
+}
 
 // This is an intent to translate text from one language to another.
 // More on that in the documentation here https://github.com/intento/intento-api/blob/master/ai.text.translate.md
