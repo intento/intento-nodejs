@@ -111,23 +111,22 @@ function IntentoConnector(credentials = {}, options = {}) {
         intento: params => {
             return this.usageFulfill(
                 '/usage/intento',
-                params, // --> range: obj, filter: obj
+                params // --> range: obj, filter: obj
             )
         },
         provider: params => {
             return this.usageFulfill(
                 '/usage/provider',
-                params, // --> range: obj, filter: obj
+                params // --> range: obj, filter: obj
             )
         },
         distinct: params => {
             return this.usageFulfill(
                 '/usage/distinct',
-                params, // --> range: obj, fields: list
+                params // --> range: obj, fields: list
             )
         },
     })
-
 }
 
 module.exports = IntentoConnector
@@ -363,7 +362,7 @@ IntentoConnector.prototype.asyncOperations = function(params) {
 IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
     const {
         from,
-        to =  Math.ceil(Date.now() / 1000),
+        to = Math.ceil(Date.now() / 1000),
         bucket,
         provider,
         fields,
