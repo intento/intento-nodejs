@@ -238,7 +238,7 @@ IntentoConnector.prototype.providers = function(slug, options = {}) {
     const params = {}
     validParams.forEach(p => {
         if (options[p]) {
-            params[p] = p
+            params[p] = options[p]
         }
     })
 

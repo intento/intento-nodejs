@@ -11,7 +11,7 @@ node index.js --key=INTENTO_API_KEY \
 ```
 
 This instruction sends a request to Intento API. If no `--intent` specified, translation intent is used.
-Get more information about other intents in [our docs](https://intento.github.io/intento-api/#basic-usage)
+Get more information about other intents in [our docs](https://github.com/intento/intento-api#basic-usage)
 
 <!-- TOC depthFrom:2 -->
 
@@ -20,6 +20,7 @@ Get more information about other intents in [our docs](https://intento.github.io
     - [Update](#update)
 - [Examples](#examples)
     - [List available providers](#list-available-providers)
+    - [Filter providers by capabilities](#filter-providers-by-capabilities)
     - [Specify a provider](#specify-a-provider)
     - [Multiple providers and async mode](#multiple-providers-and-async-mode)
     - [Translate a file](#translate-a-file)
@@ -85,9 +86,22 @@ node index.js --key=INTENTO_API_KEY \
     --intent=sentiment.providers
 ```
 
+### Filter providers by capabilities
+
+List translation providers able to translate from Russian (`--from=ru`) and supportind bulk mode (`--bulk`)
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --intent=translate.providers \
+    --from=ru \
+    --bulk
+```
+
+[More on bulk mode](https://github.com/intento/intento-nodejs/blob/master/ai.text.translate.md#bulk-mode)
+
 ### Specify a provider
 
-By default a provider for the job is smart-seleted. Find out more about it in the [docs](https://intento.github.io/intento-api/#smart-routing).
+By default a provider for the job is smart-seleted. Find out more about it in the [docs](https://github.com/intento/intento-api#smart-routing).
 In the same time a provider can be specified explicitly:
 
 ```sh
@@ -102,7 +116,7 @@ Check out an example with several providers specified in the next section.
 
 ### Multiple providers and async mode
 
-More on async mode in the [docs](https://intento.github.io/intento-api/#async-mode)
+More on async mode in the [docs](https://github.com/intento/intento-api#async-mode)
 
 ```sh
 node index.js --key=INTENTO_API_KEY \
