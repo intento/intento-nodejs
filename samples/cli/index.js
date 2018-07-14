@@ -260,9 +260,8 @@ function errorFriendlyCallback(data) {
                 }
 
                 if (data.results) {
-                    const outputFileName = output.replace(/(\.txt|\.md|\.csv)/, `_${data.service.provider.id}$1`)
-                    fs.writeFile(outputFileName, data.results.join('\n'), { encoding }, () => {
-                        console.log(`Results were written to the ${outputFileName} file`)
+                    fs.writeFile(output, data.results.join('\n'), { encoding }, () => {
+                        console.log(`Results were written to the ${output} file`)
                         if (VERBOSE || DEBUG) {
                             console.log('meta', data.meta)
                             console.log('service', data.service)
@@ -271,9 +270,8 @@ function errorFriendlyCallback(data) {
                 } else if (data.id && data.done) {
                     // it is an operation/id request with response ~ same as done = true
                     data.response.forEach(resp => {
-                        const outputFileName = output.replace(/(\.txt|\.md|\.csv)/, `_${resp.service.provider.id}$1`)
-                        fs.writeFile(outputFileName, resp.results.join('\n'), { encoding }, () => {
-                            console.log(`\nResults were written to the ${outputFileName} file\n`)
+                        fs.writeFile(output, resp.results.join('\n'), { encoding }, () => {
+                            console.log(`\nResults were written to the ${output} file\n`)
                             if (VERBOSE || DEBUG) {
                                 console.log('meta', resp.meta)
                                 console.log('service', resp.service)
@@ -281,9 +279,9 @@ function errorFriendlyCallback(data) {
                         })
                     })
                 } else {
-                    if (VERBOSE) {
-                        console.log(data)
-                    }
+                    fs.writeFile(output, JSON.stringify(data, null, 4), { encoding }, () => {
+                        console.log(`\nResults were written to the ${output} file\n`)
+                    })
                 }
             } catch (e) {
                 console.error(`Errors while writing to the ${output} file`)
