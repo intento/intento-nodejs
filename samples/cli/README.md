@@ -11,7 +11,7 @@ node index.js --key=INTENTO_API_KEY \
 ```
 
 This instruction sends a request to Intento API. If no `--intent` specified, translation intent is used.
-Get more information about other intents in [our docs](https://intento.github.io/intento-api/#basic-usage)
+Get more information about other intents in [our docs](https://github.com/intento/intento-api#basic-usage)
 
 <!-- TOC depthFrom:2 -->
 
@@ -87,7 +87,7 @@ node index.js --key=INTENTO_API_KEY \
 
 ### Specify a provider
 
-By default a provider for the job is smart-seleted. Find out more about it in the [docs](https://intento.github.io/intento-api/#smart-routing).
+By default a provider for the job is smart-seleted. Find out more about it in the [docs](https://github.com/intento/intento-api#smart-routing).
 In the same time a provider can be specified explicitly:
 
 ```sh
@@ -102,7 +102,7 @@ Check out an example with several providers specified in the next section.
 
 ### Multiple providers and async mode
 
-More on async mode in the [docs](https://intento.github.io/intento-api/#async-mode)
+More on async mode in the [docs](https://github.com/intento/intento-api#async-mode)
 
 ```sh
 node index.js --key=INTENTO_API_KEY \
