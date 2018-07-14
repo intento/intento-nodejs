@@ -20,6 +20,7 @@ Get more information about other intents in [our docs](https://github.com/intent
     - [Update](#update)
 - [Examples](#examples)
     - [List available providers](#list-available-providers)
+    - [Filter providers by capabilities](#filter-providers-by-capabilities)
     - [Specify a provider](#specify-a-provider)
     - [Multiple providers and async mode](#multiple-providers-and-async-mode)
     - [Translate a file](#translate-a-file)
@@ -84,6 +85,19 @@ Try to get available providers for the `sentiment` intent:
 node index.js --key=INTENTO_API_KEY \
     --intent=sentiment.providers
 ```
+
+### Filter providers by capabilities
+
+List translation providers able to translate from Russian (`--from=ru`) and supportind bulk mode (`--bulk`)
+
+```sh
+node index.js --key=INTENTO_API_KEY \
+    --intent=translate.providers \
+    --from=ru \
+    --bulk
+```
+
+[More on bulk mode](https://github.com/intento/intento-nodejs/blob/master/ai.text.translate.md#bulk-mode)
 
 ### Specify a provider
 
