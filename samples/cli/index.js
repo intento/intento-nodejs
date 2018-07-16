@@ -6,13 +6,14 @@ const IntentoConnector = require('../../src/index')
 
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
-    boolean: ['debug', 'verbose', 'async', 'help'],
+    boolean: ['debug', 'verbose', 'async', 'help', 'bulk'],
     alias: {
         help: ['h'],
         debug: ['d'],
         verbose: ['v'],
         apikey: ['k', 'key'],
         intent: ['i'],
+        bulk: ['b'],
     },
 })
 
@@ -34,6 +35,7 @@ const {
     _ = [],
     provider,
     input,
+    bulk = false,
     output,
     encoding = 'utf-8',
     pre_processing,
@@ -55,6 +57,7 @@ if (help) {
     console.info('  --async            (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
     console.info('  --provider         (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
     console.info("  --input            (string) relative path to a file you'd like to process")
+    console.info('  --bulk             (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
     console.info('  --output           (string) relative path to a file where results will be stored')
     console.info('  --post_processing  (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
     console.info("  --format           ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
@@ -175,7 +178,13 @@ if (input) {
 
     fs.readFile(filePath, { encoding }, (err, data) => {
         if (!err) {
+
             options.text = data
+
+            if (bulk) {
+                options.text = options.text.split('\n')
+            }
+
             try {
                 intentProcessor({ ...options, ...rest })
                     .then(errorFriendlyCallback)
