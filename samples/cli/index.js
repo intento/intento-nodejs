@@ -10,6 +10,7 @@ if (currentNodeJSVersion < minimalNodeJSVersion) {
 }
 
 const fs = require('fs')
+const util = require('util')
 const parseArgs = require('minimist')
 const IntentoConnector = require('../../src/index')
 
@@ -120,6 +121,11 @@ if (provider) {
     }
 }
 
+// Check if there is a conflict in options
+if (options.async && !provider) {
+    warnAsyncSmartAndExit()
+}
+
 // Form processing parameter object
 if (pre_processing || post_processing) {
     options.processing = options.processing || {}
@@ -131,51 +137,14 @@ if (pre_processing || post_processing) {
     }
 }
 
-//
-if (input) {
-    if (options.async && !provider) {
-        warnAsyncSmartAndExit()
-    }
+processRequest(intentProcessor, options, { input, encoding, bulk, _ })
 
-    const path = require('path')
-    let filePath
+// ---------------------------------- utils -----------------------------------
+
+async function processRequest(intentProcessor, options, argv) {
     try {
-        filePath = path.join(__dirname, input)
-    } catch (e) {
-        console.error(e.message)
-    }
-
-    fs.readFile(filePath, { encoding }, (err, data) => {
-        if (!err) {
-            options.text = data
-
-            if (bulk) {
-                options.text = options.text.split('\n')
-            }
-
-            try {
-                intentProcessor({ ...options, ...rest })
-                    .then(errorFriendlyCallback)
-                    .catch(prettyCatch)
-            } catch (e) {
-                console.error(e.message)
-            }
-        } else {
-            console.error(`Error reading ${input} file\n`, err)
-        }
-    })
-} else {
-    if (_.length > 0) {
-        if (_.length === 1) {
-            // avoid errors from providers without bulk support
-            options.text = _[0]
-        } else {
-            options.text = _
-        }
-    }
-
-    try {
-        intentProcessor({ ...options, ...rest })
+        const text = await getText(argv)
+        intentProcessor({ text, ...options, ...rest })
             .then(errorFriendlyCallback)
             .catch(prettyCatch)
     } catch (e) {
@@ -183,8 +152,41 @@ if (input) {
     }
 }
 
+async function getText({ input, encoding, bulk, _ }) {
+    console.log(input, encoding, bulk, _)
 
-// ---------------------------------- utils -----------------------------------
+    if (input) {
+        const path = require('path')
+        let filePath
+        try {
+            filePath = path.join(__dirname, input)
+        } catch (e) {
+            console.error(`Error creating file path`, e.message)
+            return ''
+        }
+
+        try {
+            const readFile = util.promisify(fs.readFile)
+            const data = await readFile(filePath, { encoding })
+            if (bulk) {
+                return data.split('\n')
+            }
+            return data
+        } catch (err) {
+            console.error(`Error reading ${input} file\n`, err)
+            return ''
+        }
+    } else {
+        if (_.length > 0) {
+            if (_.length === 1) {
+                // avoid errors from providers without bulk support
+                return _[0]
+            }
+            return _
+        }
+    }
+    return ''
+}
 
 // more here https://github.com/intento/intento-api/blob/master/README.md#errors
 const errorCodes = {
@@ -197,14 +199,13 @@ const errorCodes = {
 
 function errorFriendlyCallback(data) {
     if (data.message) {
-        console.log('\nError: ' + data.message)
-        console.log('\n\n')
+        console.error('\nError:', data.message, '\n\n')
         if (DEBUG) {
             console.error(data)
         }
     } else if (data.error) {
         // prettier-ignore
-        console.error( `\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${data.error.message}`)
+        console.error(`\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${data.error.message}`)
         if (input && !async) {
             console.log('Consider using --async option')
         }
