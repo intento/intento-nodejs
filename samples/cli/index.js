@@ -1,19 +1,27 @@
 'use strict'
 
+const currentNodeJSVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1])
+const minimalNodeJSVersion = 8.0
+if (currentNodeJSVersion < minimalNodeJSVersion) {
+    console.error(`\nMinimal NodeJS version required for this script is ${minimalNodeJSVersion}.`)
+    console.error(`Your NodeJS version is ${currentNodeJSVersion}.`)
+    console.log('Please, upgrade your NodeJS\n')
+    process.exit(1)
+}
+
 const fs = require('fs')
 const parseArgs = require('minimist')
 const IntentoConnector = require('../../src/index')
 
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
-    boolean: ['debug', 'verbose', 'async', 'help', 'bulk'],
+    boolean: ['debug', 'verbose', 'async', 'help', 'curl'],
     alias: {
         help: ['h'],
         debug: ['d'],
         verbose: ['v'],
-        apikey: ['k', 'key'],
+        apikey: ['key'],
         intent: ['i'],
-        bulk: ['b'],
     },
 })
 
@@ -21,17 +29,17 @@ const {
     help = false,
     debug = false,
     verbose = false,
+    curl = false,
     apikey,
     host,
     intent = 'translate',
     responseMapper,
-    async,
+    async = false,
     h = false, // eslint-disable-line no-unused-vars
     d, // eslint-disable-line no-unused-vars
     v, // eslint-disable-line no-unused-vars
-    k, // eslint-disable-line no-unused-vars
-    key, // eslint-disable-line no-unused-vars
     i, // eslint-disable-line no-unused-vars
+    key, // eslint-disable-line no-unused-vars
     _ = [],
     provider,
     input,
@@ -70,9 +78,6 @@ if (help) {
 const DEBUG = debug
 const VERBOSE = verbose
 
-// prettier-ignore
-const PROVIDERS_EXAMPLE = 'https://github.com/intento/intento-nodejs/tree/master/samples/cli#list-available-providers'
-
 if (!apikey) {
     // prettier-ignore
     console.error('Missing Intento API key. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment')
@@ -88,54 +93,24 @@ if (!host && DEBUG) {
     console.warn('No host specified. Default host will be used')
 }
 
-let responseMapperFnName = responseMapper
-if (!responseMapperFnName) {
-    if (intent.indexOf('providers') === -1) {
-        // not requesting for providers
-        responseMapperFnName = 'responseAsIs'
-    } else {
-        responseMapperFnName = 'listIdsFromResponse'
-    }
-}
-const outputFn = {
-    responseAsIs,
-    listIdsFromResponse,
-}[responseMapperFnName]
+// Initialize Intento connector object
+const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE, curl })
 
-const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE })
-
-const intentShortcuts = {
-    translate: client.ai.text.translate,
-    providers: client.ai.text.translate.providers,
-    ['translate.providers']: client.ai.text.translate.providers,
-    sentiment: client.ai.text.sentiment,
-    ['sentiment.providers']: client.ai.text.sentiment.providers,
-    dictionary: client.ai.text.dictionary,
-    ['dictionary.providers']: client.ai.text.dictionary.providers,
-    settings: client.settings.languages,
-}
-
-const intentProcessor = getIntentProcessor(intent)
-
-const validIntents = Object.keys(intentShortcuts)
-
+// Define which Inten.to endpoint will be used to process the request
+const intentProcessor = getIntentProcessor(client, intent)
 if (!intentProcessor) {
-    console.error(
-        'Unknown intent: ',
-        intent,
-        '. Valid intent examples are ',
-        validIntents.join(', '),
-        ' or settings.processingRules, ai/text/translate, etc.'
-    )
     process.exit(1)
 }
 
+// Here we begin to form an object with query parameters
 const options = {}
 
+// async mode option. More here https://github.com/intento/intento-nodejs#async-mode
 if (async) {
     options.async = async
 }
 
+// Form provider list if needed
 if (provider) {
     const providerList = provider.split(',')
     if (providerList.length === 1) {
@@ -145,6 +120,7 @@ if (provider) {
     }
 }
 
+// Form processing parameter object
 if (pre_processing || post_processing) {
     options.processing = options.processing || {}
     if (pre_processing) {
@@ -155,13 +131,10 @@ if (pre_processing || post_processing) {
     }
 }
 
+//
 if (input) {
     if (options.async && !provider) {
-        console.error("Smart mode for async operations currently isn't supported")
-        console.log('Please specify a provider with `--provider` option.')
-        console.log(`To get available providers try an example ${PROVIDERS_EXAMPLE}`)
-
-        process.exit(1)
+        warnAsyncSmartAndExit()
     }
 
     const path = require('path')
@@ -188,7 +161,7 @@ if (input) {
                 console.error(e.message)
             }
         } else {
-            console.log(`Error reading ${input} file\n`, err)
+            console.error(`Error reading ${input} file\n`, err)
         }
     })
 } else {
@@ -210,7 +183,8 @@ if (input) {
     }
 }
 
-/* helpers */
+
+// ---------------------------------- utils -----------------------------------
 
 // more here https://github.com/intento/intento-api/blob/master/README.md#errors
 const errorCodes = {
@@ -239,6 +213,7 @@ function errorFriendlyCallback(data) {
             console.error(data)
         }
     } else {
+        const defaultOutputFn = getDefaultOuputFn(intent)
         if (output) {
             try {
                 if (data.id && !data.done) {
@@ -293,8 +268,8 @@ function errorFriendlyCallback(data) {
                     console.log(data)
                 }
             }
-        } else if (typeof outputFn === 'function') {
-            outputFn(data)
+        } else if (typeof defaultOutputFn === 'function') {
+            defaultOutputFn(data)
         } else {
             if (DEBUG) {
                 console.log('Output results using default responseMapper')
@@ -313,6 +288,22 @@ function listIdsFromResponse(data) {
     data.forEach(p => {
         console.log(p.id)
     })
+}
+
+function getDefaultOuputFn(intent) {
+    if (responseMapper) {
+        if (intent.indexOf('providers') === -1) {
+            // not requesting for providers
+            return responseAsIs
+        } else {
+            return listIdsFromResponse
+        }
+    } else {
+        return {
+            responseAsIs,
+            listIdsFromResponse,
+        }[responseMapper]
+    }
 }
 
 function prettyCatch(errorResponse) {
@@ -345,7 +336,23 @@ function prettyCatch(errorResponse) {
     }
 }
 
-function getIntentProcessor(value) {
+function getIntentProcessor(connector, value) {
+    if (!connector || !connector.ai) {
+        console.error("Intento connector wasn't initialized properly.")
+        return
+    }
+
+    const intentShortcuts = {
+        translate: connector.ai.text.translate,
+        providers: connector.ai.text.translate.providers,
+        ['translate.providers']: connector.ai.text.translate.providers,
+        sentiment: connector.ai.text.sentiment,
+        ['sentiment.providers']: connector.ai.text.sentiment.providers,
+        dictionary: connector.ai.text.dictionary,
+        ['dictionary.providers']: connector.ai.text.dictionary.providers,
+        settings: connector.settings.languages,
+    }
+
     let shortcut = intentShortcuts[value]
     if (shortcut) {
         if (shortcut.hasOwnProperty('fulfill')) {
@@ -381,5 +388,25 @@ function getIntentProcessor(value) {
         return resultFn
     }
 
+    const validIntents = Object.keys(intentShortcuts)
+    console.error(
+        'Unknown intent: ',
+        intent,
+        '. Valid intent examples are ',
+        validIntents.join(', '),
+        ' or settings.processingRules, ai/text/translate, etc.'
+    )
     return
 }
+
+// prettier-ignore
+function warnAsyncSmartAndExit() {
+    const PROVIDERS_EXAMPLE = 'https://github.com/intento/intento-nodejs/tree/master/samples/cli#list-available-providers'
+
+    console.error("Smart mode for async operations currently isn't supported")
+    console.log('Please specify a provider with `--provider` option.')
+    console.log(`To get available providers try an example ${PROVIDERS_EXAMPLE}`)
+
+    process.exit(1)
+}
+
