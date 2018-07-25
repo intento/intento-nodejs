@@ -9,10 +9,13 @@ if (currentNodeJSVersion < minimalNodeJSVersion) {
     process.exit(1)
 }
 
+const IntentoConnector = require('../../src/index')
+
 const fs = require('fs')
 const util = require('util')
 const parseArgs = require('minimist')
-const IntentoConnector = require('../../src/index')
+const readFile = util.promisify(fs.readFile)
+const writeFile = util.promisify(fs.writeFile)
 
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
@@ -49,7 +52,7 @@ const {
     encoding = 'utf-8',
     pre_processing,
     post_processing,
-    ...rest
+    ...REST
 } = argv
 
 // prettier-ignore
@@ -137,24 +140,34 @@ if (pre_processing || post_processing) {
     }
 }
 
-processRequest(intentProcessor, options, { input, encoding, bulk, _ })
+processRequest(intentProcessor, options, {
+    intent,
+    apikey,
+    input,
+    output,
+    encoding,
+    async,
+    bulk,
+    _,
+})
 
 // ---------------------------------- utils -----------------------------------
 
 async function processRequest(intentProcessor, options, argv) {
+    let data
     try {
         const text = await getText(argv)
-        intentProcessor({ text, ...options, ...rest })
-            .then(errorFriendlyCallback)
-            .catch(prettyCatch)
+        data = await intentProcessor({ text, ...options, ...REST })
     } catch (e) {
-        console.error(e.message)
+        prettyCatch(e)
+    }
+
+    if (data) {
+        errorFriendlyCallback(data, argv)
     }
 }
 
 async function getText({ input, encoding, bulk, _ }) {
-    console.log(input, encoding, bulk, _)
-
     if (input) {
         const path = require('path')
         let filePath
@@ -166,7 +179,6 @@ async function getText({ input, encoding, bulk, _ }) {
         }
 
         try {
-            const readFile = util.promisify(fs.readFile)
             const data = await readFile(filePath, { encoding })
             if (bulk) {
                 return data.split('\n')
@@ -189,7 +201,7 @@ async function getText({ input, encoding, bulk, _ }) {
 }
 
 // more here https://github.com/intento/intento-api/blob/master/README.md#errors
-const errorCodes = {
+const ERROR_CODES = {
     401: 'Auth key is missing',
     403: 'Auth key is invalid',
     404: 'Intent/Provider not found',
@@ -197,15 +209,18 @@ const errorCodes = {
     429: 'API rate limit exceeded',
 }
 
-function errorFriendlyCallback(data) {
+async function errorFriendlyCallback(data, { input, output, async, intent, apikey, encoding }) {
     if (data.message) {
         console.error('\nError:', data.message, '\n\n')
         if (DEBUG) {
             console.error(data)
         }
-    } else if (data.error) {
+        return
+    }
+
+    if (data.error) {
         // prettier-ignore
-        console.error(`\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${data.error.message}`)
+        console.error(`\nError: ${data.error.code} ${ERROR_CODES[data.error.code]}\n${data.error.message}`)
         if (input && !async) {
             console.log('Consider using --async option')
         }
@@ -213,71 +228,94 @@ function errorFriendlyCallback(data) {
         if (DEBUG) {
             console.error(data)
         }
-    } else {
-        const defaultOutputFn = getDefaultOuputFn(intent)
-        if (output) {
-            try {
-                if (data.id && !data.done) {
-                    // prettier-ignore
-                    if (intent.indexOf('operations') === -1) {
-                        // async job was registered with `id`
-                        console.log('\noperation id', data.id)
-                        console.log(`\nRequest operation results later with a command`)
-                        if (output) {
-                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output}`)
-                        } else {
-                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=output.txt`)
-                        }
-                        fs.writeFile(`${input}_operation_id.txt`, data.id, { encoding }, () => {
-                            console.log(`\nOperation id was written to the ${input}_operation_id.txt file`)
-                        })
-                    } else {
-                        // it is an operation/id request with empty response ~ same as done = false
-                        console.log(`Operation ${data.id} is still in progress`)
-                    }
-                }
+        return
+    }
 
-                if (data.results) {
-                    fs.writeFile(output, data.results.join('\n'), { encoding }, () => {
-                        console.log(`Results were written to the ${output} file`)
-                        if (VERBOSE || DEBUG) {
-                            console.log('meta', data.meta)
-                            console.log('service', data.service)
-                        }
-                    })
-                } else if (data.id && data.done) {
-                    // it is an operation/id request with response ~ same as done = true
-                    data.response.forEach(resp => {
-                        fs.writeFile(output, resp.results.join('\n'), { encoding }, () => {
-                            console.log(`\nResults were written to the ${output} file\n`)
-                            if (VERBOSE || DEBUG) {
-                                console.log('meta', resp.meta)
-                                console.log('service', resp.service)
-                            }
-                        })
-                    })
-                } else {
-                    fs.writeFile(output, JSON.stringify(data, null, 4), { encoding }, () => {
-                        console.log(`\nResults were written to the ${output} file\n`)
-                    })
-                }
+    if (data.id && !data.done) {
+        // prettier-ignore
+        if (intent.indexOf('operations') === -1) {
+            // async job was registered with `id`
+            console.log('\noperation id', data.id)
+            console.log(`\nRequest operation results later with a command`)
+            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output || 'output.txt'}`)
+            const fname = `${input}_operation_id.txt`
+            try {
+                await writeFile(fname, data.id, { encoding })
+                console.log(`\nOperation id was written to the ${input}_operation_id.txt file`)
+            } catch (e) {
+                console.error(`Errors while writing to the ${fname} file`)
+                console.log('Response:\n', data)
+            }
+        } else {
+            // it is an operation/id request with empty response ~ same as done = false
+            console.log(`Operation ${data.id} is still in progress`)
+        }
+    }
+
+    if (output) {
+        if (data.results) {
+            try {
+                await writeFile(output, data.results.join('\n'), { encoding })
+                console.log(`Results were written to the ${output} file`)
             } catch (e) {
                 console.error(`Errors while writing to the ${output} file`)
                 console.log('Response:\n', data)
             } finally {
-                if (DEBUG) {
-                    console.log(data)
+                if (VERBOSE || DEBUG) {
+                    console.log('meta', data.meta)
+                    console.log('service', data.service)
                 }
             }
-        } else if (typeof defaultOutputFn === 'function') {
-            defaultOutputFn(data)
-        } else {
-            if (DEBUG) {
-                console.log('Output results using default responseMapper')
-            }
-            responseAsIs(data)
+            return
         }
+
+        if (data.id && data.done) {
+            // it is an operation/id request with response ~ same as done = true
+
+            data.response.forEach(async (resp, idx) => {
+                const fname = output + (idx > 0 ? `_${idx}_.txt` : '')
+                try {
+                    await writeFile(fname, resp.results.join('\n'), { encoding })
+                    console.log(`Results were written to the ${fname} file`)
+                } catch (e) {
+                    console.error(`Errors while writing to the ${fname} file`)
+                    console.log('Response:\n', resp)
+                } finally {
+                    if (VERBOSE || DEBUG) {
+                        console.log('meta', resp.meta)
+                        console.log('service', resp.service)
+                    }
+                }
+            })
+            return
+        }
+
+        try {
+            await writeFile(output, JSON.stringify(data, null, 4), { encoding })
+            console.log(`Results were written to the ${output} file`)
+        } catch (e) {
+            console.error(`Errors while writing to the ${output} file`)
+            console.log('Response:\n', data)
+        } finally {
+            if (DEBUG) {
+                console.log(data)
+            }
+        }
+
+        return
     }
+
+    const defaultOutputFn = getDefaultOuputFn(intent)
+    if (typeof defaultOutputFn === 'function') {
+        defaultOutputFn(data)
+        return
+    }
+
+    if (DEBUG) {
+        console.log('Output results using default responseMapper')
+    }
+
+    responseAsIs(data)
 }
 
 function responseAsIs(data) {
@@ -410,4 +448,3 @@ function warnAsyncSmartAndExit() {
 
     process.exit(1)
 }
-
