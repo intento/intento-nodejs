@@ -24,7 +24,7 @@
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
     "format_source": "prettier --config .prettierrc --write './src/*.js'",
-    "format_samples": "prettier --config .prettierrc --write './samples/**/*.js'",
+    "format_samples": "prettier --config ./samples/.prettierrc --write './samples/**/*.js'",
     "format": "yarn format_source && yarn format_samples && yarn format_ex"
   },
   "devDependencies": {

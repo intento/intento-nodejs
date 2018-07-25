@@ -43,6 +43,7 @@ const {
     ...rest
 } = argv
 
+// prettier-ignore
 if (help) {
     console.info('Command Line Interface for Intento API')
     console.info('  more examples here https://github.com/intento/intento-nodejs/tree/master/samples/cli#examples')
@@ -69,19 +70,17 @@ if (help) {
 const DEBUG = debug
 const VERBOSE = verbose
 
+// prettier-ignore
 const PROVIDERS_EXAMPLE = 'https://github.com/intento/intento-nodejs/tree/master/samples/cli#list-available-providers'
 
 if (!apikey) {
-    console.error(
-        'Missing Intento API key. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment'
-    )
+    // prettier-ignore
+    console.error('Missing Intento API key. Consider one of the options https://github.com/intento/intento-nodejs#how-to-pass-your-api-keys-to-your-environment')
     process.exit(1)
 }
 
 if (!intent) {
-    console.error(
-        'No intent specified. For example, add `--intent=translate` or `-i translate`'
-    )
+    console.error('No intent specified. For example, add `--intent=translate` or `-i translate`')
     process.exit(1)
 }
 
@@ -102,7 +101,6 @@ const outputFn = {
     responseAsIs,
     listIdsFromResponse,
 }[responseMapperFnName]
-
 
 const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE })
 
@@ -159,9 +157,7 @@ if (pre_processing || post_processing) {
 
 if (input) {
     if (options.async && !provider) {
-        console.error(
-            "Smart mode for async operations currently isn't supported"
-        )
+        console.error("Smart mode for async operations currently isn't supported")
         console.log('Please specify a provider with `--provider` option.')
         console.log(`To get available providers try an example ${PROVIDERS_EXAMPLE}`)
 
@@ -178,7 +174,6 @@ if (input) {
 
     fs.readFile(filePath, { encoding }, (err, data) => {
         if (!err) {
-
             options.text = data
 
             if (bulk) {
@@ -234,11 +229,8 @@ function errorFriendlyCallback(data) {
             console.error(data)
         }
     } else if (data.error) {
-        console.log(
-            `\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${
-                data.error.message
-            }`
-        )
+        // prettier-ignore
+        console.error( `\nError: ${data.error.code} ${errorCodes[data.error.code]}\n${data.error.message}`)
         if (input && !async) {
             console.log('Consider using --async option')
         }
@@ -250,6 +242,7 @@ function errorFriendlyCallback(data) {
         if (output) {
             try {
                 if (data.id && !data.done) {
+                    // prettier-ignore
                     if (intent.indexOf('operations') === -1) {
                         // async job was registered with `id`
                         console.log('\noperation id', data.id)
@@ -309,7 +302,6 @@ function errorFriendlyCallback(data) {
             responseAsIs(data)
         }
     }
-
 }
 
 function responseAsIs(data) {
