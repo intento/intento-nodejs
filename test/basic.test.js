@@ -3,8 +3,9 @@
 const IntentoConnector = require('../src/index')
 
 // Quickly load .env files into the environment
-require('dotenv').load()
+// require('dotenv').load()
 const apikey = process.env.INTENTO_API_KEY
+const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 let client
 
 const DEBUG = false
@@ -26,7 +27,7 @@ describe('Initialization', () => {
         client = new IntentoConnector('apikey')
         expect(client.error).toBeUndefined()
         expect(client.apikey).toEqual('apikey')
-        expect(client.host).toEqual('api.inten.to')
+        expect(client.host).toEqual(HOST)
         expect(client.debug).toEqual(false)
         expect(client.verbose).toEqual(false)
     })
@@ -34,7 +35,7 @@ describe('Initialization', () => {
         client = new IntentoConnector({ apikey: 'apikey' })
         expect(client.error).toBeUndefined()
         expect(client.apikey).toEqual('apikey')
-        expect(client.host).toEqual('api.inten.to')
+        expect(client.host).toEqual(HOST)
         expect(client.debug).toEqual(false)
         expect(client.verbose).toEqual(false)
     })
@@ -42,7 +43,7 @@ describe('Initialization', () => {
         client = new IntentoConnector('apikey', 'foo')
         expect(client.error).toBeUndefined()
         expect(client.apikey).toEqual('apikey')
-        expect(client.host).toEqual('api.inten.to')
+        expect(client.host).toEqual(HOST)
         expect(client.debug).toEqual(false)
         expect(client.verbose).toEqual(false)
     })
@@ -50,7 +51,7 @@ describe('Initialization', () => {
         client = new IntentoConnector('apikey', { debug: true, verbose: true })
         expect(client.error).toBeUndefined()
         expect(client.apikey).toEqual('apikey')
-        expect(client.host).toEqual('api.inten.to')
+        expect(client.host).toEqual(HOST)
         expect(client.debug).toEqual(true)
         expect(client.verbose).toEqual(true)
     })

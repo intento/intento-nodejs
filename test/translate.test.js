@@ -8,7 +8,7 @@ const apikey = process.env.INTENTO_API_KEY
 const host = process.env.INTENTO_API_HOST
 
 const DEBUG = false
-const client = new IntentoConnector({ apikey, host }, { debug: DEBUG })
+const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, curl: true })
 
 describe('ai.text.translate', () => {
     it('translate with processing', async () => {
@@ -20,7 +20,7 @@ describe('ai.text.translate', () => {
         }
         const content2 = {
             ...content,
-            processing: { // spaces are trimmed
+            processing: { // spaces should be trimmed
                 pre: [
                     "punctuation_set"
                 ],
@@ -34,6 +34,7 @@ describe('ai.text.translate', () => {
         const response2 = await client.ai.text.translate.fulfill(content2)
         expect(response.results.length > 0).toBe(true)
         expect(response2.results.length > 0).toBe(true)
+        // requires production key
         expect(response.results[0] === response2.results[0]).toBe(false) // spaces should be trimmed
     })
 })

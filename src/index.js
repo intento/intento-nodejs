@@ -6,7 +6,7 @@ const querystring = require('querystring')
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
 function IntentoConnector(credentials = {}, options = {}) {
-    const { debug = false, verbose = false } = options
+    const { debug = false, verbose = false, curl = false } = options
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -14,6 +14,7 @@ function IntentoConnector(credentials = {}, options = {}) {
     }
 
     this.debug = debug
+    this.curl = curl
     this.verbose = verbose
 
     const { apikey, host = HOST } = this.credentials
@@ -155,17 +156,41 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     }
     const requestData = data || JSON.stringify(content) || ''
 
-    if (this.debug || this.verbose) {
-        console.log(`\nAPI request data\n${requestData}\n`)
+    if (this.curl) {
+        console.log(
+            `\nTest request\ncurl -X${method} -H 'apikey: ${
+                requestOptions.headers.apikey
+            }' https://${requestOptions.host}${
+                requestOptions.path
+            } -d '${data || JSON.stringify(content, null, 4) || ''}'`
+        )
     }
 
     return new Promise((resolve, reject) => {
-        const req = https.request(requestOptions, resp =>
-            response_handler(resp, resolve, reject, this.debug, this.verbose)
-        )
+        try {
+            const req = https.request(requestOptions, resp =>
+                response_handler(
+                    resp,
+                    resolve,
+                    reject,
+                    this.debug,
+                    this.verbose
+                )
+            )
 
-        req.write(requestData)
-        req.end()
+            req.on('error', function(err) {
+                if (err.code === 'ENOTFOUND') {
+                    console.error('Host look up failed: \n', err)
+                    console.log('\nPlease, check internet connection\n')
+                } else {
+                    customErrorLog(err)
+                }
+            })
+            req.write(requestData)
+            req.end()
+        } catch (e) {
+            customErrorLog(e)
+        }
     })
 }
 
@@ -336,7 +361,7 @@ function response_handler(
 
     if (response.statusCode >= 500) {
         if (debug) {
-            console.log(response.statusCode, response.statusMessage)
+            customErrorLog(response)
         }
         reject(response)
     }
@@ -366,10 +391,17 @@ function response_handler(
             resolve(data)
         } catch (e) {
             if (debug || verbose) {
-                console.error(e)
-                console.log(response.statusCode, response.statusMessage)
+                customErrorLog(e)
             }
             reject(response)
         }
     })
+}
+
+function customErrorLog(err, explanation = '') {
+    if (err.statusCode) {
+        console.error(explanation, err.statusCode, err.statusMessage)
+    } else {
+        console.error(explanation, err)
+    }
 }
