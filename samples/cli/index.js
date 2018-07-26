@@ -1,11 +1,11 @@
 'use strict'
 
-const currentNodeJSVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1])
-const minimalNodeJSVersion = 8.0
-if (currentNodeJSVersion < minimalNodeJSVersion) {
-    console.error(`\nMinimal NodeJS version required for this script is ${minimalNodeJSVersion}.`)
-    console.error(`Your NodeJS version is ${currentNodeJSVersion}.`)
-    console.log('Please, upgrade your NodeJS\n')
+const currentNodeJSVersion = Number(process.version.match(/^v?(\d+\.\d+)/)[1])
+const minimalNodeJSVersion = '8.0'
+if (currentNodeJSVersion < Number(minimalNodeJSVersion)) {
+    console.error(`\nMinimal node version required for this script is ${minimalNodeJSVersion}.0.`)
+    console.error(`Your node version is ${currentNodeJSVersion}.`)
+    console.log('Please, upgrade your node\n')
     process.exit(1)
 }
 
@@ -52,7 +52,7 @@ const {
     encoding = 'utf-8',
     pre_processing,
     post_processing,
-    ...REST
+    ...OTHER_OPTION
 } = argv
 
 // prettier-ignore
@@ -157,7 +157,7 @@ async function processRequest(intentProcessor, options, argv) {
     let data
     try {
         const text = await getText(argv)
-        data = await intentProcessor({ text, ...options, ...REST })
+        data = await intentProcessor({ text, ...options, ...OTHER_OPTION })
     } catch (e) {
         prettyCatch(e)
     }
