@@ -1,5 +1,7 @@
 'use strict'
 
+const VERSION = '0.2.0'
+
 const https = require('https')
 const querystring = require('querystring')
 
@@ -13,6 +15,7 @@ function IntentoConnector(credentials = {}, options = {}) {
         this.credentials = credentials
     }
 
+    this.version = VERSION
     this.debug = debug
     this.curl = curl
     this.verbose = verbose
@@ -106,6 +109,8 @@ module.exports = IntentoConnector
 
 module.exports.default = Object.assign({}, module.exports)
 
+IntentoConnector.prototype.version = VERSION
+
 IntentoConnector.prototype.makeRequest = function(options = {}) {
     const { path = '', params, content, data, method = 'GET' } = options
 
@@ -115,6 +120,8 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
         host: this.host,
         headers: {
             'User-Agent': 'NodeJS SDK client',
+            'X-sdk-version': VERSION,
+            'X-node-version': process.version,
             apikey: this.apikey,
         },
         path: path + (urlParams ? '?' + urlParams : ''),
