@@ -5,7 +5,7 @@
 A simple example for translating a string to russian
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --to=ru \
     "During simulation, genotypes induce patterns of subsystem activities"
 ```
@@ -27,7 +27,8 @@ Get more information about other intents in [our docs](https://github.com/intent
     - [Translate a file, write results to another file](#translate-a-file-write-results-to-another-file)
     - [Translate a large file, write results to another file](#translate-a-large-file-write-results-to-another-file)
     - [Specifying input format](#specifying-input-format)
-    - [post-processing results](#post-processing-results)
+    - [Content processing](#content-processing)
+    - [Bulk mode](#bulk-mode)
     - [Error messages](#error-messages)
         - [Error: Invalid authentication credentials](#error-invalid-authentication-credentials)
         - [Error from provider: [bad_data] Model URL was not found](#error-from-provider-bad_data-model-url-was-not-found)
@@ -43,7 +44,7 @@ Fastest way to start experimenting is following:
 git clone git@github.com:intento/intento-nodejs.git
 cd intento-nodejs/samples/cli
 yarn install # or `npm install`
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --to=ru \
     "sample text"
 ```
@@ -59,10 +60,12 @@ git pull
 
 ## Examples
 
+Several examples are provided as bash scripts. Check out [./examples](./examples) folder.
+
 ### List available providers
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate.providers
 ```
 
@@ -82,16 +85,16 @@ ai.text.translate.yandex.translate_api.1-5
 Try to get available providers for the `sentiment` intent:
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=sentiment.providers
 ```
 
 ### Filter providers by capabilities
 
-List translation providers able to translate from Russian (`--from=ru`) and supportind bulk mode (`--bulk`)
+List translation providers able to translate from Russian (`--from=ru`) and supporting bulk mode (`--bulk`)
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate.providers \
     --from=ru \
     --bulk
@@ -105,7 +108,7 @@ By default a provider for the job is smart-seleted. Find out more about it in th
 In the same time a provider can be specified explicitly:
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
     --to=fr \
     --provider=ai.text.translate.microsoft.translator_text_api.3-0 \
@@ -119,7 +122,7 @@ Check out an example with several providers specified in the next section.
 More on async mode in the [docs](https://github.com/intento/intento-api#async-mode)
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
     --from=en \
     --to=fr \
@@ -128,12 +131,12 @@ node index.js --key=INTENTO_API_KEY \
     "During simulation, genotypes induce patterns of subsystem activities"
 ```
 
-Notice a `--from` parameter. In this case (with `--async true`) it is required.
+Notice a `--from` parameter. In this case (with `--async=true`) it is required.
 
 ### Translate a file
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --to=fr \
     --input=sample.txt
 ```
@@ -174,7 +177,7 @@ Consider using --async option
 ### Translate a file, write results to another file
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --to=fr \
     --input=sample.txt \
     --output=sample_results.txt
@@ -200,7 +203,7 @@ Consider using --async option
 ### Translate a large file, write results to another file
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --to=fr \
     --async \
     --input=large_sample.txt \
@@ -218,7 +221,7 @@ To get available providers try an example https://github.com/intento/intento-nod
 Choose a provider (or several providers)
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --to=fr \
     --async \
     --provider=ai.text.translate.google.translate_api.2-0 \
@@ -236,7 +239,7 @@ Parameter 'from' is required when using async mode
 Just add `--from=en` assuming large_sample.txt is in English
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --from=en \
     --to=fr \
     --async \
@@ -259,7 +262,7 @@ Operation id was written to the large_sample_operation_id.txt file
 Wait for a while and run that command:
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=operations \
     --id=unique-operation-id-number \
     --output=large_sample_results.txt
@@ -276,7 +279,7 @@ Try the same with several providers (`--provider=providerA,providerB`)
 ### Specifying input format
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
     --to=de \
     --provider=ai.text.translate.google.translate_api.2-0 \
@@ -296,10 +299,12 @@ API response:
 }
 ```
 
-### post-processing results
+### Content processing
+
+Sometimes it's more convenient to preprocess or postprocess text after translation, e.g. eliminate spaces before punctuation. You can easily delegate it to Intento API with `processing` tag. This tag includes a set of rules.
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
     --to=fr \
     --provider=ai.text.translate.microsoft.translator_text_api.2-0 \
@@ -317,6 +322,47 @@ API response:
     ],
     ...
 }
+```
+
+More information about sets and rules can be found at `https://api.inten.to/settings/processing-rules`. Each rule has a clear `description` what exactly it does. Run [examples/content-processing-rules.sh] to get current information on available processing rules.
+
+### Bulk mode
+
+We provide a bulk fulfillment mode to translate large multiline segments at once.
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --bulk \
+    --to=es \
+    """During simulation
+genotypes induce patterns of subsystem activities
+"""
+```
+
+Example response:
+
+```sh
+ {
+    "results": [
+        "Durante la simulación",
+        "los genotipos inducen patrones de actividades del subsistema",
+        ""
+    ],
+    ...
+}
+```
+
+When `--bulk` option is specified the given text is splitted into lines. It is useful when dealing with very large pieces of text.
+It is more convinient to pass that piece of text as a file. Also `async` option is very helpful.
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --async \
+    --bulk \
+    --from=ru \
+    --to=es \
+    --provider=ai.text.translate.promt.cloud_api.1-0 \
+    --input=examples/war_and_peace.txt
 ```
 
 ### Error messages
@@ -337,7 +383,7 @@ node index.js --key=some_invalid_key \
 Because this provider requires `category` (custom model)
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
     --provider=ai.text.translate.google.automl_api.v1alpha1 \
     --from=en \
@@ -352,7 +398,7 @@ node index.js --key=INTENTO_API_KEY \
 Because this provider requires credentials to use your custom model.
 
 ```sh
-node index.js --key=INTENTO_API_KEY \
+node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
     --provider=ai.text.translate.google.automl_api.v1alpha1 \
     --category=YOUR_CUSTOM_CATEGORY \

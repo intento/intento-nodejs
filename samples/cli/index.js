@@ -34,7 +34,7 @@ const {
     debug = false,
     verbose = false,
     curl = false,
-    apikey,
+    apikey = process.env.INTENTO_API_KEY,
     host,
     intent = 'translate',
     responseMapper,
@@ -191,6 +191,10 @@ async function getText({ input, encoding, bulk, _ }) {
     } else {
         if (_.length > 0) {
             if (_.length === 1) {
+                if (bulk) {
+                    return _[0].split('\n')
+                }
+
                 // avoid errors from providers without bulk support
                 return _[0]
             }
@@ -237,7 +241,7 @@ async function errorFriendlyCallback(data, { input, output, async, intent, apike
             // async job was registered with `id`
             console.log('\noperation id', data.id)
             console.log(`\nRequest operation results later with a command`)
-            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output || 'output.txt'}`)
+            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output || `${Date.now()}_output.txt`}`)
             const fname = `${input}_operation_id.txt`
             try {
                 await writeFile(fname, data.id, { encoding })
@@ -403,7 +407,7 @@ function getIntentProcessor(connector, value) {
     let resultFn = client
     const elements = value.split(/[./]/)
 
-    var MethodDoesntExist = {}
+    const MethodDoesntExist = {}
 
     try {
         elements.forEach(element => {
@@ -433,7 +437,7 @@ function getIntentProcessor(connector, value) {
         intent,
         '. Valid intent examples are ',
         validIntents.join(', '),
-        ' or settings.processingRules, ai/text/translate, etc.'
+        ' or settings/processing-rules, ai/text/translate, etc.'
     )
     return
 }

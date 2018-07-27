@@ -40,6 +40,9 @@ function IntentoConnector(credentials = {}, options = {}) {
         processingRules: params => {
             return this.processingRules(params)
         },
+        'processing-rules': params => {
+            return this.processingRules(params)
+        },
     })
 
     this.ai = Object.freeze({
