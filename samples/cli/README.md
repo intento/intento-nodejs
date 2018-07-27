@@ -49,7 +49,7 @@ node index.js --key=$INTENTO_API_KEY \
     "sample text"
 ```
 
-Make sure your node version [supports es6+ syntax](https://node.green/#ES2017-features-async-functions). node@^7.6.0 will suffice.
+Make sure your node version [supports es6+ syntax](https://node.green/#ES2017-features-async-functions) and `util.promisify` for fs.readFile and fs.writeFile. node@^8.0.0 will suffice.
 
 ### Update
 

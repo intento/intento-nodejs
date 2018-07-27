@@ -17,6 +17,7 @@ const parseArgs = require('minimist')
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
+// Return an argument object populated with the array arguments from args
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
     boolean: ['debug', 'verbose', 'async', 'help', 'curl'],
@@ -29,6 +30,7 @@ const argv = parseArgs(process.argv.slice(2), {
     },
 })
 
+// All command line arguments
 const {
     help = false,
     debug = false,
@@ -39,11 +41,6 @@ const {
     intent = 'translate',
     responseMapper,
     async = false,
-    h = false, // eslint-disable-line no-unused-vars
-    d, // eslint-disable-line no-unused-vars
-    v, // eslint-disable-line no-unused-vars
-    i, // eslint-disable-line no-unused-vars
-    key, // eslint-disable-line no-unused-vars
     _ = [],
     provider,
     input,
@@ -52,9 +49,10 @@ const {
     encoding = 'utf-8',
     pre_processing,
     post_processing,
-    ...OTHER_OPTION
+    ...OTHER_OPTIONS
 } = argv
 
+// Show command line help
 // prettier-ignore
 if (help) {
     console.info('Command Line Interface for Intento API')
@@ -140,6 +138,7 @@ if (pre_processing || post_processing) {
     }
 }
 
+// Run main processing function
 processRequest(intentProcessor, options, {
     intent,
     apikey,
@@ -153,11 +152,28 @@ processRequest(intentProcessor, options, {
 
 // ---------------------------------- utils -----------------------------------
 
+// General Intento error codes
+// more here https://github.com/intento/intento-api/blob/master/README.md#errors
+const ERROR_CODES = {
+    401: 'Auth key is missing',
+    403: 'Auth key is invalid',
+    404: 'Intent/Provider not found',
+    413: 'Capabilities mismatch for the chosen provider (too long text, unsupported languages, etc)',
+    429: 'API rate limit exceeded',
+}
+
+/**
+ * Main function to run an intent job
+ * @param {Function} intentProcessor an intent
+ * @param {object} options request parameters related to how the intent should work
+ * @param {object} argv command line arguments related to text processing
+ */
 async function processRequest(intentProcessor, options, argv) {
     let data
     try {
         const text = await getText(argv)
-        data = await intentProcessor({ text, ...options, ...OTHER_OPTION })
+
+        data = await intentProcessor({ text, ...options, ...OTHER_OPTIONS })
     } catch (e) {
         prettyCatch(e)
     }
@@ -167,6 +183,11 @@ async function processRequest(intentProcessor, options, argv) {
     }
 }
 
+/**
+ * Prepare given data to pass as a text field
+ * @param {object} { input, encoding, bulk, _ } arguments from command line
+ * @returns {string|array} text to process
+ */
 async function getText({ input, encoding, bulk, _ }) {
     if (input) {
         const path = require('path')
@@ -204,15 +225,11 @@ async function getText({ input, encoding, bulk, _ }) {
     return ''
 }
 
-// more here https://github.com/intento/intento-api/blob/master/README.md#errors
-const ERROR_CODES = {
-    401: 'Auth key is missing',
-    403: 'Auth key is invalid',
-    404: 'Intent/Provider not found',
-    413: 'Capabilities mismatch for the chosen provider (too long text, unsupported languages, etc)',
-    429: 'API rate limit exceeded',
-}
-
+/**
+ * Log response results to the console or write them to a specified file
+ * @param {object} data request response
+ * @param {object} { input, output, async, intent, apikey, encoding } arguments from command line
+ */
 async function errorFriendlyCallback(data, { input, output, async, intent, apikey, encoding }) {
     if (data.message) {
         console.error('\nError:', data.message, '\n\n')
@@ -322,10 +339,18 @@ async function errorFriendlyCallback(data, { input, output, async, intent, apike
     responseAsIs(data)
 }
 
+/**
+ * Log response results as pretty printed JSON object
+ * @param {array|object} data
+ */
 function responseAsIs(data) {
     console.log('API response:\n', JSON.stringify(data, null, 4), '\n\n')
 }
 
+/**
+ * Log response showing only provider ids
+ * @param {array} data
+ */
 function listIdsFromResponse(data) {
     console.log('API response:')
     data.forEach(p => {
@@ -333,6 +358,11 @@ function listIdsFromResponse(data) {
     })
 }
 
+/**
+ * Choose a function to log response results
+ * @param {string} intent name
+ * @returns
+ */
 function getDefaultOuputFn(intent) {
     if (responseMapper) {
         if (intent.indexOf('providers') === -1) {
@@ -349,6 +379,11 @@ function getDefaultOuputFn(intent) {
     }
 }
 
+/**
+ * Log errors to the console
+ * @param {object} errorResponse
+ * @returns
+ */
 function prettyCatch(errorResponse) {
     if (errorResponse.message) {
         console.log('\nError: ' + errorResponse.message)
@@ -379,6 +414,12 @@ function prettyCatch(errorResponse) {
     }
 }
 
+/**
+ * Select SDK function to make requests to the Intento API
+ * @param {object} connector an IntentoConnector instance
+ * @param {string} value intent name
+ * @returns {Function} function that can make http requests to a certain Intento API endpoint
+ */
 function getIntentProcessor(connector, value) {
     if (!connector || !connector.ai) {
         console.error("Intento connector wasn't initialized properly.")
@@ -442,8 +483,12 @@ function getIntentProcessor(connector, value) {
     return
 }
 
-// prettier-ignore
+/**
+ * Explain why the script execution was stopped
+ * @returns
+ */
 function warnAsyncSmartAndExit() {
+    // prettier-ignore
     const PROVIDERS_EXAMPLE = 'https://github.com/intento/intento-nodejs/tree/master/samples/cli#list-available-providers'
 
     console.error("Smart mode for async operations currently isn't supported")
