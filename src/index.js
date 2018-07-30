@@ -200,13 +200,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     return new Promise((resolve, reject) => {
         try {
             const req = https.request(requestOptions, resp =>
-                response_handler(
-                    resp,
-                    resolve,
-                    reject,
-                    this.debug,
-                    this.verbose
-                )
+                responseHandler(resp, resolve, reject, this.debug, this.verbose)
             )
 
             req.on('error', function(err) {
@@ -243,12 +237,12 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         input_format,
         output_format,
         pretty_print,
-        processing,
+        processing = {},
     } = parameters
     const content = {
         context: { text, from, to, lang, category, format },
         service: {
-            provider,
+            provider: stringToList(provider),
             auth,
             async,
             bidding,
@@ -258,7 +252,10 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             input_format,
             output_format,
             pretty_print,
-            processing,
+            processing: {
+                pre: stringToList(processing.pre),
+                post: stringToList(processing.post),
+            },
         },
     }
 
@@ -362,17 +359,23 @@ IntentoConnector.prototype.asyncOperations = function(params) {
 IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
     const {
         from,
-        to = Math.ceil(Date.now() / 1000),
+        to,
         bucket,
         provider,
+        intent,
+        status,
+        client,
         fields,
     } = parameters
     const content = {
         range: { from, to, bucket },
     }
 
-    if (provider) {
-        content.filter = { provider }
+    content.filter = {
+        provider: stringToList(provider),
+        intent: stringToList(intent),
+        status: stringToList(status),
+        client: stringToList(client),
     }
 
     if (fields && path.indexOf('distinct') !== -1) {
@@ -390,15 +393,22 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
     })
 }
 
-// helpers
+// ---------------------------------- utils -----------------------------------
 
-const pathBySlug = {
-    sentiment: '/ai/text/sentiment',
-    translate: '/ai/text/translate',
-    dictionary: '/ai/text/dictionary',
-}
-
+/**
+ * Return url to send request to
+ *
+ * @param {string} slug intent short name
+ * @param {boolean} [debug=false] debug mode (more logging)
+ * @param {boolean} [verbose=false] verbose mode (more pretty logs)
+ * @returns {string}
+ */
 function getPath(slug, debug = false, verbose = false) {
+    const pathBySlug = {
+        sentiment: '/ai/text/sentiment',
+        translate: '/ai/text/translate',
+        dictionary: '/ai/text/dictionary',
+    }
     let path = pathBySlug[slug]
     if (!path) {
         path = pathBySlug.translate
@@ -412,7 +422,16 @@ function getPath(slug, debug = false, verbose = false) {
     return path
 }
 
-function response_handler(
+/**
+ * Process request response
+ *
+ * @param {object} response any http response (JSON)
+ * @param {Function} resolve Promise resolve
+ * @param {Function} reject Promise reject
+ * @param {boolean} [debug=false] debug mode (more logging)
+ * @param {boolean} [verbose=false] verbose mode (more pretty logs)
+ */
+function responseHandler(
     response,
     resolve,
     reject,
@@ -460,10 +479,34 @@ function response_handler(
     })
 }
 
+/**
+ * Log error description.
+ *
+ * @param {object} err javacsript error object or custom error object
+ * @param {string} [explanation=''] some details on a context in which this error occurs
+ */
 function customErrorLog(err, explanation = '') {
     if (err.statusCode) {
         console.error(explanation, err.statusCode, err.statusMessage)
     } else {
         console.error(explanation, err)
     }
+}
+
+/**
+ * Transform a comma-separated string into a list.
+ * Do nothing if array is passed.
+ * @param {string|array} value query parameter value
+ * @returns array of strings
+ */
+function stringToList(value) {
+    if (Array.isArray(value)) {
+        return value
+    }
+
+    if (typeof value !== 'string') {
+        return
+    }
+
+    return value.split(',').map(s => s.trim())
 }
