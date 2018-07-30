@@ -8,7 +8,12 @@ const querystring = require('querystring')
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
 function IntentoConnector(credentials = {}, options = {}) {
-    const { debug = false, verbose = false, curl = false } = options
+    const {
+        debug = false,
+        verbose = false,
+        curl = false,
+        dryRun = false,
+    } = options
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -19,6 +24,7 @@ function IntentoConnector(credentials = {}, options = {}) {
     this.debug = debug
     this.curl = curl
     this.verbose = verbose
+    this.dryRun = dryRun
 
     const { apikey, host = HOST } = this.credentials
 
@@ -185,16 +191,18 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     if (this.debug) {
         console.log('\nAPI request content\n', content)
     }
-    const requestData = data || JSON.stringify(content) || ''
 
     if (this.curl) {
-        console.log(
-            `\nTest request\ncurl -X${method} -H 'apikey: ${
-                requestOptions.headers.apikey
-            }' https://${requestOptions.host}${
-                requestOptions.path
-            } -d '${data || JSON.stringify(content, null, 4) || ''}'`
-        )
+        const requestString = `curl -X${method} -H 'apikey: ${
+            requestOptions.headers.apikey
+        }' https://${requestOptions.host}${requestOptions.path} -d '${data ||
+            JSON.stringify(content, null, 4) ||
+            ''}'`
+        console.log(`\nTest request\n${requestString}`)
+    }
+
+    if (this.dryRun) {
+        return data || content || ''
     }
 
     return new Promise((resolve, reject) => {
@@ -211,7 +219,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                     customErrorLog(err)
                 }
             })
-            req.write(requestData)
+            req.write(data || JSON.stringify(content) || '')
             req.end()
         } catch (e) {
             customErrorLog(e)
