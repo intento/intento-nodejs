@@ -369,6 +369,7 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
         from,
         to,
         bucket,
+        items,
         provider,
         intent,
         status,
@@ -376,7 +377,7 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
         fields,
     } = parameters
     const content = {
-        range: { from, to, bucket },
+        range: { from, to, bucket, items },
     }
 
     content.filter = {

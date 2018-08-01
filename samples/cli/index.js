@@ -38,9 +38,10 @@ const {
     verbose = false,
     curl = false,
     usage = false,
+    viewpoint = 'intento',
     apikey = process.env.INTENTO_API_KEY,
     host,
-    intent = 'translate',
+    intent,
     responseMapper,
     _ = [],
     input,
@@ -65,6 +66,7 @@ if (help) {
     console.info('  --from             (language code)')
     console.info('  --async            (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
     console.info('  --usage            (boolean) get usage statistics on specified intent(s)')
+    console.info('  --viewpoint        (string) for usage requests: intento|provider|distinct')
     console.info('  --provider         (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
     console.info("  --input            (string) relative path to a file you'd like to process")
     console.info('  --bulk             (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
@@ -98,7 +100,7 @@ if (!host && DEBUG) {
 const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE, curl })
 
 // Define which Inten.to endpoint will be used to process the request
-const intentProcessor = getIntentProcessor(client, usage ? 'usage' : intent)
+const intentProcessor = getIntentProcessor(client, usage ? 'usage/' + viewpoint : intent)
 if (!intentProcessor) {
     process.exit(1)
 }
@@ -396,7 +398,7 @@ function prettyCatch(errorResponse) {
  * @param {string} value intent name
  * @returns {Function} function that can make http requests to a certain Intento API endpoint
  */
-function getIntentProcessor(connector, value) {
+function getIntentProcessor(connector, value = 'translate') {
     if (!connector || !connector.ai) {
         console.error("Intento connector wasn't initialized properly.")
         return
