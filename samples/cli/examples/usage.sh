@@ -9,7 +9,13 @@ from=$(expr $to - $delta)
 echo "Usage stat intents default interval till now, one-day buckets"
 node index.js --key=$INTENTO_API_KEY \
     --bucket=1d \
+	--usage
+
+echo "Usage stat grouped by intents, latest 10 buckets"
+node index.js --key=$INTENTO_API_KEY \
+    --bucket=1d \
     --items=10 \
+    --group=intent \
 	--usage
 
 echo "Usage stat for providers default interval till now, one-day buckets"
@@ -19,7 +25,6 @@ node index.js --key=$INTENTO_API_KEY \
 
 echo "Usage stat for involved providers and intents"
 node index.js --key=$INTENTO_API_KEY \
-    --curl \
 	--usage \
     --fields=provider \
     --fields=intent \

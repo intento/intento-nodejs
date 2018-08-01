@@ -375,8 +375,10 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
         status,
         client,
         fields,
+        group,
     } = parameters
     const content = {
+        group: stringToList(group),
         range: { from, to, bucket, items },
     }
 
