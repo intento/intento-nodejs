@@ -150,8 +150,8 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
         host: this.host,
         headers: {
             'User-Agent': 'NodeJS SDK client',
-            'X-sdk-version': VERSION,
-            'X-node-version': process.version,
+            // 'X-sdk-version': VERSION,
+            // 'X-node-version': process.version,
             apikey: this.apikey,
         },
         path: path + (urlParams ? '?' + urlParams : ''),
