@@ -337,6 +337,17 @@ function listIdsFromResponse(data) {
 }
 
 /**
+ * Log usage response as a table
+ * @param {array} data
+ */
+function usageResponse(data) {
+    console.log('API response:')
+    const list = data.data.map(({ metrics, timestamp }) => ({ ...metrics, timestamp }))
+
+    console.table(list, ['requests', 'items', 'len', 'errors', 'timestamp'])
+}
+
+/**
  * Choose a function to log response results
  * @param {string} intent name
  * @returns
@@ -346,15 +357,19 @@ function getDefaultOuputFn(intent) {
         return {
             responseAsIs,
             listIdsFromResponse,
+            usageResponse,
         }[responseMapper]
     }
 
-    if (intent.indexOf('providers') === -1) {
-        // not requesting for providers
-        return responseAsIs
+    if (usage && viewpoint === 'intento') {
+        return usageResponse
     }
 
-    return listIdsFromResponse
+    if (intent && intent.indexOf('providers') !== -1) {
+        return listIdsFromResponse
+    }
+
+    return responseAsIs
 }
 
 /**
