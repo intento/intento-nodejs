@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export $(cat .env)
 
@@ -9,23 +9,23 @@ from=$(expr $to - $delta)
 echo "Usage stat intents default interval till now, one-day buckets"
 node index.js --key=$INTENTO_API_KEY \
     --bucket=1d \
-	--usage
+    --usage
 
 echo "Usage stat grouped by intents, latest 10 buckets"
 node index.js --key=$INTENTO_API_KEY \
     --bucket=1d \
     --items=10 \
     --group=intent \
-	--usage
+    --usage
 
 echo "Usage stat for providers default interval till now, one-day buckets"
 node index.js --key=$INTENTO_API_KEY \
-	--usage \
+    --usage \
     --viewpoint=provider
 
 echo "Usage stat for involved providers and intents"
 node index.js --key=$INTENTO_API_KEY \
-	--usage \
+    --usage \
     --fields=provider \
     --fields=intent \
     --viewpoint=distinct
@@ -38,4 +38,4 @@ node index.js --key=$INTENTO_API_KEY \
     --intent=ai.text.translate \
     --provider=ai.text.translate.systran.translation_api.1-0-0 \
     --provider=ai.text.translate.yandex.translate_api.1-5 \
-	--usage
+    --usage
