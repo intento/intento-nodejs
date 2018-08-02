@@ -343,18 +343,18 @@ function listIdsFromResponse(data) {
  */
 function getDefaultOuputFn(intent) {
     if (responseMapper) {
-        if (intent.indexOf('providers') === -1) {
-            // not requesting for providers
-            return responseAsIs
-        } else {
-            return listIdsFromResponse
-        }
-    } else {
         return {
             responseAsIs,
             listIdsFromResponse,
         }[responseMapper]
     }
+
+    if (intent.indexOf('providers') === -1) {
+        // not requesting for providers
+        return responseAsIs
+    }
+
+    return listIdsFromResponse
 }
 
 /**
