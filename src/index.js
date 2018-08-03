@@ -240,7 +240,8 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         failover,
         failover_list,
         auth,
-        async,
+        // prettier-ignore
+        'async': asyncMode,
         multiple_translations,
         input_format,
         output_format,
@@ -252,7 +253,8 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         service: {
             provider: stringToList(provider),
             auth,
-            async,
+            // prettier-ignore
+            'async': asyncMode,
             bidding,
             failover,
             failover_list,

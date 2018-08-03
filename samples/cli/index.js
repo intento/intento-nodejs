@@ -206,7 +206,7 @@ async function getText({ input, encoding, bulk, _ }) {
 /**
  * Log response results to the console or write them to a specified file
  * @param {object} data request response
- * @param {object} { input, output, async, intent, apikey, encoding } arguments from command line
+ * @param {object} { input, output, intent, apikey, encoding } arguments from command line
  */
 async function errorFriendlyCallback(data, { input, output, intent, apikey, encoding }) {
     if (data.message) {
