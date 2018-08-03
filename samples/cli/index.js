@@ -87,11 +87,6 @@ if (!apikey) {
     process.exit(1)
 }
 
-if (!intent && !usage) {
-    console.error('No intent specified. For example, add `--intent=translate` or `-i translate`')
-    process.exit(1)
-}
-
 if (!host && DEBUG) {
     console.warn('No host specified. Default host will be used')
 }
