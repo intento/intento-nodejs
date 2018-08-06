@@ -1,6 +1,7 @@
+/* global window */
 'use strict'
 
-const VERSION = '0.2.0'
+const VERSION = '0.3.0-beta'
 
 const https = require('https')
 const querystring = require('querystring')
@@ -146,12 +147,19 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
 
     const urlParams = querystring.stringify(params)
 
+    let userAgent = ''
+    if (process) {
+        userAgent = `NodeJS SDK client (sdk version ${VERSION}; node version ${process.version})`
+    } else if (window && window.navigator) {
+        userAgent = `NodeJS SDK client (sdk version ${VERSION}) ` + window.navigator.userAgent
+    } else {
+        userAgent = `NodeJS SDK client (sdk version ${VERSION})`
+    }
+
     const requestOptions = {
         host: this.host,
         headers: {
-            'User-Agent': 'NodeJS SDK client',
-            // 'X-sdk-version': VERSION,
-            // 'X-node-version': process.version,
+            'User-Agent': userAgent,
             apikey: this.apikey,
         },
         path: path + (urlParams ? '?' + urlParams : ''),
