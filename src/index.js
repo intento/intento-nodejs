@@ -228,13 +228,13 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                     console.error('Host look up failed: \n', err)
                     console.log('\nPlease, check internet connection\n')
                 } else {
-                    customErrorLog(err)
+                    customErrorLog(err, 'Fails getting a response from the API')
                 }
             })
             req.write(data || JSON.stringify(content) || '')
             req.end()
         } catch (e) {
-            customErrorLog(e)
+            customErrorLog(e, 'Fails to send a request to the API')
         }
     })
 }
@@ -494,7 +494,15 @@ function responseHandler(
                     throw new Error('Unexpected response: ' + body)
                 }
             }
-            resolve(data)
+            if (response.statusCode >= 400 && !data.error) {
+                reject({
+                    statusCode: response.statusCode,
+                    statusMessage: response.statusMessage,
+                    ...data
+                })
+            } else {
+                resolve(data)
+            }
         } catch (e) {
             if (debug || verbose) {
                 customErrorLog(e)

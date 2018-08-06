@@ -47,10 +47,16 @@ describe('makeRequest', () => {
 
     it('fails with an incorrect path specified: /usage', async () => {
         expect.assertions(2)
-        await client.makeRequest({ path: '/usage' }).catch(e => {
-            expect(e.statusCode).toEqual(404)
-            expect(e.statusMessage).toEqual('Not Found')
-        })
+        await client.makeRequest({ path: '/usage' })
+            .then(e => {
+                expect(e.error).toBeDefined()
+                expect(e.error.code).toEqual(404)
+                expect(e.error.message).toEqual('no such intent')
+            })
+            .catch(e => {
+                expect(e.statusCode).toEqual(404)
+                expect(e.statusMessage).toEqual('Not Found')
+            })
     })
 
     it('makeRequest returns a promise', () => {
