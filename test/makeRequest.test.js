@@ -46,7 +46,7 @@ describe('makeRequest', () => {
     })
 
     it('fails with an incorrect path specified: /usage', async () => {
-        expect.assertions(2)
+        expect.assertions(3)
         await client.makeRequest({ path: '/usage' })
             .then(e => {
                 expect(e.error).toBeDefined()
@@ -54,6 +54,7 @@ describe('makeRequest', () => {
                 expect(e.error.message).toEqual('no such intent')
             })
             .catch(e => {
+                expect(e.error).toBeUndefined()
                 expect(e.statusCode).toEqual(404)
                 expect(e.statusMessage).toEqual('Not Found')
             })
