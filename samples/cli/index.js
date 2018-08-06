@@ -20,13 +20,14 @@ const writeFile = util.promisify(fs.writeFile)
 // Return an argument object populated with the array arguments from args
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
-    boolean: ['debug', 'verbose', 'async', 'help', 'curl'],
+    boolean: ['debug', 'verbose', 'help', 'curl', 'usage'],
     alias: {
         help: ['h'],
         debug: ['d'],
         verbose: ['v'],
         apikey: ['key'],
         intent: ['i'],
+        usage: ['u'],
     },
 })
 
@@ -36,19 +37,17 @@ const {
     debug = false,
     verbose = false,
     curl = false,
+    usage = false,
+    viewpoint = 'intento',
     apikey = process.env.INTENTO_API_KEY,
     host,
-    intent = 'translate',
+    intent,
     responseMapper,
-    async = false,
     _ = [],
-    provider,
     input,
     bulk = false,
     output,
     encoding = 'utf-8',
-    pre_processing,
-    post_processing,
     ...OTHER_OPTIONS
 } = argv
 
@@ -66,6 +65,8 @@ if (help) {
     console.info('  --to               (language code)')
     console.info('  --from             (language code)')
     console.info('  --async            (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
+    console.info('  --usage            (boolean) get usage statistics on specified intent(s)')
+    console.info('  --viewpoint        (string) for usage requests: intento|provider|distinct')
     console.info('  --provider         (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
     console.info("  --input            (string) relative path to a file you'd like to process")
     console.info('  --bulk             (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
@@ -86,11 +87,6 @@ if (!apikey) {
     process.exit(1)
 }
 
-if (!intent) {
-    console.error('No intent specified. For example, add `--intent=translate` or `-i translate`')
-    process.exit(1)
-}
-
 if (!host && DEBUG) {
     console.warn('No host specified. Default host will be used')
 }
@@ -99,54 +95,25 @@ if (!host && DEBUG) {
 const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE, curl })
 
 // Define which Inten.to endpoint will be used to process the request
-const intentProcessor = getIntentProcessor(client, intent)
+const intentProcessor = getIntentProcessor(client, usage ? 'usage/' + viewpoint : intent)
 if (!intentProcessor) {
     process.exit(1)
 }
 
-// Here we begin to form an object with query parameters
-const options = {}
-
-// async mode option. More here https://github.com/intento/intento-nodejs#async-mode
-if (async) {
-    options.async = async
-}
-
-// Form provider list if needed
-if (provider) {
-    const providerList = provider.split(',')
-    if (providerList.length === 1) {
-        options.provider = providerList[0]
-    } else {
-        options.provider = providerList
-    }
-}
-
 // Check if there is a conflict in options
-if (options.async && !provider) {
+if (OTHER_OPTIONS.async && !OTHER_OPTIONS.provider) {
     warnAsyncSmartAndExit()
 }
 
-// Form processing parameter object
-if (pre_processing || post_processing) {
-    options.processing = options.processing || {}
-    if (pre_processing) {
-        options.processing.pre = pre_processing.split(',')
-    }
-    if (post_processing) {
-        options.processing.post = post_processing.split(',')
-    }
-}
-
 // Run main processing function
-processRequest(intentProcessor, options, {
+processRequest(intentProcessor, {
     intent,
     apikey,
     input,
     output,
     encoding,
-    async,
     bulk,
+    usage,
     _,
 })
 
@@ -168,12 +135,18 @@ const ERROR_CODES = {
  * @param {object} options request parameters related to how the intent should work
  * @param {object} argv command line arguments related to text processing
  */
-async function processRequest(intentProcessor, options, argv) {
+async function processRequest(intentProcessor, argv) {
     let data
     try {
-        const text = await getText(argv)
+        const params = { ...OTHER_OPTIONS }
+        if (argv.usage) {
+            params.intent = argv.intent
+        } else {
+            const text = await getText(argv)
+            params.text = text
+        }
 
-        data = await intentProcessor({ text, ...options, ...OTHER_OPTIONS })
+        data = await intentProcessor(params)
     } catch (e) {
         prettyCatch(e)
     }
@@ -228,9 +201,9 @@ async function getText({ input, encoding, bulk, _ }) {
 /**
  * Log response results to the console or write them to a specified file
  * @param {object} data request response
- * @param {object} { input, output, async, intent, apikey, encoding } arguments from command line
+ * @param {object} { input, output, intent, apikey, encoding } arguments from command line
  */
-async function errorFriendlyCallback(data, { input, output, async, intent, apikey, encoding }) {
+async function errorFriendlyCallback(data, { input, output, intent, apikey, encoding }) {
     if (data.message) {
         console.error('\nError:', data.message, '\n\n')
         if (DEBUG) {
@@ -242,7 +215,7 @@ async function errorFriendlyCallback(data, { input, output, async, intent, apike
     if (data.error) {
         // prettier-ignore
         console.error(`\nError: ${data.error.code} ${ERROR_CODES[data.error.code]}\n${data.error.message}`)
-        if (input && !async) {
+        if (input && !OTHER_OPTIONS.async) {
             console.log('Consider using --async option')
         }
         console.log('\n')
@@ -359,24 +332,39 @@ function listIdsFromResponse(data) {
 }
 
 /**
+ * Log usage response as a table
+ * @param {array} data
+ */
+function usageResponse(data) {
+    console.log('API response:')
+    const list = data.data.map(({ metrics, timestamp }) => ({ ...metrics, timestamp }))
+
+    console.table(list, ['requests', 'items', 'len', 'errors', 'timestamp'])
+}
+
+/**
  * Choose a function to log response results
  * @param {string} intent name
  * @returns
  */
 function getDefaultOuputFn(intent) {
     if (responseMapper) {
-        if (intent.indexOf('providers') === -1) {
-            // not requesting for providers
-            return responseAsIs
-        } else {
-            return listIdsFromResponse
-        }
-    } else {
         return {
             responseAsIs,
             listIdsFromResponse,
+            usageResponse,
         }[responseMapper]
     }
+
+    if (usage && viewpoint === 'intento') {
+        return usageResponse
+    }
+
+    if (intent && intent.indexOf('providers') !== -1) {
+        return listIdsFromResponse
+    }
+
+    return responseAsIs
 }
 
 /**
@@ -420,7 +408,7 @@ function prettyCatch(errorResponse) {
  * @param {string} value intent name
  * @returns {Function} function that can make http requests to a certain Intento API endpoint
  */
-function getIntentProcessor(connector, value) {
+function getIntentProcessor(connector, value = 'translate') {
     if (!connector || !connector.ai) {
         console.error("Intento connector wasn't initialized properly.")
         return
@@ -435,6 +423,7 @@ function getIntentProcessor(connector, value) {
         dictionary: connector.ai.text.dictionary,
         ['dictionary.providers']: connector.ai.text.dictionary.providers,
         settings: connector.settings.languages,
+        usage: connector.usage.intento,
     }
 
     let shortcut = intentShortcuts[value]
@@ -446,6 +435,13 @@ function getIntentProcessor(connector, value) {
     }
 
     let resultFn = client
+
+    if (typeof value !== 'string') {
+        console.error('Unexpected intent description: ', value)
+        intentHelp(intentShortcuts)
+        return
+    }
+
     const elements = value.split(/[./]/)
 
     const MethodDoesntExist = {}
@@ -472,15 +468,23 @@ function getIntentProcessor(connector, value) {
         return resultFn
     }
 
+    console.error('Unknown intent: ', intent)
+    intentHelp(intentShortcuts)
+    return
+}
+
+/**
+ * Log help on how to specify an intent
+ *
+ * @param {object} intentShortcuts - description for most popular intents
+ */
+function intentHelp(intentShortcuts) {
     const validIntents = Object.keys(intentShortcuts)
-    console.error(
-        'Unknown intent: ',
-        intent,
-        '. Valid intent examples are ',
+    console.log(
+        'Valid intent examples are ',
         validIntents.join(', '),
         ' or settings/processing-rules, ai/text/translate, etc.'
     )
-    return
 }
 
 /**

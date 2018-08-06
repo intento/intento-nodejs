@@ -22,6 +22,7 @@
     "test": "export $(cat .env) && jest --coverage --collectCoverageFrom=src/*.js --forceExit",
     "build": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
+    "format_test": "prettier --config test/.prettierrc --write 'test/*.js'",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
     "format_source": "prettier --config .prettierrc --write './src/*.js'",
     "format_samples": "prettier --config ./samples/.prettierrc --write './samples/**/*.js'",

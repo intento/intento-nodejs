@@ -1,6 +1,7 @@
+/* global window */
 'use strict'
 
-const VERSION = '0.2.0'
+const VERSION = '0.3.0-beta'
 
 const https = require('https')
 const querystring = require('querystring')
@@ -8,7 +9,12 @@ const querystring = require('querystring')
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
 function IntentoConnector(credentials = {}, options = {}) {
-    const { debug = false, verbose = false, curl = false } = options
+    const {
+        debug = false,
+        verbose = false,
+        curl = false,
+        dryRun = false,
+    } = options
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
     } else {
@@ -19,6 +25,7 @@ function IntentoConnector(credentials = {}, options = {}) {
     this.debug = debug
     this.curl = curl
     this.verbose = verbose
+    this.dryRun = dryRun
 
     const { apikey, host = HOST } = this.credentials
 
@@ -106,6 +113,27 @@ function IntentoConnector(credentials = {}, options = {}) {
             return this.asyncOperations(params)
         },
     })
+
+    this.usage = Object.freeze({
+        intento: params => {
+            return this.usageFulfill(
+                '/usage/intento',
+                params // --> range: obj, filter: obj
+            )
+        },
+        provider: params => {
+            return this.usageFulfill(
+                '/usage/provider',
+                params // --> range: obj, filter: obj
+            )
+        },
+        distinct: params => {
+            return this.usageFulfill(
+                '/usage/distinct',
+                params // --> range: obj, fields: list
+            )
+        },
+    })
 }
 
 module.exports = IntentoConnector
@@ -119,12 +147,23 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
 
     const urlParams = querystring.stringify(params)
 
+    let userAgent = ''
+    if (process) {
+        userAgent = `NodeJS SDK client (sdk version ${VERSION}; node version ${
+            process.version
+        })`
+    } else if (window && window.navigator) {
+        userAgent =
+            `NodeJS SDK client (sdk version ${VERSION}) ` +
+            window.navigator.userAgent
+    } else {
+        userAgent = `NodeJS SDK client (sdk version ${VERSION})`
+    }
+
     const requestOptions = {
         host: this.host,
         headers: {
-            'User-Agent': 'NodeJS SDK client',
-            'X-sdk-version': VERSION,
-            'X-node-version': process.version,
+            'User-Agent': userAgent,
             apikey: this.apikey,
         },
         path: path + (urlParams ? '?' + urlParams : ''),
@@ -164,28 +203,24 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     if (this.debug) {
         console.log('\nAPI request content\n', content)
     }
-    const requestData = data || JSON.stringify(content) || ''
 
     if (this.curl) {
-        console.log(
-            `\nTest request\ncurl -X${method} -H 'apikey: ${
-                requestOptions.headers.apikey
-            }' https://${requestOptions.host}${
-                requestOptions.path
-            } -d '${data || JSON.stringify(content, null, 4) || ''}'`
-        )
+        const requestString = `curl -X${method} -H 'apikey: ${
+            requestOptions.headers.apikey
+        }' https://${requestOptions.host}${requestOptions.path} -d '${data ||
+            JSON.stringify(content, null, 4) ||
+            ''}'`
+        console.log(`\nTest request\n${requestString}`)
+    }
+
+    if (this.dryRun) {
+        return data || content || ''
     }
 
     return new Promise((resolve, reject) => {
         try {
             const req = https.request(requestOptions, resp =>
-                response_handler(
-                    resp,
-                    resolve,
-                    reject,
-                    this.debug,
-                    this.verbose
-                )
+                responseHandler(resp, resolve, reject, this.debug, this.verbose)
             )
 
             req.on('error', function(err) {
@@ -193,13 +228,13 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                     console.error('Host look up failed: \n', err)
                     console.log('\nPlease, check internet connection\n')
                 } else {
-                    customErrorLog(err)
+                    customErrorLog(err, 'Fails getting a response from the API')
                 }
             })
-            req.write(requestData)
+            req.write(data || JSON.stringify(content) || '')
             req.end()
         } catch (e) {
-            customErrorLog(e)
+            customErrorLog(e, 'Fails to send a request to the API')
         }
     })
 }
@@ -217,19 +252,21 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         failover,
         failover_list,
         auth,
-        async,
+        // prettier-ignore
+        'async': asyncMode,
         multiple_translations,
         input_format,
         output_format,
         pretty_print,
-        processing,
+        processing = {},
     } = parameters
     const content = {
         context: { text, from, to, lang, category, format },
         service: {
-            provider,
+            provider: stringToList(provider),
             auth,
-            async,
+            // prettier-ignore
+            'async': asyncMode,
             bidding,
             failover,
             failover_list,
@@ -237,7 +274,10 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             input_format,
             output_format,
             pretty_print,
-            processing,
+            processing: {
+                pre: stringToList(processing.pre),
+                post: stringToList(processing.post),
+            },
         },
     }
 
@@ -338,15 +378,62 @@ IntentoConnector.prototype.asyncOperations = function(params) {
     })
 }
 
-// helpers
+IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
+    const {
+        from,
+        to,
+        bucket,
+        items,
+        provider,
+        intent,
+        status,
+        client,
+        fields,
+        group,
+    } = parameters
+    const content = {
+        group: stringToList(group),
+        range: { from, to, bucket, items },
+    }
 
-const pathBySlug = {
-    sentiment: '/ai/text/sentiment',
-    translate: '/ai/text/translate',
-    dictionary: '/ai/text/dictionary',
+    content.filter = {
+        provider: stringToList(provider),
+        intent: stringToList(intent),
+        status: stringToList(status),
+        client: stringToList(client),
+    }
+
+    if (fields && path.indexOf('distinct') !== -1) {
+        if (Array.isArray(fields)) {
+            content.fields = fields
+        } else if (typeof fields === 'string') {
+            content.fields = [fields]
+        }
+    }
+
+    return this.makeRequest({
+        path,
+        content,
+        method: 'POST',
+    })
 }
 
+// ---------------------------------- utils -----------------------------------
+
+/**
+ * Return url to send request to
+ *
+ * @param {string} slug intent short name
+ * @param {boolean} [debug=false] debug mode (more logging)
+ * @param {boolean} [verbose=false] verbose mode (more pretty logs)
+ * @returns {string}
+ */
 function getPath(slug, debug = false, verbose = false) {
+    const pathBySlug = {
+        sentiment: '/ai/text/sentiment',
+        translate: '/ai/text/translate',
+        dictionary: '/ai/text/dictionary',
+    }
     let path = pathBySlug[slug]
     if (!path) {
         path = pathBySlug.translate
@@ -360,7 +447,16 @@ function getPath(slug, debug = false, verbose = false) {
     return path
 }
 
-function response_handler(
+/**
+ * Process request response
+ *
+ * @param {object} response any http response (JSON)
+ * @param {Function} resolve Promise resolve
+ * @param {Function} reject Promise reject
+ * @param {boolean} [debug=false] debug mode (more logging)
+ * @param {boolean} [verbose=false] verbose mode (more pretty logs)
+ */
+function responseHandler(
     response,
     resolve,
     reject,
@@ -398,7 +494,15 @@ function response_handler(
                     throw new Error('Unexpected response: ' + body)
                 }
             }
-            resolve(data)
+            if (response.statusCode >= 400 && !data.error) {
+                reject({
+                    statusCode: response.statusCode,
+                    statusMessage: response.statusMessage,
+                    ...data,
+                })
+            } else {
+                resolve(data)
+            }
         } catch (e) {
             if (debug || verbose) {
                 customErrorLog(e)
@@ -408,10 +512,34 @@ function response_handler(
     })
 }
 
+/**
+ * Log error description.
+ *
+ * @param {object} err javacsript error object or custom error object
+ * @param {string} [explanation=''] some details on a context in which this error occurs
+ */
 function customErrorLog(err, explanation = '') {
     if (err.statusCode) {
         console.error(explanation, err.statusCode, err.statusMessage)
     } else {
         console.error(explanation, err)
     }
+}
+
+/**
+ * Transform a comma-separated string into a list.
+ * Do nothing if array is passed.
+ * @param {string|array} value query parameter value
+ * @returns array of strings
+ */
+function stringToList(value) {
+    if (Array.isArray(value)) {
+        return value
+    }
+
+    if (typeof value !== 'string') {
+        return
+    }
+
+    return value.split(',').map(s => s.trim())
 }
