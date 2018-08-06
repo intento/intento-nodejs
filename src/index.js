@@ -498,7 +498,7 @@ function responseHandler(
                 reject({
                     statusCode: response.statusCode,
                     statusMessage: response.statusMessage,
-                    ...data
+                    ...data,
                 })
             } else {
                 resolve(data)
