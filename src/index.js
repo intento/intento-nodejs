@@ -149,9 +149,13 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
 
     let userAgent = ''
     if (process) {
-        userAgent = `NodeJS SDK client (sdk version ${VERSION}; node version ${process.version})`
+        userAgent = `NodeJS SDK client (sdk version ${VERSION}; node version ${
+            process.version
+        })`
     } else if (window && window.navigator) {
-        userAgent = `NodeJS SDK client (sdk version ${VERSION}) ` + window.navigator.userAgent
+        userAgent =
+            `NodeJS SDK client (sdk version ${VERSION}) ` +
+            window.navigator.userAgent
     } else {
         userAgent = `NodeJS SDK client (sdk version ${VERSION})`
     }
