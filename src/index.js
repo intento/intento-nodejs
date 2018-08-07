@@ -276,11 +276,14 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             input_format,
             output_format,
             pretty_print,
-            processing: {
-                pre: stringToList(processing.pre),
-                post: stringToList(processing.post),
-            },
         },
+    }
+
+    if (processing && (processing.pre || processing.post)) {
+        content.service.processing = {
+            pre: stringToList(processing.pre),
+            post: stringToList(processing.post),
+        }
     }
 
     if (!content.service.provider) {
@@ -554,7 +557,7 @@ function stringToList(value) {
  * - auth="[{\"key\": \"$SOME_PROVIDER_APIKEY\" }]" - JSON decoded list of objects, , any structure accepted
  * - auth="{\"some-provider-id\":[{\"key\": \"$SOME_PROVIDER_APIKEY\" }]}" - JSON decoded full auth object, where keys are provider ids
  * - auth={'some-provider-id':[{ key: $SOME_PROVIDER_APIKEY }] } - javascript object, where keys are provider ids
- * @param {string} auth - credential description
+ * @param {string|object} auth - credential description
  * @param {array} providerList - list of provider ids as strings
  * @returns {object} - correct auth object
  */
