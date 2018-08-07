@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.3.0-beta'
+const VERSION = '0.3.0'
 
 const https = require('https')
 const querystring = require('querystring')
