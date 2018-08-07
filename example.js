@@ -173,7 +173,13 @@ function defaultCallback(data) {
 }
 
 function prettyPrintProviders(data) {
-    console.log(`\nThere are overall ${data.length} providers:`)
+    if (!data || !data.length) {
+        console.log(`\nThere are  no providers.`)
+    } else if (data.length === 1) {
+        console.log(`\nThere is one provider:`)
+    } else {
+        console.log(`\nThere are overall ${data.length} providers:`)
+    }
     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.name}`))
     console.log('\n\n')
 }

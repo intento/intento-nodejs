@@ -5,7 +5,13 @@ const VERSION = '0.3.0-beta'
 
 const https = require('https')
 const querystring = require('querystring')
-
+const {
+    getPath,
+    responseHandler,
+    customErrorLog,
+    stringToList,
+    ownCredentials,
+} = require('./utils')
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
 function IntentoConnector(credentials = {}, options = {}) {
@@ -213,11 +219,11 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
         console.log(`\nTest request\n${requestString}`)
     }
 
-    if (this.dryRun) {
-        return data || content || ''
-    }
-
     return new Promise((resolve, reject) => {
+        if (this.dryRun) {
+            resolve(data || content || '')
+        }
+
         try {
             const req = https.request(requestOptions, resp =>
                 responseHandler(resp, resolve, reject, this.debug, this.verbose)
@@ -260,11 +266,13 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         pretty_print,
         processing = {},
     } = parameters
+    const providerList = stringToList(provider)
+
     const content = {
         context: { text, from, to, lang, category, format },
         service: {
-            provider: stringToList(provider),
-            auth,
+            provider: providerList,
+            auth: ownCredentials(auth, providerList),
             // prettier-ignore
             'async': asyncMode,
             bidding,
@@ -274,11 +282,14 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             input_format,
             output_format,
             pretty_print,
-            processing: {
-                pre: stringToList(processing.pre),
-                post: stringToList(processing.post),
-            },
         },
+    }
+
+    if (processing && (processing.pre || processing.post)) {
+        content.service.processing = {
+            pre: stringToList(processing.pre),
+            post: stringToList(processing.post),
+        }
     }
 
     if (!content.service.provider) {
@@ -416,130 +427,4 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
         content,
         method: 'POST',
     })
-}
-
-// ---------------------------------- utils -----------------------------------
-
-/**
- * Return url to send request to
- *
- * @param {string} slug intent short name
- * @param {boolean} [debug=false] debug mode (more logging)
- * @param {boolean} [verbose=false] verbose mode (more pretty logs)
- * @returns {string}
- */
-function getPath(slug, debug = false, verbose = false) {
-    const pathBySlug = {
-        sentiment: '/ai/text/sentiment',
-        translate: '/ai/text/translate',
-        dictionary: '/ai/text/dictionary',
-    }
-    let path = pathBySlug[slug]
-    if (!path) {
-        path = pathBySlug.translate
-        if (debug || verbose) {
-            console.error(
-                `Unknown intent ${slug}. Translate intent will be used`
-            )
-        }
-    }
-
-    return path
-}
-
-/**
- * Process request response
- *
- * @param {object} response any http response (JSON)
- * @param {Function} resolve Promise resolve
- * @param {Function} reject Promise reject
- * @param {boolean} [debug=false] debug mode (more logging)
- * @param {boolean} [verbose=false] verbose mode (more pretty logs)
- */
-function responseHandler(
-    response,
-    resolve,
-    reject,
-    debug = false,
-    verbose = false
-) {
-    response.setEncoding('utf8')
-
-    if (response.statusCode >= 500) {
-        if (debug) {
-            customErrorLog(response)
-        }
-        reject(response)
-    }
-
-    let body = ''
-    response.on('data', function(chunk) {
-        body += chunk
-    })
-    response.on('end', function() {
-        try {
-            let data = null
-            if (body.length > 0) {
-                if (body[0] === '{' || body[0] === '[') {
-                    data = JSON.parse(body)
-                } else if (body[0] === '<') {
-                    if (response.statusCode >= 400) {
-                        throw new Error('HTML 4xx response: ' + body)
-                    } else {
-                        throw new Error(
-                            'Unexpected 2xx or 3xx response: ' + body
-                        )
-                    }
-                } else {
-                    throw new Error('Unexpected response: ' + body)
-                }
-            }
-            if (response.statusCode >= 400 && !data.error) {
-                reject({
-                    statusCode: response.statusCode,
-                    statusMessage: response.statusMessage,
-                    ...data,
-                })
-            } else {
-                resolve(data)
-            }
-        } catch (e) {
-            if (debug || verbose) {
-                customErrorLog(e)
-            }
-            reject(response)
-        }
-    })
-}
-
-/**
- * Log error description.
- *
- * @param {object} err javacsript error object or custom error object
- * @param {string} [explanation=''] some details on a context in which this error occurs
- */
-function customErrorLog(err, explanation = '') {
-    if (err.statusCode) {
-        console.error(explanation, err.statusCode, err.statusMessage)
-    } else {
-        console.error(explanation, err)
-    }
-}
-
-/**
- * Transform a comma-separated string into a list.
- * Do nothing if array is passed.
- * @param {string|array} value query parameter value
- * @returns array of strings
- */
-function stringToList(value) {
-    if (Array.isArray(value)) {
-        return value
-    }
-
-    if (typeof value !== 'string') {
-        return
-    }
-
-    return value.split(',').map(s => s.trim())
 }
