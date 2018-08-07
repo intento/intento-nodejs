@@ -47,7 +47,8 @@ describe('makeRequest', () => {
 
     it('fails with an incorrect path specified: /usage', async () => {
         expect.assertions(3)
-        await client.makeRequest({ path: '/usage' })
+        await client
+            .makeRequest({ path: '/usage' })
             .then(e => {
                 expect(e.error).toBeDefined()
                 expect(e.error.code).toEqual(404)
