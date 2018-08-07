@@ -1,3 +1,4 @@
+const ERROR_MESSAGE_PREFIX = 'Utils error: '
 /**
  * Return url to send request to
  *
@@ -62,14 +63,12 @@ function responseHandler(
                     data = JSON.parse(body)
                 } else if (body[0] === '<') {
                     if (response.statusCode >= 400) {
-                        throw new Error('HTML 4xx response: ' + body)
+                        throwError('HTML 4xx response: ' + body)
                     } else {
-                        throw new Error(
-                            'Unexpected 2xx or 3xx response: ' + body
-                        )
+                        throwError('Unexpected 2xx or 3xx response: ' + body)
                     }
                 } else {
-                    throw new Error('Unexpected response: ' + body)
+                    throwError('Unexpected response: ' + body)
                 }
             }
             if (response.statusCode >= 400 && !data.error) {
@@ -138,9 +137,9 @@ function ownCredentials(auth, providerList) {
     if (!auth) {
         return
     }
-    if (!providerList) {
-        throw new Error(
-            'Unclear auth parameter: specify at least one provider or clarify provider inside auth object'
+    if (!providerList || !providerList.length) {
+        throwError(
+            'Unclear parameters: specify at least one provider'
         )
     }
     if (typeof auth === 'object') {
@@ -151,7 +150,14 @@ function ownCredentials(auth, providerList) {
     let authKeys
 
     if (auth[0] === '{') {
-        const authKeysParsed = JSON.parse(auth)
+        let authKeysParsed
+        try {
+            authKeysParsed = JSON.parse(auth)
+        } catch (e) {
+            throwError(
+                'Can not parse `auth` parameter. `auth` should be stringified json.'
+            )
+        }
 
         if (providerList.indexOf(Object.keys(authKeysParsed)[0]) !== -1) {
             authObj = authKeysParsed
@@ -161,24 +167,29 @@ function ownCredentials(auth, providerList) {
             authKeys = [authKeysParsed]
         }
     } else if (auth[0] === '[') {
-        authKeys = JSON.parse(auth)
-    }
-
-    if (authKeys) {
-        if (providerList.length > 1) {
-            throw new Error(
-                'Unclear auth parameter: specify at least one provider or clarify provider inside auth object'
+        try {
+            // keep authObj undefined
+            authKeys = JSON.parse(auth)
+        } catch (e) {
+            throwError(
+                'Can not parse `auth` parameter. `auth` should be stringified json.'
             )
         }
-        if (!authObj) {
-            authObj = { [providerList[0]]: authKeys }
-        }
+    }
+
+    if (!authObj) {
+        authObj = { [providerList[0]]: authKeys }
     }
 
     return authObj
 }
 
+function throwError(message) {
+    throw new Error(ERROR_MESSAGE_PREFIX + message)
+}
+
 module.exports = {
+    ERROR_MESSAGE_PREFIX,
     getPath,
     responseHandler,
     customErrorLog,
