@@ -14,15 +14,13 @@ describe('auth with own keys', () => {
     it('forms correct request object when auth is a stringified object with credentials', async () => {
         expect.assertions(1)
         const content = {
-            text: 'Sample text',
-            to: 'es',
             provider: 'some-provider',
             auth: JSON.stringify({
                 key: 'value',
             }),
         }
         const sampleRequest = {
-            context: { text: 'Sample text', to: 'es' },
+            context: {},
             service: {
                 provider: ['some-provider'],
                 auth: { 'some-provider': [{ key: 'value' }] },
@@ -30,5 +28,22 @@ describe('auth with own keys', () => {
         }
         const requestObj = await client.ai.text.translate.fulfill(content)
         expect(t(requestObj)).toEqual(t(sampleRequest))
+    })
+
+    it('fails without provider', async () => {
+        expect.assertions(2)
+        const content = {
+            // no provider specified
+            auth: JSON.stringify({
+                key: 'value',
+            }),
+        }
+
+        try {
+            await client.ai.text.translate.fulfill(content)
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error)
+            expect(e.message).toBeDefined()
+        }
     })
 })

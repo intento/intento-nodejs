@@ -138,6 +138,11 @@ function ownCredentials(auth, providerList) {
     if (!auth) {
         return
     }
+    if (!providerList) {
+        throw new Error(
+            'Unclear auth parameter: specify at least one provider or clarify provider inside auth object'
+        )
+    }
     if (typeof auth === 'object') {
         return auth
     }
@@ -162,7 +167,7 @@ function ownCredentials(auth, providerList) {
     if (authKeys) {
         if (providerList.length > 1) {
             throw new Error(
-                'Unclear auth parameter: specify one provider or clarify provider inside auth object'
+                'Unclear auth parameter: specify at least one provider or clarify provider inside auth object'
             )
         }
         if (!authObj) {
