@@ -219,11 +219,11 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
         console.log(`\nTest request\n${requestString}`)
     }
 
-    if (this.dryRun) {
-        return data || content || ''
-    }
-
     return new Promise((resolve, reject) => {
+        if (this.dryRun) {
+            resolve(data || content || '')
+        }
+
         try {
             const req = https.request(requestOptions, resp =>
                 responseHandler(resp, resolve, reject, this.debug, this.verbose)
