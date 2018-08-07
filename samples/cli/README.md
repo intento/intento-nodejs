@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-A simple example for translating a string to russian
+A simple [example](own-keys-auth.sh) for translating a string to russian
 
 ```sh
 node index.js --key=$INTENTO_API_KEY \
@@ -29,6 +29,7 @@ Get more information about other intents in [our docs](https://github.com/intent
     - [Specifying input format](#specifying-input-format)
     - [Content processing](#content-processing)
     - [Bulk mode](#bulk-mode)
+    - [Use own keys](#use-own-keys)
     - [Error messages](#error-messages)
         - [Error: Invalid authentication credentials](#error-invalid-authentication-credentials)
         - [Error from provider: [bad_data] Model URL was not found](#error-from-provider-bad_data-model-url-was-not-found)
@@ -363,6 +364,28 @@ node index.js --key=$INTENTO_API_KEY \
     --to=es \
     --provider=ai.text.translate.promt.cloud_api.1-0 \
     --input=examples/war_and_peace.txt
+```
+
+### Use own keys
+
+Translate with own google key (see an [example](./examples/own-keys-auth.sh))
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --to=es \
+    --provider=ai.text.translate.google.translate_api.2-0 \
+    --auth="{\"key\": \"$YOUR_GOOGLE_APIKEY\" }" \
+    "Hallo welt"
+```
+
+Translate with own IBM credentials
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --to=es \
+    --provider=ai.text.translate.ibm-language-translator \
+    --auth="{\"user\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx\", \"password\": \"xxxxxxxx\" }" \
+    "Hallo welt"
 ```
 
 ### Error messages
