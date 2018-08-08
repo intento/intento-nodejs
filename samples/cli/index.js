@@ -349,8 +349,9 @@ function usageResponse(data) {
                     data2[timestamp][group[g]] = metrics[metric]
                 })
             })
-            const list = Object.keys(data2).map(timestamp => ({ ...data2[timestamp], timestamp }))
-            console.table(list, [...Object.keys(data2[Object.keys(data2)[0]]), 'timestamp'])
+            const list = Object.keys(data2).map(timestamp => ({ ...data2[timestamp], timestamp: new Date(1000 * timestamp) }))
+            console.log(`\n${Array(40).join('-')}> ${metric}`)
+            console.table(list, ['timestamp', ...Object.keys(data2[Object.keys(data2)[0]])])
         })
     } else {
         const list = values.map(({ metrics, timestamp, group }) => ({ ...metrics, timestamp, ...group }))
