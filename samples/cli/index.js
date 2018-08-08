@@ -337,9 +337,25 @@ function listIdsFromResponse(data) {
  */
 function usageResponse(data) {
     console.log('API response:')
-    const list = data.data.map(({ metrics, timestamp }) => ({ ...metrics, timestamp }))
-
-    console.table(list, ['requests', 'items', 'len', 'errors', 'timestamp'])
+    const values = data.data
+    if (values[0].group ) {
+        Object.keys(values[0].metrics).forEach(metric => {
+            const data2 = {}
+            values.forEach(({ metrics, timestamp, group }) => {
+                if (!data2[timestamp]) {
+                    data2[timestamp] = {}
+                }
+                Object.keys(group).forEach(g => {
+                    data2[timestamp][group[g]] = metrics[metric]
+                })
+            })
+            const list = Object.keys(data2).map(timestamp => ({ ...data2[timestamp], timestamp }))
+            console.table(list, [...Object.keys(data2[Object.keys(data2)[0]]), 'timestamp'])
+        })
+    } else {
+        const list = values.map(({ metrics, timestamp, group }) => ({ ...metrics, timestamp, ...group }))
+        console.table(list, ['requests', 'items', 'len', 'errors', 'timestamp'])
+    }
 }
 
 /**
