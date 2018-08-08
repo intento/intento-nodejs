@@ -140,6 +140,21 @@ function IntentoConnector(credentials = {}, options = {}) {
             )
         },
     })
+
+    this.credentials = Object.freeze({
+        list: params => (this.listCredentials(
+            '/delegated_credentials',
+            params
+        )),
+        add: params => (this.addCredentials(
+            '/delegated_credentials',
+            params
+        )),
+        remove: params => (this.removeCredentials(
+            '/delegated_credentials',
+            params
+        )),
+    })
 }
 
 module.exports = IntentoConnector
@@ -426,5 +441,39 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
         path,
         content,
         method: 'POST',
+    })
+}
+
+IntentoConnector.prototype.listCredentials = function(path) {
+    return this.makeRequest({
+        path,
+        method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.addCredentials = function(path, parameters = {}) {
+    const {
+        credential_id,
+        credential_type,
+        secret_credentials,
+    } = parameters
+    return this.makeRequest({
+        path: path,
+        content: {
+            credential_id,
+            credential_type,
+            secret_credentials,
+        },
+        method: 'POST',
+    })
+}
+
+IntentoConnector.prototype.removeCredentials = function(path, parameters = {}) {
+    const {
+        credential_id,
+    } = parameters
+    return this.makeRequest({
+        path: path + '/' + credential_id,
+        method: 'DELETE',
     })
 }

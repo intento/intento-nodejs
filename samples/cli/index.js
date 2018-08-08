@@ -12,6 +12,7 @@ if (currentNodeJSVersion < Number(minimalNodeJSVersion)) {
 const IntentoConnector = require('../../src/index')
 
 const fs = require('fs')
+const path = require('path')
 const util = require('util')
 const parseArgs = require('minimist')
 const readFile = util.promisify(fs.readFile)
@@ -48,6 +49,7 @@ const {
     bulk = false,
     output,
     encoding = 'utf-8',
+    secret_credentials_file,
     ...OTHER_OPTIONS
 } = argv
 
@@ -137,6 +139,11 @@ const ERROR_CODES = {
  */
 async function processRequest(intentProcessor, argv) {
     let data
+
+    if (secret_credentials_file) {
+        OTHER_OPTIONS.secret_credentials = await getDataFromFile(secret_credentials_file, encoding)
+    }
+
     try {
         const params = { ...OTHER_OPTIONS }
         if (argv.usage) {
@@ -156,6 +163,24 @@ async function processRequest(intentProcessor, argv) {
     }
 }
 
+async function getDataFromFile(filename, encoding) {
+    let filePath
+    try {
+        filePath = path.join(__dirname, filename)
+    } catch (e) {
+        console.error(`Error creating file path`, e.message)
+        return ''
+    }
+
+    try {
+        const data = await readFile(filePath, { encoding })
+        return data
+    } catch (err) {
+        console.error(`Error reading ${filename} file\n`, err)
+        return ''
+    }
+}
+
 /**
  * Prepare given data to pass as a text field
  * @param {object} { input, encoding, bulk, _ } arguments from command line
@@ -163,25 +188,11 @@ async function processRequest(intentProcessor, argv) {
  */
 async function getText({ input, encoding, bulk, _ }) {
     if (input) {
-        const path = require('path')
-        let filePath
-        try {
-            filePath = path.join(__dirname, input)
-        } catch (e) {
-            console.error(`Error creating file path`, e.message)
-            return ''
+        const data = await getDataFromFile(input, encoding)
+        if (bulk) {
+            return data.split('\n')
         }
-
-        try {
-            const data = await readFile(filePath, { encoding })
-            if (bulk) {
-                return data.split('\n')
-            }
-            return data
-        } catch (err) {
-            console.error(`Error reading ${input} file\n`, err)
-            return ''
-        }
+        return data
     } else {
         if (_.length > 0) {
             if (_.length === 1) {

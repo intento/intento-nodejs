@@ -45,9 +45,7 @@ function responseHandler(
     response.setEncoding('utf8')
 
     if (response.statusCode >= 500) {
-        if (debug) {
-            customErrorLog(response)
-        }
+        customErrorLog(response)
         reject(response)
     }
 
@@ -71,12 +69,18 @@ function responseHandler(
                     throwError('Unexpected response: ' + body)
                 }
             }
-            if (response.statusCode >= 400 && !data.error) {
-                reject({
-                    statusCode: response.statusCode,
-                    statusMessage: response.statusMessage,
-                    ...data,
-                })
+            if (response.statusCode >= 400) {
+                if (data.error) {
+                    customErrorLog(data)
+                    reject(data)
+                } else {
+                    reject({
+                        statusCode: response.statusCode,
+                        statusMessage:
+                            response.statusMessage,
+                        ...data,
+                    })
+                }
             } else {
                 resolve(data)
             }
