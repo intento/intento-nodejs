@@ -142,18 +142,10 @@ function IntentoConnector(credentials = {}, options = {}) {
     })
 
     this.credentials = Object.freeze({
-        list: params => (this.listCredentials(
-            '/delegated_credentials',
-            params
-        )),
-        add: params => (this.addCredentials(
-            '/delegated_credentials',
-            params
-        )),
-        remove: params => (this.removeCredentials(
-            '/delegated_credentials',
-            params
-        )),
+        list: params => this.listCredentials('/delegated_credentials', params),
+        add: params => this.addCredentials('/delegated_credentials', params),
+        remove: params =>
+            this.removeCredentials('/delegated_credentials', params),
     })
 }
 
@@ -251,6 +243,9 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                 } else {
                     customErrorLog(err, 'Fails getting a response from the API')
                 }
+            })
+            req.on('timeout', function(err) {
+                customErrorLog(err, 'Are you offline?')
             })
             req.write(data || JSON.stringify(content) || '')
             req.end()
@@ -452,11 +447,7 @@ IntentoConnector.prototype.listCredentials = function(path) {
 }
 
 IntentoConnector.prototype.addCredentials = function(path, parameters = {}) {
-    const {
-        credential_id,
-        credential_type,
-        secret_credentials,
-    } = parameters
+    const { credential_id, credential_type, secret_credentials } = parameters
     return this.makeRequest({
         path: path,
         content: {
@@ -469,9 +460,7 @@ IntentoConnector.prototype.addCredentials = function(path, parameters = {}) {
 }
 
 IntentoConnector.prototype.removeCredentials = function(path, parameters = {}) {
-    const {
-        credential_id,
-    } = parameters
+    const { credential_id } = parameters
     return this.makeRequest({
         path: path + '/' + credential_id,
         method: 'DELETE',

@@ -71,13 +71,11 @@ function responseHandler(
             }
             if (response.statusCode >= 400) {
                 if (data.error) {
-                    customErrorLog(data)
                     reject(data)
                 } else {
                     reject({
                         statusCode: response.statusCode,
-                        statusMessage:
-                            response.statusMessage,
+                        statusMessage: response.statusMessage,
                         ...data,
                     })
                 }
@@ -142,9 +140,7 @@ function ownCredentials(auth, providerList) {
         return
     }
     if (!providerList || !providerList.length) {
-        throwError(
-            'Unclear parameters: specify at least one provider'
-        )
+        throwError('Unclear parameters: specify at least one provider')
     }
     if (typeof auth === 'object') {
         return auth
