@@ -388,6 +388,16 @@ node index.js --key=$INTENTO_API_KEY \
     "Hallo welt"
 ```
 
+Or read own keys from a file:
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --to=es \
+    --provider=ai.text.translate.ibm-language-translator \
+    --auth_file=path/to/file_with_own_keys.json \
+    "Hallo welt"
+```
+
 ### Error messages
 
 #### Error: Invalid authentication credentials

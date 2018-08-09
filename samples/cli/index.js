@@ -50,6 +50,7 @@ const {
     output,
     encoding = 'utf-8',
     secret_credentials_file,
+    auth_file,
     ...OTHER_OPTIONS
 } = argv
 
@@ -61,21 +62,23 @@ if (help) {
     console.info('\nUSAGE')
     console.info('  node index.js [ARGUMENTS] [text to process]')
     console.info('\nARGUMENTS')
-    console.info('  --help             (boolean) display help')
-    console.info('  --key              [REQUIRED] your intento API key (visit https://console.inten.to to get one)')
-    console.info('  --intent           (string) any available intent like translate (default) or sentiment or ai.text.translate or ai/text/dictionary (more in docs https://github.com/intento/intento-api#intents)')
-    console.info('  --to               (language code)')
-    console.info('  --from             (language code)')
-    console.info('  --async            (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
-    console.info('  --usage            (boolean) get usage statistics on specified intent(s)')
-    console.info('  --viewpoint        (string) for usage requests: intento|provider|distinct')
-    console.info('  --provider         (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
-    console.info("  --input            (string) relative path to a file you'd like to process")
-    console.info('  --bulk             (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
-    console.info('  --output           (string) relative path to a file where results will be stored')
-    console.info('  --post_processing  (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
-    console.info("  --format           ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
-    console.info('  --id               (string) job id for `--intent=operations`')
+    console.info('  --help                    (boolean) display help')
+    console.info('  --key                     [REQUIRED] your intento API key (visit https://console.inten.to to get one)')
+    console.info('  --intent                  (string) any available intent like translate (default) or sentiment or ai.text.translate or ai/text/dictionary (more in docs https://github.com/intento/intento-api#intents)')
+    console.info('  --to                      (string|number) for ai.text.* it is used as a language code; for `--usage` requests it is used as timestamp (in seconds)')
+    console.info('  --from                    (string|number) for ai.text.* it is used as a language code; for `--usage` requests it is used as timestamp (in seconds)')
+    console.info('  --async                   (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
+    console.info('  --usage                   (boolean) get usage statistics on specified intents or providers')
+    console.info('  --viewpoint               (string) for `--usage` requests, values: intento|provider|distinct, default to "intento"')
+    console.info('  --provider                (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
+    console.info("  --input                   (string) relative path to a file you'd like to process")
+    console.info('  --bulk                    (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
+    console.info('  --output                  (string) relative path to a file where results will be stored')
+    console.info('  --post_processing         (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
+    console.info("  --format                  ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
+    console.info('  --id                      (string) job id for `--intent=operations`')
+    console.info('  --secret_credentials_file (string) relative path to a json file with credentials config to be delegated to autogenerate auth tokens')
+    console.info('  --auth_file               (string) relative path to a json file with own keys')
     console.info('')
     process.exit(1)
 }
@@ -144,18 +147,27 @@ async function processRequest(intentProcessor, argv) {
         OTHER_OPTIONS.secret_credentials = await getDataFromFile(secret_credentials_file, encoding)
     }
 
-    try {
+    if (auth_file) {
+        OTHER_OPTIONS.auth = await getDataFromFile(auth_file, encoding)
+    }
+
         const params = { ...OTHER_OPTIONS }
         if (argv.usage) {
             params.intent = argv.intent
         } else {
+        try {
             const text = await getText(argv)
             params.text = text
+        } catch (e) {
+            params.text = ''
+            prettyCatch(e, 'Error while getting text to process')
         }
+    }
 
+    try {
         data = await intentProcessor(params)
     } catch (e) {
-        prettyCatch(e)
+        prettyCatch(e, 'Error while processing a request to API')
     }
 
     if (data) {
@@ -163,7 +175,13 @@ async function processRequest(intentProcessor, argv) {
     }
 }
 
-async function getDataFromFile(filename, encoding) {
+/**
+ * Read file content
+ * @param {string} filename relative path to a file
+ * @param {string} [encoding='utf-8'] character encoding
+ * @returns content of a file
+ */
+async function getDataFromFile(filename, encoding = 'utf-8') {
     let filePath
     try {
         filePath = path.join(__dirname, filename)
