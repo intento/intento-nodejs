@@ -15,8 +15,11 @@ const fs = require('fs')
 const path = require('path')
 const util = require('util')
 const parseArgs = require('minimist')
+const ProgressBar = require('progress')
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
+
+const NOW_TS = Date.now() // helps to distinguish output from different script runs
 
 // Return an argument object populated with the array arguments from args
 const argv = parseArgs(process.argv.slice(2), {
@@ -51,6 +54,7 @@ const {
     encoding = 'utf-8',
     secret_credentials_file,
     auth_file,
+    only_operation_id,
     ...OTHER_OPTIONS
 } = argv
 
@@ -68,6 +72,7 @@ if (help) {
     console.info('  --to                      (string|number) for ai.text.* it is used as a language code; for `--usage` requests it is used as timestamp (in seconds)')
     console.info('  --from                    (string|number) for ai.text.* it is used as a language code; for `--usage` requests it is used as timestamp (in seconds)')
     console.info('  --async                   (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
+    console.info('  --only_operation_id       (boolean) for `--async` requests do not send next requests, return operation id to request results later')
     console.info('  --usage                   (boolean) get usage statistics on specified intents or providers')
     console.info('  --viewpoint               (string) for `--usage` requests, values: intento|provider|distinct, default to "intento"')
     console.info('  --provider                (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
@@ -119,6 +124,7 @@ processRequest(intentProcessor, {
     encoding,
     bulk,
     usage,
+    only_operation_id,
     _,
 })
 
@@ -232,7 +238,7 @@ async function getText({ input, encoding, bulk, _ }) {
  * @param {object} data request response
  * @param {object} { input, output, intent, apikey, encoding } arguments from command line
  */
-async function errorFriendlyCallback(data, { input, output, intent, apikey, encoding }) {
+async function errorFriendlyCallback(data, { input, output, intent = 'translate', apikey, encoding, only_operation_id }) {
     if (printError(data, 'success response with some error message')) {
         if (input && !OTHER_OPTIONS.async) {
             console.log('Consider using --async option')
@@ -240,9 +246,16 @@ async function errorFriendlyCallback(data, { input, output, intent, apikey, enco
         return
     }
 
-    if (data.id && !data.done) {
-        // prettier-ignore
-        if (intent.indexOf('operations') === -1) {
+    if (intent === 'operations' && !data.done) {
+        // it is an operation/id request with empty response ~ same as done = false
+        console.log(`Operation ${data.id} is still in progress`)
+        return
+    }
+
+    // prettier-ignore
+    if (data.id && intent !== 'operations') {
+        // it must be response on some async request
+        if (only_operation_id) {
             // async job was registered with `id`
             console.log('\noperation id', data.id)
             console.log(`\nRequest operation results later with a command`)
@@ -256,25 +269,73 @@ async function errorFriendlyCallback(data, { input, output, intent, apikey, enco
                 console.log('Response:\n', data)
             }
         } else {
-            // it is an operation/id request with empty response ~ same as done = false
-            console.log(`Operation ${data.id} is still in progress`)
+            // send next request
+            let resultsWerePrinted = false
+
+            const bar = new ProgressBar(':bar  :current/:total :percent', {
+                total: 18,
+                complete: '.',
+                incomplete: ' ',
+            })
+            const timer = setInterval(async function () {
+                bar.tick()
+
+                let results
+                try {
+                    results = await client.operations.fulfill(data)
+                } catch (err) {
+                    clearInterval(timer)
+                    printError(err, `Problem requesting operation results:\n${data}`)
+                    return true
+                }
+
+                if (results.done) {
+                    clearInterval(timer)
+                    console.log('\n')
+                    if (results.response === null) {
+                        const logFilename = `${NOW_TS}_errors.txt`
+                        const content = {
+                            error: 'We are collecting errors from provider(s). Repeat this request later to get more info.',
+                            ...results,
+                        }
+                        await writeFile(logFilename, JSON.stringify(content, null, 4), { encoding }, () => {
+                            console.log(`Job finished with errors. More in the ${logFilename} file\n`)
+                        })
+                    } else {
+                        if (!resultsWerePrinted) {
+                            resultsWerePrinted = true
+                            const resultsTransformer = {
+                                translate: prettyTranslationResults,
+                                'ai.text.translate': prettyTranslationResults,
+                            }[intent] || prettyJSON
+                            if (output) {
+                                writeResultsToFile(output, results, resultsTransformer)
+                            } else {
+                                printResults(intent, results.response)
+                            }
+                        }
+                    }
+                }
+
+                if (bar.complete) {
+                    clearInterval(timer)
+                    if (!resultsWerePrinted) {
+                        resultsWerePrinted = true
+                        console.log('\nStop sending operation requests\n')
+                        if (!results || results.done === false) {
+                            console.log(`Operation ${data.id} is still in progress`)
+                        }
+                    }
+                }
+            }, 1000)
         }
+
+        return
     }
 
     if (output) {
         if (data.results) {
-            try {
-                await writeFile(output, data.results.join('\n'), { encoding })
-                console.log(`Results were written to the ${output} file`)
-            } catch (e) {
-                console.error(`Errors while writing to the ${output} file`)
-                console.log('Response:\n', data)
-            } finally {
-                if (VERBOSE || DEBUG) {
-                    console.log('meta', data.meta)
-                    console.log('service', data.service)
-                }
-            }
+            writeResultsToFile(output, data)
             return
         }
 
@@ -283,37 +344,31 @@ async function errorFriendlyCallback(data, { input, output, intent, apikey, enco
 
             data.response.forEach(async (resp, idx) => {
                 const fname = output + (idx > 0 ? `_${idx}_.txt` : '')
-                try {
-                    await writeFile(fname, resp.results.join('\n'), { encoding })
-                    console.log(`Results were written to the ${fname} file`)
-                } catch (e) {
-                    console.error(`Errors while writing to the ${fname} file`)
-                    console.log('Response:\n', resp)
-                } finally {
-                    if (VERBOSE || DEBUG) {
-                        console.log('meta', resp.meta)
-                        console.log('service', resp.service)
-                    }
-                }
+                writeResultsToFile(fname, resp)
             })
             return
         }
 
-        try {
-            await writeFile(output, JSON.stringify(data, null, 4), { encoding })
-            console.log(`Results were written to the ${output} file`)
-        } catch (e) {
-            console.error(`Errors while writing to the ${output} file`)
-            console.log('Response:\n', data)
-        } finally {
-            if (DEBUG) {
-                console.log(data)
-            }
-        }
-
+        writeResultsToFile(output, data, prettyJSON)
         return
     }
 
+    printResults(intent, data)
+}
+
+function prettyTranslationResults(data) {
+    return data.response.map(resp => resp.results.join('')).join('\n')
+}
+
+function prettyJSON(data) {
+    return JSON.stringify(data, null, 4)
+}
+
+function joinLines(data) {
+    return data.results.join('\n')
+}
+
+function printResults(intent, data) {
     const defaultOutputFn = getDefaultOuputFn(intent)
     if (typeof defaultOutputFn === 'function') {
         defaultOutputFn(data)
@@ -325,6 +380,28 @@ async function errorFriendlyCallback(data, { input, output, intent, apikey, enco
     }
 
     responseAsIs(data)
+}
+
+async function writeResultsToFile(output, data, resultsGetter = joinLines) {
+    try {
+        await writeFile(output, resultsGetter(data), { encoding })
+        console.log(`Results were written to the ${output} file`)
+    } catch (e) {
+        console.error(`Errors while writing to the ${output} file`)
+        console.log('Response:\n', data)
+    } finally {
+        if (VERBOSE || DEBUG) {
+            if (data.meta) {
+                console.log('meta', data.meta)
+            }
+            if (data.service) {
+                console.log('service', data.service)
+            }
+            if (!data.meta && !data.service) {
+                console.log(data)
+            }
+        }
+    }
 }
 
 /**
