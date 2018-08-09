@@ -151,10 +151,10 @@ async function processRequest(intentProcessor, argv) {
         OTHER_OPTIONS.auth = await getDataFromFile(auth_file, encoding)
     }
 
-        const params = { ...OTHER_OPTIONS }
-        if (argv.usage) {
-            params.intent = argv.intent
-        } else {
+    const params = { ...OTHER_OPTIONS }
+    if (argv.usage) {
+        params.intent = argv.intent
+    } else {
         try {
             const text = await getText(argv)
             params.text = text
@@ -233,23 +233,9 @@ async function getText({ input, encoding, bulk, _ }) {
  * @param {object} { input, output, intent, apikey, encoding } arguments from command line
  */
 async function errorFriendlyCallback(data, { input, output, intent, apikey, encoding }) {
-    if (data.message) {
-        console.error('\nError:', data.message, '\n\n')
-        if (DEBUG) {
-            console.error(data)
-        }
-        return
-    }
-
-    if (data.error) {
-        // prettier-ignore
-        console.error(`\nError: ${data.error.code} ${ERROR_CODES[data.error.code]}\n${data.error.message}`)
+    if (printError(data, 'success response with some error message')) {
         if (input && !OTHER_OPTIONS.async) {
             console.log('Consider using --async option')
-        }
-        console.log('\n')
-        if (DEBUG) {
-            console.error(data)
         }
         return
     }
@@ -367,7 +353,7 @@ function listIdsFromResponse(data) {
 function usageResponse(data) {
     console.log('API response:')
     const values = data.data
-    if (values[0].group ) {
+    if (values[0].group) {
         Object.keys(values[0].metrics).forEach(metric => {
             const data2 = {}
             values.forEach(({ metrics, timestamp, group }) => {
@@ -378,12 +364,19 @@ function usageResponse(data) {
                     data2[timestamp][group[g]] = metrics[metric]
                 })
             })
-            const list = Object.keys(data2).map(timestamp => ({ ...data2[timestamp], timestamp: new Date(1000 * timestamp) }))
+            const list = Object.keys(data2).map(timestamp => ({
+                ...data2[timestamp],
+                timestamp: new Date(1000 * timestamp),
+            }))
             console.log(`\n${Array(40).join('-')}> ${metric}`)
             console.table(list, ['timestamp', ...Object.keys(data2[Object.keys(data2)[0]])])
         })
     } else {
-        const list = values.map(({ metrics, timestamp, group }) => ({ ...metrics, timestamp, ...group }))
+        const list = values.map(({ metrics, timestamp, group }) => ({
+            ...metrics,
+            timestamp,
+            ...group,
+        }))
         console.table(list, ['requests', 'items', 'len', 'errors', 'timestamp'])
     }
 }
@@ -418,34 +411,29 @@ function getDefaultOuputFn(intent) {
  * @param {object} errorResponse
  * @returns
  */
-function prettyCatch(errorResponse) {
-    if (errorResponse.message) {
-        console.log('\nError: ' + errorResponse.message)
-        console.log('\n\n')
-    } else if (errorResponse.error) {
-        console.log('\nError: ' + errorResponse.error.message)
-        console.log('\n\n')
-    } else {
-        errorResponse.setEncoding('utf8')
-        let body = ''
-        errorResponse.on('data', function(chunk) {
-            body += chunk
-            console.log(chunk)
-        })
-        errorResponse.on('end', function() {
-            try {
-                let data = null
-                if (body.length > 0) {
-                    data = JSON.parse(body)
-                }
-                console.error(data)
-            } catch (e) {
-                if (DEBUG) {
-                    console.error('Failed reading response body', body)
-                }
-            }
-        })
+function prettyCatch(errorResponse, explanation = '') {
+    if ((printError(errorResponse), explanation)) {
+        return
     }
+
+    errorResponse.setEncoding('utf8')
+    let body = ''
+    errorResponse.on('data', function(chunk) {
+        body += chunk
+    })
+    errorResponse.on('end', function() {
+        try {
+            let data = null
+            if (body.length > 0) {
+                data = JSON.parse(body)
+            }
+            console.error(data)
+        } catch (e) {
+            if (DEBUG) {
+                console.error('Failed reading response body', body)
+            }
+        }
+    })
 }
 
 /**
@@ -546,4 +534,37 @@ function warnAsyncSmartAndExit() {
     console.log(`To get available providers try an example ${PROVIDERS_EXAMPLE}`)
 
     process.exit(1)
+}
+
+/**
+ * Log error message if one was found
+ *
+ * @param {object} data response object
+ * @param {string} [explanation='']
+ * @returns true if some error message was detected
+ */
+function printError(data, explanation = '') {
+    if (DEBUG) {
+        console.error(data)
+    }
+
+    const bang = 'CLI error report'
+    if (data.message) {
+        console.error(`${bang}: ${explanation}\n${data.message}`)
+        return true
+    }
+    if (data.error) {
+        console.error(
+            `${bang}: ${explanation}\n ${data.error.code} ${ERROR_CODES[data.error.code] || ''}\n${
+                data.error.message
+            }`
+        )
+        return true
+    }
+    if (data.statusCode) {
+        console.error(`${bang}: ${explanation}\n ${data.statusCode} ${data.statusMessage}`)
+        return true
+    }
+
+    return false
 }
