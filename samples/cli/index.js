@@ -20,6 +20,8 @@ const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
 const NOW_TS = Date.now() // helps to distinguish output from different script runs
+const ATTEMPTS_TO_REQUEST_ASYNC_RESULTS = 15 // how many times send request
+const INTERVAL_TO_REQUEST_ASYNC_RESULTS = 1000 // milliseconds between consecutive requests
 
 // Return an argument object populated with the array arguments from args
 const argv = parseArgs(process.argv.slice(2), {
@@ -55,6 +57,8 @@ const {
     secret_credentials_file,
     auth_file,
     only_operation_id,
+    attempts = ATTEMPTS_TO_REQUEST_ASYNC_RESULTS,
+    timedelta = INTERVAL_TO_REQUEST_ASYNC_RESULTS,
     ...OTHER_OPTIONS
 } = argv
 
@@ -73,6 +77,8 @@ if (help) {
     console.info('  --from                    (string|number) for ai.text.* it is used as a language code; for `--usage` requests it is used as timestamp (in seconds)')
     console.info('  --async                   (boolean) process large pieces in a deferred way (more in docs https://github.com/intento/intento-api#async-mode)')
     console.info('  --only_operation_id       (boolean) for `--async` requests do not send next requests, return operation id to request results later')
+    console.info('  --attempts                (number) for `--async` requests how many times send request')
+    console.info('  --timedelta               (number) for `--async` requests milliseconds between consecutive requests')
     console.info('  --usage                   (boolean) get usage statistics on specified intents or providers')
     console.info('  --viewpoint               (string) for `--usage` requests, values: intento|provider|distinct, default to "intento"')
     console.info('  --provider                (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
@@ -125,6 +131,8 @@ processRequest(intentProcessor, {
     bulk,
     usage,
     only_operation_id,
+    attempts,
+    timedelta,
     _,
 })
 
@@ -239,7 +247,19 @@ async function getText({ input, encoding, bulk, _ }) {
  * @param {object} data request response
  * @param {object} { input, output, intent, apikey, encoding } arguments from command line
  */
-async function errorFriendlyCallback(data, { input, output, intent = 'translate', apikey, encoding, only_operation_id }) {
+async function errorFriendlyCallback(
+    data,
+    {
+        input,
+        output,
+        intent = 'translate',
+        apikey,
+        encoding,
+        only_operation_id,
+        attempts,
+        timedelta,
+    }
+) {
     if (printError(data, 'success response with some error message')) {
         if (input && !OTHER_OPTIONS.async) {
             console.log('Consider using --async option')
@@ -274,7 +294,7 @@ async function errorFriendlyCallback(data, { input, output, intent = 'translate'
             let resultsWerePrinted = false
 
             const bar = new ProgressBar(':bar  :current/:total :percent', {
-                total: 18,
+                total: attempts,
                 complete: '.',
                 incomplete: ' ',
             })
@@ -299,7 +319,7 @@ async function errorFriendlyCallback(data, { input, output, intent = 'translate'
                             error: 'We are collecting errors from provider(s). Repeat this request later to get more info.',
                             ...results,
                         }
-                        await writeFile(logFilename, JSON.stringify(content, null, 4), { encoding }, () => {
+                        await writeFile(logFilename, prettyJSON(content), { encoding }, () => {
                             console.log(`Job finished with errors. More in the ${logFilename} file\n`)
                         })
                     } else {
@@ -325,10 +345,12 @@ async function errorFriendlyCallback(data, { input, output, intent = 'translate'
                         console.log('\nStop sending operation requests\n')
                         if (!results || results.done === false) {
                             console.log(`Operation ${data.id} is still in progress`)
+                            console.log(`Request operation results later with a command`)
+                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output || `${Date.now()}_output.txt`}`)
                         }
                     }
                 }
-            }, 1000)
+            }, timedelta)
         }
 
         return
@@ -410,7 +432,7 @@ async function writeResultsToFile(output, data, resultsGetter = joinLines) {
  * @param {array|object} data
  */
 function responseAsIs(data) {
-    console.log('API response:\n', JSON.stringify(data, null, 4), '\n\n')
+    console.log('API response:\n', prettyJSON(data), '\n\n')
 }
 
 /**
