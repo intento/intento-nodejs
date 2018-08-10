@@ -133,6 +133,7 @@ processRequest(intentProcessor, {
 // General Intento error codes
 // more here https://github.com/intento/intento-api/blob/master/README.md#errors
 const ERROR_CODES = {
+    400: 'Provider-related error',
     401: 'Auth key is missing',
     403: 'Auth key is invalid',
     404: 'Intent/Provider not found',
