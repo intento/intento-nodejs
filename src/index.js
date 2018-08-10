@@ -150,7 +150,7 @@ function IntentoConnector(credentials = {}, options = {}) {
         },
     })
 
-    this.credentials = Object.freeze({
+    this.delegatedCredentials = Object.freeze({
         list: params => this.listCredentials('/delegated_credentials', params),
         add: params => this.addCredentials('/delegated_credentials', params),
         remove: params =>

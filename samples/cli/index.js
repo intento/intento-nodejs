@@ -692,7 +692,7 @@ function warnAsyncSmartAndExit() {
  * @param {object} data response object
  * @param {string} [explanation=''] description of a context where an error might be happening
  * @returns true if some error message was detected
- * @returns {undefined}
+ * @returns {bool} return true if error was printed
  */
 function printError(data, explanation = '') {
     if (DEBUG) {
