@@ -1,3 +1,14 @@
+if (process) {
+    const currentNodeJSVersion = Number(process.version.match(/^v?(\d+\.\d+)/)[1])
+    const minimalNodeJSVersion = '10.0'
+    if (currentNodeJSVersion < Number(minimalNodeJSVersion)) {
+        console.error(`\nMinimal node version required for this script is ${minimalNodeJSVersion}.0.`)
+        console.error(`Your node version is ${currentNodeJSVersion}.`)
+        console.log('Please, upgrade your node\n')
+        process.exit(1)
+    }
+}
+
 const client = require('./index')
 
 client.ai.text.translate
@@ -26,7 +37,7 @@ client.ai.text.translate
 
 client.ai.text.translate
     .providers({ to: 'af' })
-    .then(printProviderNames)
+    .then(printProvidersAsTable)
     .catch(console.error)
 
 client.ai.text.translate
@@ -42,11 +53,23 @@ client.ai.text.translate
 
 // helpers
 
+/**
+ * Print provider names only
+ *
+ * @param {array} data list of provider descriptions
+ * @returns {undefined}
+ */
 function printProviderNames(data) {
     console.log(`There are overall ${data.length} providers:`)
     data.forEach((p, i) => console.log(`  ${i + 1}. ${p.name}`))
 }
 
+/**
+ * Print provider full, but "zip" info about language pairs
+ *
+ * @param {array} data list of provider descriptions
+ * @returns {undefined}
+ */
 function printProvidersInfo(data) {
     console.log(`There are overall ${data.length} providers:`)
     console.info(
@@ -58,11 +81,12 @@ function printProvidersInfo(data) {
     )
 }
 
-// console.table requires node v10.0.0
-// One can use this function as a callback if one's nodejs version is >=10.0.0
-// If your `node --version` is below 10 consider upgrading node
-// This callback gives very nice and clear output.
-// eslint-disable-next-line no-unused-vars
+/**
+ * Print provider as table view
+ * console.table requires node@^v10.0.0
+ * @param {array} data list of provider descriptions
+ * @returns {undefined}
+ */
 function printProvidersAsTable(data) {
     console.log(`\nThere are overall ${data.length} providers:`)
 

@@ -14,6 +14,15 @@ const {
 } = require('./utils')
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
+/**
+ * Main class for connectiong to Intento API
+ * Typical usage:
+ *      const client = new IntentoConnector({ apikey: YOUR_APIKEY })
+ *
+ * @param {*} [credentials={}] credentials like apikey
+ * @param {*} [options={}] options for logging and debug mostly
+ * @returns {undefined}
+ */
 function IntentoConnector(credentials = {}, options = {}) {
     const {
         debug = false,
@@ -140,6 +149,13 @@ function IntentoConnector(credentials = {}, options = {}) {
             )
         },
     })
+
+    this.delegatedCredentials = Object.freeze({
+        list: params => this.listCredentials('/delegated_credentials', params),
+        add: params => this.addCredentials('/delegated_credentials', params),
+        remove: params =>
+            this.removeCredentials('/delegated_credentials', params),
+    })
 }
 
 module.exports = IntentoConnector
@@ -236,6 +252,9 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                 } else {
                     customErrorLog(err, 'Fails getting a response from the API')
                 }
+            })
+            req.on('timeout', function(err) {
+                customErrorLog(err, 'Are you offline?')
             })
             req.write(data || JSON.stringify(content) || '')
             req.end()
@@ -426,5 +445,33 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
         path,
         content,
         method: 'POST',
+    })
+}
+
+IntentoConnector.prototype.listCredentials = function(path) {
+    return this.makeRequest({
+        path,
+        method: 'GET',
+    })
+}
+
+IntentoConnector.prototype.addCredentials = function(path, parameters = {}) {
+    const { credential_id, credential_type, secret_credentials } = parameters
+    return this.makeRequest({
+        path: path,
+        content: {
+            credential_id,
+            credential_type,
+            secret_credentials,
+        },
+        method: 'POST',
+    })
+}
+
+IntentoConnector.prototype.removeCredentials = function(path, parameters = {}) {
+    const { credential_id } = parameters
+    return this.makeRequest({
+        path: path + '/' + credential_id,
+        method: 'DELETE',
     })
 }

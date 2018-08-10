@@ -2,7 +2,7 @@
  * transforms object to a pretty string (json formatted)
  *
  * @param {object|string} obj any object or string
- * @returns string as is or json pretty-stringified object
+ * @returns {string} string as is or json pretty-stringified object
  */
 function stringify(obj) {
     if (typeof obj === 'string') {

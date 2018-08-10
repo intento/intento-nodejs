@@ -18,6 +18,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "lint": "eslint src test",
+    "eslint": "eslint",
     "jest": "jest",
     "test": "export $(cat .env) && jest --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "build": "cross-env BABEL_ENV=production babel src --out-dir lib",

@@ -26,6 +26,9 @@ Get more information about other intents in [our docs](https://github.com/intent
     - [Translate a file](#translate-a-file)
     - [Translate a file, write results to another file](#translate-a-file-write-results-to-another-file)
     - [Translate a large file, write results to another file](#translate-a-large-file-write-results-to-another-file)
+    - [Async requests, advanced examples](#async-requests-advanced-examples)
+        - [More attempts](#more-attempts)
+        - [Postpone getting async results](#postpone-getting-async-results)
     - [Specifying input format](#specifying-input-format)
     - [Content processing](#content-processing)
     - [Bulk mode](#bulk-mode)
@@ -249,6 +252,78 @@ node index.js --key=$INTENTO_API_KEY \
     --output=large_sample_results.txt
 ```
 
+This command will asyncronously schedule a translatation job to be done. And after that it requests for that job results with another requests. The progress will be visualized in a console like that:
+
+```sh
+.                   1/15 7%
+[skip lines]
+...............     12/15 83%
+..................  15/15 100%
+```
+
+If your job finishes during that time the output will be:
+
+```sh
+...............  15/15 100%
+Results were written to the examples/large_sample_results.txt file
+```
+
+### Async requests, advanced examples
+
+Continue with the same example from the previous section.
+
+#### More attempts
+
+If, say, the file is too big, it may take more time to finish the translation (or another job). And you'll see:
+
+```sh
+Stop sending operation requests
+
+Operation some-unique-operation-id is still in progress
+Request operation results later with a command
+    node index.js --key=$INTENTO_API_KEY --intent=operations --id=some-unique-operation-id --output=large_sample_results.txt
+```
+
+By default up to 15 attempts are made to get async request results. One can use `--attempts` options to change that.
+And by default there are 1000 milliseconds (1 second) between those requests. Use `--timedelta` options to change it.
+
+Lets make fewer attempts, and let's make them less often
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --from=en \
+    --to=fr \
+    --async \
+    --attempts=8 \
+    --timedelta=2500 \
+    --provider=ai.text.translate.google.translate_api.2-0 \
+    --input=large_sample.txt \
+    --output=large_sample_results.txt
+```
+
+Results may lool like:
+
+```sh
+.......   7/8 88%
+
+Results were written to the examples/large_sample_results.txt file
+```
+
+#### Postpone getting async results
+
+Requestinf async joab with `--only_operation_id` flag will return you only job id
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --from=en \
+    --to=fr \
+    --async \
+    --only_operation_id \
+    --provider=ai.text.translate.google.translate_api.2-0 \
+    --input=large_sample.txt \
+    --output=large_sample_results.txt
+```
+
 Example output:
 
 ```sh
@@ -260,6 +335,7 @@ Request operation results later with a command
 Operation id was written to the large_sample_operation_id.txt file
 ```
 
+It may be usefull when one doesn't need immediate results.
 Wait for a while and run that command:
 
 ```sh
@@ -274,8 +350,6 @@ Example output:
 ```sh
 Results were written to the large_sample_ai.text.translate.google.translate_api.2-0.txt file
 ```
-
-Try the same with several providers (`--provider=providerA,providerB`)
 
 ### Specifying input format
 
@@ -385,6 +459,16 @@ node index.js --key=$INTENTO_API_KEY \
     --to=es \
     --provider=ai.text.translate.ibm-language-translator \
     --auth="{\"user\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx\", \"password\": \"xxxxxxxx\" }" \
+    "Hallo welt"
+```
+
+Or read own keys from a file:
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --to=es \
+    --provider=ai.text.translate.ibm-language-translator \
+    --auth_file=path/to/file_with_own_keys.json \
     "Hallo welt"
 ```
 
