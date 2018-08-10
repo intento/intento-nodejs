@@ -151,9 +151,10 @@ const ERROR_CODES = {
 
 /**
  * Main function to run an intent job
+ *
  * @param {Function} intentProcessor an intent
- * @param {object} options request parameters related to how the intent should work
- * @param {object} argv command line arguments related to text processing
+ * @param {object} argv command line arguments related to how the intent should work
+ * @returns {undefined}
  */
 async function processRequest(intentProcessor, argv) {
     let data
@@ -192,9 +193,10 @@ async function processRequest(intentProcessor, argv) {
 
 /**
  * Read file content
+ *
  * @param {string} filename relative path to a file
  * @param {string} [encoding='utf-8'] character encoding
- * @returns content of a file
+ * @returns {string} content of a file
  */
 async function getDataFromFile(filename, encoding = 'utf-8') {
     let filePath
@@ -216,6 +218,7 @@ async function getDataFromFile(filename, encoding = 'utf-8') {
 
 /**
  * Prepare given data to pass as a text field
+ *
  * @param {object} { input, encoding, bulk, _ } arguments from command line
  * @returns {string|array} text to process
  */
@@ -244,8 +247,10 @@ async function getText({ input, encoding, bulk, _ }) {
 
 /**
  * Log response results to the console or write them to a specified file
+ *
  * @param {object} data request response
  * @param {object} { input, output, intent, apikey, encoding } arguments from command line
+ * @returns {undefined}
  */
 async function errorFriendlyCallback(
     data,
@@ -379,18 +384,43 @@ async function errorFriendlyCallback(
     printResults(intent, data)
 }
 
+/**
+ * Transforms complex response structure to a multiline string
+ *
+ * @param {array} data response results
+ * @returns {string} multiline string
+ */
 function prettyTranslationResults(data) {
     return data.response.map(resp => resp.results.join('')).join('\n')
 }
 
+/**
+ * Logs human-readable json
+ *
+ * @param {array} data response results
+ * @returns {undefined}
+ */
 function prettyJSON(data) {
     return JSON.stringify(data, null, 4)
 }
 
+/**
+ * Transforms results array to a multiline string
+ *
+ * @param {array} data response results
+ * @returns {string} response results as oneliner
+ */
 function joinLines(data) {
     return data.results.join('\n')
 }
 
+/**
+ * Log results depending on intent
+ *
+ * @param {string} intent (ai) intent
+ * @param {array} data response results
+ * @returns {undefined}
+ */
 function printResults(intent, data) {
     const defaultOutputFn = getDefaultOuputFn(intent)
     if (typeof defaultOutputFn === 'function') {
@@ -405,6 +435,14 @@ function printResults(intent, data) {
     responseAsIs(data)
 }
 
+/**
+ * Writes results to a specified file
+ *
+ * @param {string} output relative path to filename, from cli arguments
+ * @param {array} data response results
+ * @param {function} [resultsGetter=joinLines] how to extract valuable results from API response (may depend on type of intent, etc.)
+ * @returns {undefined}
+ */
 async function writeResultsToFile(output, data, resultsGetter = joinLines) {
     try {
         await writeFile(output, resultsGetter(data), { encoding })
@@ -429,7 +467,9 @@ async function writeResultsToFile(output, data, resultsGetter = joinLines) {
 
 /**
  * Log response results as pretty printed JSON object
- * @param {array|object} data
+ *
+ * @param {array|object} data response data
+ * @returns {undefined}
  */
 function responseAsIs(data) {
     console.log('API response:\n', prettyJSON(data), '\n\n')
@@ -437,7 +477,9 @@ function responseAsIs(data) {
 
 /**
  * Log response showing only provider ids
- * @param {array} data
+ *
+ * @param {array} data response data
+ * @returns {undefined}
  */
 function listIdsFromResponse(data) {
     console.log('API response:')
@@ -448,7 +490,9 @@ function listIdsFromResponse(data) {
 
 /**
  * Log usage response as a table
- * @param {array} data
+ *
+ * @param {array} data response results
+ * @returns {undefined}
  */
 function usageResponse(data) {
     console.log('API response:')
@@ -483,8 +527,9 @@ function usageResponse(data) {
 
 /**
  * Choose a function to log response results
+ *
  * @param {string} intent name
- * @returns
+ * @returns {function} how to output response results
  */
 function getDefaultOuputFn(intent) {
     if (responseMapper) {
@@ -508,8 +553,10 @@ function getDefaultOuputFn(intent) {
 
 /**
  * Log errors to the console
- * @param {object} errorResponse
- * @returns
+ *
+ * @param {object} errorResponse - http response object
+ * @param {string} [explanation=''] description of a context where an error might be happening
+ * @returns {undefined}
  */
 function prettyCatch(errorResponse, explanation = '') {
     if ((printError(errorResponse), explanation)) {
@@ -538,6 +585,7 @@ function prettyCatch(errorResponse, explanation = '') {
 
 /**
  * Select SDK function to make requests to the Intento API
+ *
  * @param {object} connector an IntentoConnector instance
  * @param {string} value intent name
  * @returns {Function} function that can make http requests to a certain Intento API endpoint
@@ -611,6 +659,7 @@ function getIntentProcessor(connector, value = 'translate') {
  * Log help on how to specify an intent
  *
  * @param {object} intentShortcuts - description for most popular intents
+ * @returns {undefined}
  */
 function intentHelp(intentShortcuts) {
     const validIntents = Object.keys(intentShortcuts)
@@ -623,7 +672,8 @@ function intentHelp(intentShortcuts) {
 
 /**
  * Explain why the script execution was stopped
- * @returns
+ *
+ * @returns {undefined}
  */
 function warnAsyncSmartAndExit() {
     // prettier-ignore
@@ -640,8 +690,9 @@ function warnAsyncSmartAndExit() {
  * Log error message if one was found
  *
  * @param {object} data response object
- * @param {string} [explanation='']
+ * @param {string} [explanation=''] description of a context where an error might be happening
  * @returns true if some error message was detected
+ * @returns {undefined}
  */
 function printError(data, explanation = '') {
     if (DEBUG) {

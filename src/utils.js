@@ -5,7 +5,7 @@ const ERROR_MESSAGE_PREFIX = 'Utils error: '
  * @param {string} slug intent short name
  * @param {boolean} [debug=false] debug mode (more logging)
  * @param {boolean} [verbose=false] verbose mode (more pretty logs)
- * @returns {string}
+ * @returns {string} uri part
  */
 function getPath(slug, debug = false, verbose = false) {
     const pathBySlug = {
@@ -34,6 +34,7 @@ function getPath(slug, debug = false, verbose = false) {
  * @param {Function} reject Promise reject
  * @param {boolean} [debug=false] debug mode (more logging)
  * @param {boolean} [verbose=false] verbose mode (more pretty logs)
+ * @returns {undefined}
  */
 function responseHandler(
     response,
@@ -96,6 +97,7 @@ function responseHandler(
  *
  * @param {object} err javacsript error object or custom error object
  * @param {string} [explanation=''] some details on a context in which this error occurs
+ * @returns {undefined}
  */
 function customErrorLog(err, explanation = '') {
     if (err.statusCode) {
@@ -109,7 +111,7 @@ function customErrorLog(err, explanation = '') {
  * Transform a comma-separated string into a list.
  * Do nothing if array is passed.
  * @param {string|array} value query parameter value
- * @returns array of strings
+ * @returns {array} array of strings
  */
 function stringToList(value) {
     if (Array.isArray(value)) {
@@ -184,6 +186,12 @@ function ownCredentials(auth, providerList) {
     return authObj
 }
 
+/**
+ * throws Error with prefixed message. Depends on global ERROR_MESSAGE_PREFIX
+ *
+ * @param {string} message error explanation
+ * @return {undefined}
+ */
 function throwError(message) {
     throw new Error(ERROR_MESSAGE_PREFIX + message)
 }

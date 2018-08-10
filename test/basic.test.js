@@ -180,6 +180,12 @@ describe('Dictionary Intent', () => {
     })
 })
 
+/**
+ *  Log error message
+ *
+ * @param {object} errorResponse error response
+ * @returns {undefined}
+ */
 function prettyCatch(errorResponse) {
     console.log('\nError: ', errorResponse.statusCode, errorResponse.statusMessage)
 }

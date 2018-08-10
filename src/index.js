@@ -14,6 +14,15 @@ const {
 } = require('./utils')
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
+/**
+ * Main class for connectiong to Intento API
+ * Typical usage:
+ *      const client = new IntentoConnector({ apikey: YOUR_APIKEY })
+ *
+ * @param {*} [credentials={}] credentials like apikey
+ * @param {*} [options={}] options for logging and debug mostly
+ * @returns {undefined}
+ */
 function IntentoConnector(credentials = {}, options = {}) {
     const {
         debug = false,

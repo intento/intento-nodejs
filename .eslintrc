@@ -10,6 +10,8 @@
     "parser": "babel-eslint",
     "globals": {},
     "rules": {
+        "require-jsdoc": 1,
+        "valid-jsdoc": 1,
         "no-console": "off",
         "indent": [
             2,
