@@ -391,6 +391,9 @@ async function errorFriendlyCallback(
  * @returns {string} multiline string
  */
 function prettyTranslationResults(data) {
+    if (data.response.length === 1) {
+        return data.response[0].results.join('\n')
+    }
     return data.response.map(resp => resp.results.join('')).join('\n')
 }
 
