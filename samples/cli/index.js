@@ -226,14 +226,14 @@ async function getText({ input, encoding, bulk, _ }) {
     if (input) {
         const data = await getDataFromFile(input, encoding)
         if (bulk) {
-            return data.split('\n')
+            return splitIntoLines(data)
         }
         return data
     } else {
         if (_.length > 0) {
             if (_.length === 1) {
                 if (bulk) {
-                    return _[0].split('\n')
+                    return splitIntoLines(_[0])
                 }
 
                 // avoid errors from providers without bulk support
@@ -243,6 +243,16 @@ async function getText({ input, encoding, bulk, _ }) {
         }
     }
     return ''
+}
+
+/**
+ * Splits a string into array of lines. OS independent
+ *
+ * @param {String} str multiline string
+ * @returns {array} lines
+ */
+function splitIntoLines(str) {
+    return str.split(/[\r\n]+/)
 }
 
 /**
