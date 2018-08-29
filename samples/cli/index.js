@@ -274,6 +274,7 @@ async function errorFriendlyCallback(
     {
         input,
         output,
+        csv,
         intent = 'translate',
         apikey,
         encoding,
@@ -352,7 +353,11 @@ async function errorFriendlyCallback(
                                 'ai.text.translate': prettyTranslationResults,
                             }[intent] || prettyJSON
                             if (output) {
-                                writeResultsToFile(output, results, resultsTransformer)
+                                if (csv) {
+                                    writeResultsToFile(output, results, csvifyResults)
+                                } else {
+                                    writeResultsToFile(output, results, resultsTransformer)
+                                }
                             } else {
                                 printResults(intent, results.response)
                             }
@@ -412,6 +417,19 @@ function prettyTranslationResults(data) {
         return data.response[0].results.join('\n')
     }
     return data.response.map(resp => resp.results.join('')).join('\n')
+}
+
+/**
+ *
+ *
+ * @param {object} data response with processed input
+ * @returns {string} multiline string
+ */
+function csvifyResults(data) {
+    if (data.response.length === 1) {
+        return data.response[0].results.map(JSON.stringify).join('\n')
+    }
+    return data.response.map(resp => resp.results.join('')).map(JSON.stringify).join('\n')
 }
 
 /**
