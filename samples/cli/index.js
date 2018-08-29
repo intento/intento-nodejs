@@ -14,6 +14,7 @@ const IntentoConnector = require('../../src/index')
 const fs = require('fs')
 const path = require('path')
 const util = require('util')
+const neatCsv = require('neat-csv')
 const parseArgs = require('minimist')
 const ProgressBar = require('progress')
 const readFile = util.promisify(fs.readFile)
@@ -50,6 +51,7 @@ const {
     intent,
     responseMapper,
     _ = [],
+    csv,
     input,
     bulk = false,
     output,
@@ -84,6 +86,7 @@ if (help) {
     console.info('  --provider                (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
     console.info("  --input                   (string) relative path to a file you'd like to process")
     console.info('  --bulk                    (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
+    console.info('  --csv                     (boolean) use csv parser to split text into lines')
     console.info('  --output                  (string) relative path to a file where results will be stored')
     console.info('  --post_processing         (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
     console.info("  --format                  ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
@@ -129,6 +132,7 @@ processRequest(intentProcessor, {
     output,
     encoding,
     bulk,
+    csv,
     usage,
     only_operation_id,
     attempts,
@@ -222,11 +226,14 @@ async function getDataFromFile(filename, encoding = 'utf-8') {
  * @param {object} { input, encoding, bulk, _ } arguments from command line
  * @returns {string|array} text to process
  */
-async function getText({ input, encoding, bulk, _ }) {
+async function getText({ input, encoding, bulk, csv, _ }) {
     if (input) {
         const data = await getDataFromFile(input, encoding)
         if (bulk) {
             return splitIntoLines(data)
+        } else if (csv) {
+            const lines = await neatCsv(data, { headers: 'abcdefghijklmnopqrstuvwxyz'.split('') })
+            return lines.map(line => line.a || '')
         }
         return data
     } else {
