@@ -52,6 +52,7 @@ const {
     responseMapper,
     _ = [],
     csv,
+    csv_col = 'a',
     input,
     bulk = false,
     output,
@@ -87,6 +88,7 @@ if (help) {
     console.info("  --input                   (string) relative path to a file you'd like to process")
     console.info('  --bulk                    (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
     console.info('  --csv                     (boolean) use csv parser to split text into lines')
+    console.info('  --csv_col                 (string) csv column to translate, as a letter from a to z, default - first column')
     console.info('  --output                  (string) relative path to a file where results will be stored')
     console.info('  --post_processing         (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
     console.info("  --format                  ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
@@ -133,6 +135,7 @@ processRequest(intentProcessor, {
     encoding,
     bulk,
     csv,
+    csvCol: csv_col.toLowerCase(),
     usage,
     only_operation_id,
     attempts,
@@ -226,14 +229,14 @@ async function getDataFromFile(filename, encoding = 'utf-8') {
  * @param {object} { input, encoding, bulk, _ } arguments from command line
  * @returns {string|array} text to process
  */
-async function getText({ input, encoding, bulk, csv, _ }) {
+async function getText({ input, encoding, bulk, csv, csvCol, _ }) {
     if (input) {
         const data = await getDataFromFile(input, encoding)
         if (bulk) {
             return splitIntoLines(data)
         } else if (csv) {
             const lines = await neatCsv(data, { headers: 'abcdefghijklmnopqrstuvwxyz'.split('') })
-            return lines.map(line => line.a || '')
+            return lines.map(line => line[csvCol] || '')
         }
         return data
     } else {
@@ -337,7 +340,11 @@ async function errorFriendlyCallback(
                     clearInterval(timer)
                     console.log('\n')
                     if (results.response === null) {
-                        const logFilename = `${NOW_TS}_errors.txt`
+                        let prefix = ''
+                        if (output) {
+                            prefix = `${output}_`
+                        }
+                        const logFilename = `${prefix}${NOW_TS}_errors.txt`
                         const content = {
                             error: 'We are collecting errors from provider(s). Repeat this request later to get more info.',
                             ...results,
