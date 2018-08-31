@@ -311,7 +311,7 @@ Results were written to the examples/large_sample_results.txt file
 
 #### Postpone getting async results
 
-Requestinf async joab with `--only_operation_id` flag will return you only job id
+Requesting async job with `--only_operation_id` flag will return you only job id
 
 ```sh
 node index.js --key=$INTENTO_API_KEY \
