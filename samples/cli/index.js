@@ -262,7 +262,13 @@ async function getText({ input, encoding, bulk, csv, csvCol, _ }) {
  * @returns {array} lines
  */
 function splitIntoLines(str) {
-    return str.split(/[\r\n]+/)
+    if (str.indexOf('\r') === -1) {
+        // Mac OS ir Linux line breaks
+        return str.split('\n')
+    }
+
+    // Windows line breaks
+    return str.replace(/\n/g,'').split('\r')
 }
 
 /**
