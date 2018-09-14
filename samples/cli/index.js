@@ -85,16 +85,16 @@ if (help) {
     console.info('  --usage                   (boolean) get usage statistics on specified intents or providers')
     console.info('  --viewpoint               (string) for `--usage` requests, values: intento|provider|distinct, default to "intento"')
     console.info('  --provider                (string|list) use specific provider(s), list provider ids separated by comma, no spaces (more in docs https://github.com/intento/intento-api#basic-usage)')
-    console.info("  --input                   (string) relative path to a file you'd like to process")
+    console.info("  --input                   (string) relative or absolute path to a file you'd like to process")
     console.info('  --bulk                    (boolean) treat each line of the input file as a separate segment, sending an array of segments for translation')
     console.info('  --csv                     (boolean) use csv parser to split text into lines')
     console.info('  --csv_col                 (string) csv column to translate, as a letter from a to z, default - first column')
-    console.info('  --output                  (string) relative path to a file where results will be stored')
+    console.info('  --output                  (string) relative or absolute path to a file where results will be stored')
     console.info('  --post_processing         (string|list) content processing for `--intent=translate` (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#content-processing)')
     console.info("  --format                  ('text'|'html'|'xml') default to 'text' (more in docs https://github.com/intento/intento-api/blob/master/ai.text.translate.md#supported-formats)")
     console.info('  --id                      (string) job id for `--intent=operations`')
-    console.info('  --secret_credentials_file (string) relative path to a json file with credentials config to be delegated to autogenerate auth tokens')
-    console.info('  --auth_file               (string) relative path to a json file with own keys')
+    console.info('  --secret_credentials_file (string) relative or absolute path to a json file with credentials config to be delegated to autogenerate auth tokens')
+    console.info('  --auth_file               (string) relative or absolute path to a json file with own keys')
     console.info('')
     process.exit(1)
 }
@@ -187,6 +187,11 @@ async function processRequest(intentProcessor, argv) {
         }
     }
 
+    if (params.text === '' || params.text.join && params.text.join('') === '') {
+        console.error('Nothing to process. Stop.')
+        return
+    }
+
     try {
         data = await intentProcessor(params)
     } catch (e) {
@@ -201,24 +206,36 @@ async function processRequest(intentProcessor, argv) {
 /**
  * Read file content
  *
- * @param {string} filename relative path to a file
+ * @param {string} filename relative or absolute path to a file
  * @param {string} [encoding='utf-8'] character encoding
  * @returns {string} content of a file
  */
 async function getDataFromFile(filename, encoding = 'utf-8') {
     let filePath
-    try {
-        filePath = path.join(__dirname, filename)
-    } catch (e) {
-        console.error(`Error creating file path`, e.message)
-        return ''
+
+    if (!filename) {
+        return 'Please specify path to a file as a first argument'
+    }
+
+    if (path.isAbsolute(filename)) {
+        filePath = filename
+    } else {
+        try {
+            filePath = path.join(__dirname, filename)
+        } catch (e) {
+            console.error(`Error creating file path`, e.message)
+            return ''
+        }
     }
 
     try {
         const data = await readFile(filePath, { encoding })
         return data
     } catch (err) {
-        console.error(`Error reading ${filename} file\n`, err)
+        console.error(`Error reading ${filename} file.`)
+        if (DEBUG) {
+            console.error(err)
+        }
         return ''
     }
 }
