@@ -66,6 +66,8 @@ function responseHandler(
                     } else {
                         throwError('Unexpected 2xx or 3xx response: ' + body)
                     }
+                } else if (body === 'OK') { // temporary workaround TODO change API response
+                    data = { status: 'OK' }
                 } else {
                     throwError('Unexpected response: ' + body)
                 }
