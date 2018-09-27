@@ -23,6 +23,7 @@ const writeFile = util.promisify(fs.writeFile)
 const NOW_TS = Date.now() // helps to distinguish output from different script runs
 const ATTEMPTS_TO_REQUEST_ASYNC_RESULTS = 15 // how many times send request
 const INTERVAL_TO_REQUEST_ASYNC_RESULTS = 1000 // milliseconds between consecutive requests
+const DEFAULT_INTENT = 'translate'
 
 // Return an argument object populated with the array arguments from args
 const argv = parseArgs(process.argv.slice(2), {
@@ -187,9 +188,11 @@ async function processRequest(intentProcessor, argv) {
         }
     }
 
-    if (params.text === '' || params.text.join && params.text.join('') === '') {
-        console.error('Nothing to process. Stop.')
-        return
+    if (!argv.usage && intentRequiresText(argv.intent)) {
+        if (params.text === '' || params.text.join && params.text.join('') === '') {
+            console.error('No text or an input file to process. Stop.')
+            return
+        }
     }
 
     try {
@@ -658,7 +661,7 @@ function prettyCatch(errorResponse, explanation = '') {
  * @param {string} value intent name
  * @returns {Function} function that can make http requests to a certain Intento API endpoint
  */
-function getIntentProcessor(connector, value = 'translate') {
+function getIntentProcessor(connector, value = DEFAULT_INTENT) {
     if (!connector || !connector.ai) {
         console.error("Intento connector wasn't initialized properly.")
         return
@@ -764,7 +767,7 @@ function warnAsyncSmartAndExit() {
  */
 function printError(data, explanation = '') {
     if (DEBUG) {
-        console.error(data)
+        console.error(Object.keys(data))
     }
 
     const bang = 'CLI error report'
@@ -780,10 +783,33 @@ function printError(data, explanation = '') {
         )
         return true
     }
-    if (data.statusCode) {
+    if (data.statusCode && data.statusCode !== 200) {
         console.error(`${bang}: ${explanation}\n ${data.statusCode} ${data.statusMessage}`)
         return true
     }
 
     return false
+}
+
+/**
+ * Tests if given intent requires non-empty text field.
+ * For example all `ai.text.*` (or `ai/text/*`) intents require the text parameter (or the input file parameter).
+ * Also their aliases - translate, dictionary and sentiment - require the text parameter (or the input file parameter).
+ * In the same time `(translate|dictionary|sentiment).providers` intent does not require the text parameter.
+ *
+ * @param {string} intent intent name
+ * @returns {bool} true when text value is required
+ */
+function intentRequiresText(intent = DEFAULT_INTENT) {
+    if (intent === 'translate') {
+        return true
+    }
+    if (intent === 'dictionary') {
+        return true
+    }
+    if (intent === 'sentiment') {
+        return true
+    }
+
+    return intent.indexOf('text') !== -1
 }
