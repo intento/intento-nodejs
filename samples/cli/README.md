@@ -33,10 +33,11 @@ Get more information about other intents in [our docs](https://github.com/intent
     - [Content processing](#content-processing)
     - [Bulk mode](#bulk-mode)
     - [Use own keys](#use-own-keys)
-    - [Error messages](#error-messages)
-        - [Error: Invalid authentication credentials](#error-invalid-authentication-credentials)
-        - [Error from provider: [bad_data] Model URL was not found](#error-from-provider-bad_data-model-url-was-not-found)
-        - [Error from provider: [access] Request had invalid authentication credentials](#error-from-provider-access-request-had-invalid-authentication-credentials)
+    - [Use custom or domain-specific models](#use-custom-or-domain-specific-models)
+- [Error messages](#error-messages)
+    - [Error: Invalid authentication credentials](#error-invalid-authentication-credentials)
+    - [Error from provider: [bad_data] Model URL was not found](#error-from-provider-bad_data-model-url-was-not-found)
+    - [Error from provider: [access] Request had invalid authentication credentials](#error-from-provider-access-request-had-invalid-authentication-credentials)
 
 <!-- /TOC -->
 
@@ -472,9 +473,50 @@ node index.js --key=$INTENTO_API_KEY \
     "Hallo welt"
 ```
 
-### Error messages
+### Use custom or domain-specific models
 
-#### Error: Invalid authentication credentials
+If one knows a model identifier, one can specify it in the `category` option:
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --to=es \
+    --provider=ai.text.translate.microsoft.translator_text_api.2-0 \
+    --category=speech \
+    "Hallo welt"
+```
+
+Translate with your own custom model.
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --from=en \
+    --to=pt \
+    --provider=ai.text.translate.microsoft.translator_text_api.2-0 \
+    --category=$MS_CUSTOM_MODEL_NAME \
+    --auth="{\"key\": \"$YOUR_MICROSOFT_APIKEY\" }" \
+    "Genetics and epigenetics are important for this"
+```
+
+Translate a big file with your own custom model (requires custom keys).
+
+```sh
+node index.js --key=$INTENTO_API_KEY \
+    --async \
+    --bulk \
+    --from=ru \
+    --to=es \
+    --provider=ai.text.translate.microsoft.translator_text_api.2-0 \
+    --category=$MS_CUSTOM_MODEL_NAME \
+    --auth="{\"key\": \"$YOUR_MICROSOFT_APIKEY\" }" \
+    --input=war-and-peace.txt \
+    --output=war-and-peace-es.txt
+```
+
+These examples in [a script](./examples/translate-with-custom-model.sh).
+
+## Error messages
+
+### Error: Invalid authentication credentials
 
 ```sh
 node index.js --key=some_invalid_key \
@@ -485,7 +527,7 @@ node index.js --key=some_invalid_key \
     "epigenetics markers for cancer and bowel syndrome treatment in a hospital setting"
 ```
 
-#### Error from provider: [bad_data] Model URL was not found
+### Error from provider: [bad_data] Model URL was not found
 
 Because this provider requires `category` (custom model)
 
@@ -498,7 +540,7 @@ node index.js --key=$INTENTO_API_KEY \
     "epigenetics markers for cancer and bowel syndrome treatment in a hospital setting"
 ```
 
-#### Error from provider: [access] Request had invalid authentication credentials
+### Error from provider: [access] Request had invalid authentication credentials
 
 `Error from provider: [access] Request had invalid authentication credentials. Expected OAuth 2 access token.`
 
