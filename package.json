@@ -20,7 +20,7 @@
     "lint": "eslint src test",
     "eslint": "eslint",
     "jest": "jest",
-    "test": "export $(cat .env) && jest --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
+    "test": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "build": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
     "format_test": "prettier --config test/.prettierrc --write 'test*/*.js'",
