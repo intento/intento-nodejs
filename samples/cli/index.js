@@ -1,5 +1,8 @@
 'use strict'
 
+const VERSION = '0.1.0'
+const SDK_NAME = 'Intento.CLI'
+
 const currentNodeJSVersion = Number(process.version.match(/^v?(\d+\.\d+)/)[1])
 const minimalNodeJSVersion = '8.0'
 if (currentNodeJSVersion < Number(minimalNodeJSVersion)) {
@@ -114,7 +117,15 @@ if (!host && DEBUG) {
 }
 
 // Initialize Intento connector object
-const client = new IntentoConnector({ apikey, host }, { debug: DEBUG, verbose: VERBOSE, curl })
+const client = new IntentoConnector(
+    { apikey, host },
+    {
+        debug: DEBUG,
+        verbose: VERBOSE,
+        curl,
+        userAgent: `${SDK_NAME}/${VERSION}`,
+    }
+)
 
 // Define which Inten.to endpoint will be used to process the request
 const intentProcessor = getIntentProcessor(client, usage ? 'usage/' + viewpoint : intent)
@@ -189,7 +200,7 @@ async function processRequest(intentProcessor, argv) {
     }
 
     if (!argv.usage && intentRequiresText(argv.intent)) {
-        if (params.text === '' || params.text.join && params.text.join('') === '') {
+        if (params.text === '' || (params.text.join && params.text.join('') === '')) {
             console.error('No text or an input file to process. Stop.')
             return
         }
@@ -226,7 +237,7 @@ async function getDataFromFile(filename, encoding = 'utf-8') {
         try {
             filePath = path.join(__dirname, filename)
         } catch (e) {
-            console.error(`Error creating file path`, e.message)
+            console.error('Error creating file path', e.message)
             return ''
         }
     }
@@ -288,7 +299,7 @@ function splitIntoLines(str) {
     }
 
     // Windows line breaks
-    return str.replace(/\n/g,'').split('\r')
+    return str.replace(/\n/g, '').split('\r')
 }
 
 /**
@@ -462,7 +473,10 @@ function csvifyResults(data) {
     if (data.response.length === 1) {
         return data.response[0].results.map(JSON.stringify).join('\n')
     }
-    return data.response.map(resp => resp.results.join('')).map(JSON.stringify).join('\n')
+    return data.response
+        .map(resp => resp.results.join(''))
+        .map(JSON.stringify)
+        .join('\n')
 }
 
 /**

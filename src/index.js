@@ -1,7 +1,8 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.3.0'
+const VERSION = '0.3.2'
+const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
 const querystring = require('querystring')
@@ -29,6 +30,7 @@ function IntentoConnector(credentials = {}, options = {}) {
         verbose = false,
         curl = false,
         dryRun = false,
+        userAgent,
     } = options
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
@@ -41,6 +43,7 @@ function IntentoConnector(credentials = {}, options = {}) {
     this.curl = curl
     this.verbose = verbose
     this.dryRun = dryRun
+    this.userAgent = userAgent
 
     const { apikey, host = HOST } = this.credentials
 
@@ -169,23 +172,10 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
 
     const urlParams = querystring.stringify(params)
 
-    let userAgent = ''
-    if (process) {
-        userAgent = `NodeJS SDK client (sdk version ${VERSION}; node version ${
-            process.version
-        })`
-    } else if (window && window.navigator) {
-        userAgent =
-            `NodeJS SDK client (sdk version ${VERSION}) ` +
-            window.navigator.userAgent
-    } else {
-        userAgent = `NodeJS SDK client (sdk version ${VERSION})`
-    }
-
     const requestOptions = {
         host: this.host,
         headers: {
-            'User-Agent': userAgent,
+            'User-Agent': this.getUserAgent(),
             apikey: this.apikey,
         },
         path: path + (urlParams ? '?' + urlParams : ''),
@@ -336,6 +326,26 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         content,
         method: 'POST',
     })
+}
+
+IntentoConnector.prototype.getUserAgent = function() {
+    const markers = []
+
+    if (this.userAgent) {
+        markers.push(this.userAgent)
+    }
+
+    markers.push(`${SDK_NAME}/${this.version}`)
+
+    if (process) {
+        // running from node environment (from terminal)
+        markers.push(`(NodeJS/${process.version})`)
+    } else if (window && window.navigator) {
+        // running from a browser
+        markers.push(window.navigator.userAgent)
+    }
+
+    return markers.join(' ')
 }
 
 IntentoConnector.prototype.providers = function(slug, options = {}) {
