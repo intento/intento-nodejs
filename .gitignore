@@ -39,6 +39,8 @@ lib/
 
 # dotenv environment variables file
 .env
+*/.*.env
+*/*/.*.env
 
 dist/
 package/
