@@ -31,14 +31,8 @@ const DEFAULT_INTENT = 'translate'
 // Return an argument object populated with the array arguments from args
 const argv = parseArgs(process.argv.slice(2), {
     /* options */
-    boolean: ['debug', 'verbose', 'help', 'curl', 'usage'],
     alias: {
-        help: ['h'],
-        debug: ['d'],
-        verbose: ['v'],
         apikey: ['key'],
-        intent: ['i'],
-        usage: ['u'],
     },
 })
 
@@ -49,8 +43,10 @@ const {
     verbose = false,
     curl = false,
     usage = false,
+    dryRun = false,
     viewpoint = 'intento',
     apikey = process.env.INTENTO_API_KEY,
+    key, // eslint-disable-line no-unused-vars
     host,
     intent,
     responseMapper,
@@ -123,6 +119,7 @@ const client = new IntentoConnector(
         debug: DEBUG,
         verbose: VERBOSE,
         curl,
+        dryRun,
         userAgent: `${SDK_NAME}/${VERSION}`,
     }
 )
@@ -191,18 +188,16 @@ async function processRequest(intentProcessor, argv) {
         params.intent = argv.intent
     } else {
         try {
-            const text = await getText(argv)
-            params.text = text
+            if (intentRequiresText(argv.intent)) {
+                const text = await getText(argv)
+                if (!text || text === '' || (text.join && text.join('') === '')) {
+                    console.error('No text or an input file to process. Stop.')
+                    return
+                }
+                params.text = text
+            }
         } catch (e) {
-            params.text = ''
             prettyCatch(e, 'Error while getting text to process')
-        }
-    }
-
-    if (!argv.usage && intentRequiresText(argv.intent)) {
-        if (params.text === '' || (params.text.join && params.text.join('') === '')) {
-            console.error('No text or an input file to process. Stop.')
-            return
         }
     }
 
@@ -823,6 +818,12 @@ function intentRequiresText(intent = DEFAULT_INTENT) {
     }
     if (intent === 'sentiment') {
         return true
+    }
+    if (intent.indexOf('providers') !== -1) {
+        return false
+    }
+    if (intent.indexOf('languages') !== -1) {
+        return false
     }
 
     return intent.indexOf('text') !== -1
