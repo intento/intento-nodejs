@@ -7,5 +7,8 @@
     "minimist": "^1.2.0",
     "neat-csv": "^3.0.0",
     "progress": "^2.0.0"
+  },
+  "scripts": {
+    "test": "for i in `ls examples|grep .sh`; do sh examples/$i; done > test.log"
   }
 }
