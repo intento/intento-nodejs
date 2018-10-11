@@ -185,6 +185,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
         host: this.host,
         headers: {
             'User-Agent': this.getUserAgent(),
+            'X-User-Agent': this.getUserAgent({ customHeader: true }),
             apikey: this.apikey,
         },
         path: path + (urlParams ? '?' + urlParams : ''),
@@ -342,7 +343,8 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.getUserAgent = function() {
+IntentoConnector.prototype.getUserAgent = function (params = {}) {
+    const { customHeader = false } = params
     const markers = []
 
     if (this.userAgent) {
@@ -351,11 +353,16 @@ IntentoConnector.prototype.getUserAgent = function() {
 
     markers.push(`${SDK_NAME}/${this.version}`)
 
-    if (process) {
+    if (process && process.version) {
         // running from node environment (from terminal)
         markers.push(`(NodeJS/${process.version})`)
-    } else if (window && window.navigator) {
+    } else if (window && window.navigator && !customHeader) {
         // running from a browser
+        // there is a problem with setting custom user-agent
+        // short description: https://stackoverflow.com/a/42815264/2412719
+        // spec https://fetch.spec.whatwg.org/#forbidden-header-name (changing user-agent was allowed lately)
+        // firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=1188932 (resolved fixed)
+        // chrome bug https://bugs.chromium.org/p/chromium/issues/detail?id=571722 (not fixed, Oct 2018)
         markers.push(window.navigator.userAgent)
     }
 
