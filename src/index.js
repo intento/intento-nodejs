@@ -383,11 +383,15 @@ IntentoConnector.prototype.language = function(slug, langCode, params) {
 }
 
 IntentoConnector.prototype.languages = function(slug, params = {}) {
-    const { id: language, ...other } = params
+    const { id, language, ...other } = params
     let path = getPath(slug, this.debug, this.verbose) + '/languages'
+
     if (language) {
         path += '/' + language
+    } else if (id) {
+        path += '/' + id
     }
+
     return this.makeRequest({
         path,
         params: other,
