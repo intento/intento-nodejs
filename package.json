@@ -16,6 +16,8 @@
     "text meanings"
   ],
   "scripts": {
+    "app_examples": "export $(cat .env) && node samples/server-side-app/*.js",
+    "examples": "export $(cat .env) && node example.js",
     "clean": "rimraf lib",
     "lint": "eslint src test",
     "eslint": "eslint",

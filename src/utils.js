@@ -14,6 +14,7 @@ function getPath(slug, debug = false, verbose = false) {
         dictionary: '/ai/text/dictionary',
     }
     let path = pathBySlug[slug]
+    /* istanbul ignore next */
     if (!path) {
         path = pathBySlug.translate
         if (debug || verbose) {
@@ -43,17 +44,23 @@ function responseHandler(
     debug = false,
     verbose = false
 ) {
+    /* istanbul ignore next */
     response.setEncoding('utf8')
 
+    /* istanbul ignore next */
     if (response.statusCode >= 500) {
         customErrorLog(response)
         reject(response)
     }
 
+    /* istanbul ignore next */
     let body = ''
+    /* istanbul ignore next */
     response.on('data', function(chunk) {
         body += chunk
     })
+
+    /* istanbul ignore next */
     response.on('end', function() {
         try {
             let data = null
@@ -66,7 +73,8 @@ function responseHandler(
                     } else {
                         throwError('Unexpected 2xx or 3xx response: ' + body)
                     }
-                } else if (body === 'OK') { // temporary workaround TODO change API response
+                } else if (body === 'OK') {
+                    // temporary workaround TODO change API response
                     data = { status: 'OK' }
                 } else {
                     throwError('Unexpected response: ' + body)
@@ -102,6 +110,7 @@ function responseHandler(
  * @returns {undefined}
  */
 function customErrorLog(err, explanation = '') {
+    /* istanbul ignore next */
     if (err.statusCode) {
         console.error(explanation, err.statusCode, err.statusMessage)
     } else {
