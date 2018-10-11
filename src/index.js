@@ -108,6 +108,12 @@ function IntentoConnector(credentials = {}, options = {}) {
                 provider: (providerId, params) => {
                     return this.provider('sentiment', providerId, params)
                 },
+                languages: params => {
+                    return this.languages('sentiment', params)
+                },
+                language: (langCode, params) => {
+                    return this.language('sentiment', langCode, params)
+                },
             },
             dictionary: {
                 fulfill: params => {
@@ -121,6 +127,9 @@ function IntentoConnector(credentials = {}, options = {}) {
                 },
                 languages: params => {
                     return this.languages('dictionary', params)
+                },
+                language: (langCode, params) => {
+                    return this.language('dictionary', langCode, params)
                 },
             },
         },
@@ -217,17 +226,22 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     }
 
     if (this.curl) {
-        const requestString = `curl -X${method} -H 'apikey: ${
-            requestOptions.headers.apikey
-        }' https://${requestOptions.host}${requestOptions.path} -d '${data ||
-            JSON.stringify(content, null, 4) ||
-            ''}'`
+        const { host, path, headers } = requestOptions
+        let requestString = `curl -X${method} -H 'apikey: ${
+            headers.apikey
+        }' https://${host}${path}`
+        const curlData = data || JSON.stringify(content, null, 4) || ''
+
+        if (curlData) {
+            requestString += ` -d '${curlData}'`
+        }
+
         console.log(`\nTest request\n${requestString}`)
     }
 
     return new Promise((resolve, reject) => {
         if (this.dryRun) {
-            resolve(data || content || '')
+            resolve(data || content || requestOptions.path || '')
         }
 
         try {
@@ -348,15 +362,7 @@ IntentoConnector.prototype.getUserAgent = function() {
     return markers.join(' ')
 }
 
-IntentoConnector.prototype.providers = function(slug, options = {}) {
-    const validParams = ['from', 'to', 'bulk', 'lang_detect']
-    const params = {}
-    validParams.forEach(p => {
-        if (options[p]) {
-            params[p] = options[p]
-        }
-    })
-
+IntentoConnector.prototype.providers = function(slug, params) {
     return this.makeRequest({
         path: getPath(slug, this.debug, this.verbose),
         params,
@@ -373,23 +379,18 @@ IntentoConnector.prototype.provider = function(slug, providerId, params) {
 }
 
 IntentoConnector.prototype.language = function(slug, langCode, params) {
-    return this.makeRequest({
-        path:
-            getPath(slug, this.debug, this.verbose) + '/languages/' + langCode,
-        params,
-        method: 'GET',
-    })
+    return this.languages(slug, { ...params, id: langCode })
 }
 
 IntentoConnector.prototype.languages = function(slug, params = {}) {
-    const { language, locale } = params
+    const { id: language, ...other } = params
     let path = getPath(slug, this.debug, this.verbose) + '/languages'
     if (language) {
         path += '/' + language
     }
     return this.makeRequest({
         path,
-        params: { locale },
+        params: other,
         method: 'GET',
     })
 }
@@ -411,9 +412,14 @@ IntentoConnector.prototype.processingRules = function(params) {
 }
 
 IntentoConnector.prototype.asyncOperations = function(params) {
-    const { id } = params
+    let path = '/operations/'
+    const { id, ...other } = params
+    if (id) {
+        path += id
+    }
     return this.makeRequest({
-        path: '/operations/' + id,
+        path,
+        params: other,
         method: 'GET',
     })
 }
