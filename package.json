@@ -1,7 +1,7 @@
 {
   "name": "intento-nodejs",
   "description": "Intento API Client Library for Node.js",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "main": "lib/index.js",
   "repository": "intento/intento-nodejs",
   "author": "Intento Inc.",
