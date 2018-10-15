@@ -347,7 +347,8 @@ async function errorFriendlyCallback(
                 console.error(`Errors while writing to the ${fname} file`)
                 console.log('Response:\n', data)
             }
-        } else {
+        } else if (Object.keys(data).length === 1) {
+            // this is a response to an async operation request (like ai.text.translate with `async:true`)
             // send next request
             let resultsWerePrinted = false
 
@@ -419,7 +420,7 @@ async function errorFriendlyCallback(
             }, timedelta)
         }
 
-        return
+        // return
     }
 
     if (output) {
@@ -606,6 +607,20 @@ function usageResponse(data) {
 }
 
 /**
+ * Log response showing a provider info except for languages
+ *
+ * @param {array} data response data
+ * @returns {undefined}
+ */
+function shortProviderInfoResponse(data = {}) {
+    const {
+        languages, // eslint-disable-line no-unused-vars
+        ...other
+    } = data
+    console.log('API response:\n', prettyJSON(other), '\n\n')
+}
+
+/**
  * Choose a function to log response results
  *
  * @param {string} intent name
@@ -617,6 +632,7 @@ function getDefaultOuputFn(intent) {
             responseAsIs,
             listIdsFromResponse,
             usageResponse,
+            shortProviderInfoResponse,
         }[responseMapper]
     }
 
@@ -819,10 +835,10 @@ function intentRequiresText(intent = DEFAULT_INTENT) {
     if (intent === 'sentiment') {
         return true
     }
-    if (intent.indexOf('providers') !== -1) {
+    if (intent.indexOf('provider') !== -1) {
         return false
     }
-    if (intent.indexOf('languages') !== -1) {
+    if (intent.indexOf('language') !== -1) {
         return false
     }
 
