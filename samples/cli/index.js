@@ -183,7 +183,7 @@ async function processRequest(intentProcessor, argv) {
         OTHER_OPTIONS.auth = await getDataFromFile(auth_file, encoding)
     }
 
-    const params = { ...OTHER_OPTIONS }
+    const params = { bulk: argv.bulk, ...OTHER_OPTIONS }
     if (argv.usage) {
         params.intent = argv.intent
     } else {
