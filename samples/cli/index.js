@@ -54,7 +54,7 @@ const {
     csv,
     csv_col = 'a',
     input,
-    bulk = false,
+    bulk, // keep it falsy
     output,
     encoding = 'utf-8',
     secret_credentials_file,
@@ -183,7 +183,10 @@ async function processRequest(intentProcessor, argv) {
         OTHER_OPTIONS.auth = await getDataFromFile(auth_file, encoding)
     }
 
-    const params = { bulk: argv.bulk, ...OTHER_OPTIONS }
+    const params = { ...OTHER_OPTIONS }
+    if (bulk) {
+        params.bulk = true
+    }
     if (argv.usage) {
         params.intent = argv.intent
     } else {
