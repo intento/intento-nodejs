@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.3.3'
+const VERSION = '0.3.4'
 const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
@@ -370,6 +370,10 @@ IntentoConnector.prototype.getUserAgent = function (params = {}) {
 }
 
 IntentoConnector.prototype.providers = function(slug, params) {
+    if (params && params.id) {
+        // a description of a provider was requested
+        return this.provider(slug, params)
+    }
     return this.makeRequest({
         path: getPath(slug, this.debug, this.verbose),
         params,
@@ -377,10 +381,12 @@ IntentoConnector.prototype.providers = function(slug, params) {
     })
 }
 
-IntentoConnector.prototype.provider = function(slug, providerId, params) {
+IntentoConnector.prototype.provider = function(slug, params = {}) {
+    const { id, ...otherParams } = params
+
     return this.makeRequest({
-        path: getPath(slug, this.debug, this.verbose) + '/' + providerId,
-        params,
+        path: getPath(slug, this.debug, this.verbose) + '/' + id,
+        params: otherParams,
         method: 'GET',
     })
 }
