@@ -1,31 +1,4 @@
 const ERROR_MESSAGE_PREFIX = 'Utils error: '
-/**
- * Return url to send request to
- *
- * @param {string} slug intent short name
- * @param {boolean} [debug=false] debug mode (more logging)
- * @param {boolean} [verbose=false] verbose mode (more pretty logs)
- * @returns {string} uri part
- */
-function getPath(slug, debug = false, verbose = false) {
-    const pathBySlug = {
-        sentiment: '/ai/text/sentiment',
-        translate: '/ai/text/translate',
-        dictionary: '/ai/text/dictionary',
-    }
-    let path = pathBySlug[slug]
-    /* istanbul ignore next */
-    if (!path) {
-        path = pathBySlug.translate
-        if (debug || verbose) {
-            console.error(
-                `Unknown intent ${slug}. Translate intent will be used`
-            )
-        }
-    }
-
-    return path
-}
 
 /**
  * Process request response
@@ -209,7 +182,6 @@ function throwError(message) {
 
 module.exports = {
     ERROR_MESSAGE_PREFIX,
-    getPath,
     responseHandler,
     customErrorLog,
     stringToList,

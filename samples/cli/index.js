@@ -126,6 +126,7 @@ const client = new IntentoConnector(
 
 // Define which Inten.to endpoint will be used to process the request
 const intentProcessor = getIntentProcessor(client, usage ? 'usage/' + viewpoint : intent)
+
 if (!intentProcessor) {
     process.exit(1)
 }
@@ -194,7 +195,7 @@ async function processRequest(intentProcessor, argv) {
             if (intentRequiresText(argv.intent)) {
                 const text = await getText(argv)
                 if (!text || text === '' || (text.join && text.join('') === '')) {
-                    console.error('No text or an input file to process. Stop.')
+                    printError({ message: 'No text or an input file to process. Stop.' })
                     return
                 }
                 params.text = text
@@ -610,6 +611,27 @@ function usageResponse(data) {
 }
 
 /**
+ * Log response showing provider list info except for language-related fields
+ *
+ * @param {array} data response data
+ * @returns {undefined}
+ */
+function providersCompactResponse(data = {}) {
+    data.forEach(provider => {
+        const {
+            languages, // eslint-disable-line no-unused-vars
+            language, // eslint-disable-line no-unused-vars
+            fromsript, // eslint-disable-line no-unused-vars
+            tosript, // eslint-disable-line no-unused-vars
+            pairs, // eslint-disable-line no-unused-vars
+            symmetric, // eslint-disable-line no-unused-vars
+            ...other
+        } = provider
+        console.log(prettyJSON(other))
+    })
+}
+
+/**
  * Log response showing a provider info except for languages
  *
  * @param {array} data response data
@@ -636,6 +658,7 @@ function getDefaultOuputFn(intent) {
             listIdsFromResponse,
             usageResponse,
             shortProviderInfoResponse,
+            providersCompactResponse,
         }[responseMapper]
     }
 

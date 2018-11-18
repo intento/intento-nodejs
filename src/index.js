@@ -7,7 +7,6 @@ const SDK_NAME = 'Intento.NodeJS'
 const https = require('https')
 const querystring = require('querystring')
 const {
-    getPath,
     responseHandler,
     customErrorLog,
     stringToList,
@@ -70,68 +69,68 @@ function IntentoConnector(credentials = {}, options = {}) {
         },
     })
 
+    /**
+     * Generates functions typical for all intents
+     *
+     * @param {String} [slug] intent path like `/ai/image/ocr`
+     * @returns {Object} intent API
+     */
+    const anyIntentGenerator = slug => {
+        return {
+            fulfill: params => {
+                // POST /ai/text/translate with params
+                // Example params: `from`, `to`, `text
+                return this.fulfill(slug, params)
+            },
+            providers: params => {
+                // GET /ai/text/translate with params
+                // Example param: `lang_detect`
+                return this.providers(slug, params)
+            },
+            provider: (providerId, params) => {
+                // GET /ai/text/translate/{providerId} without params, may accept params in the future
+                return this.provider(slug, providerId, params)
+            },
+        }
+    }
+
+    /**
+     * Generates functions typical for text intents
+     *
+     * @param {String} [slug] intent path like `/ai/image/ocr`
+     * @returns {Object} intent API
+     */
+    const textIntentGenerator = slug => {
+        return {
+            ...anyIntentGenerator(slug),
+            languages: params => {
+                // GET <slug>/languages with params
+                // Example param: `locale`
+                return this.languages(slug, params)
+            },
+            language: (langCode, params) => {
+                // GET <slug>/languages/{id} with params
+                // Example param: `locale`
+                return this.language(slug, langCode, params)
+            },
+        }
+    }
+
     this.ai = Object.freeze({
         text: {
-            translate: {
-                fulfill: params => {
-                    // POST /ai/text/translate with params
-                    // Example params: `from`, `to`, `text
-                    return this.fulfill('translate', params)
-                },
-                providers: params => {
-                    // GET /ai/text/translate with params
-                    // Example param: `lang_detect`
-                    return this.providers('translate', params)
-                },
-                provider: (providerId, params) => {
-                    // GET /ai/text/translate/{id} without params, may accept params in the future
-                    return this.provider('translate', providerId, params)
-                },
-                languages: params => {
-                    // GET /ai/text/translate/languages with params
-                    // Example param: `locale`
-                    return this.languages('translate', params)
-                },
-                language: (langCode, params) => {
-                    // GET /ai/text/translate/languages/{id} with params
-                    // Example param: `locale`
-                    return this.language('translate', langCode, params)
-                },
-            },
-            sentiment: {
-                fulfill: params => {
-                    return this.fulfill('sentiment', params)
-                },
-                providers: params => {
-                    return this.providers('sentiment', params)
-                },
-                provider: (providerId, params) => {
-                    return this.provider('sentiment', providerId, params)
-                },
-                languages: params => {
-                    return this.languages('sentiment', params)
-                },
-                language: (langCode, params) => {
-                    return this.language('sentiment', langCode, params)
-                },
-            },
-            dictionary: {
-                fulfill: params => {
-                    return this.fulfill('dictionary', params)
-                },
-                providers: params => {
-                    return this.providers('dictionary', params)
-                },
-                provider: (providerId, params) => {
-                    return this.provider('dictionary', providerId, params)
-                },
-                languages: params => {
-                    return this.languages('dictionary', params)
-                },
-                language: (langCode, params) => {
-                    return this.language('dictionary', langCode, params)
-                },
-            },
+            translate: textIntentGenerator('/ai/text/translate'),
+            sentiment: textIntentGenerator('/ai/text/sentiment'),
+            dictionary: textIntentGenerator('/ai/text/dictionary'),
+            classify: textIntentGenerator('/ai/text/classify'),
+            transliterate: textIntentGenerator('/ai/text/transliterate'),
+            'detect-intent': textIntentGenerator('/ai/text/detect-intent'),
+        },
+        image: {
+            tagging: anyIntentGenerator('/ai/image/tagging'),
+            ocr: anyIntentGenerator('/ai/image/ocr'),
+        },
+        speech: {
+            transcribe: anyIntentGenerator('/ai/image/transcribe'),
         },
     })
 
@@ -337,7 +336,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     }
 
     return this.makeRequest({
-        path: getPath(slug, this.debug, this.verbose),
+        path: slug,
         content,
         method: 'POST',
     })
@@ -375,7 +374,7 @@ IntentoConnector.prototype.providers = function(slug, params) {
         return this.provider(slug, params)
     }
     return this.makeRequest({
-        path: getPath(slug, this.debug, this.verbose),
+        path: slug,
         params,
         method: 'GET',
     })
@@ -385,7 +384,7 @@ IntentoConnector.prototype.provider = function(slug, params = {}) {
     const { id, ...otherParams } = params
 
     return this.makeRequest({
-        path: getPath(slug, this.debug, this.verbose) + '/' + id,
+        path: slug + '/' + id,
         params: otherParams,
         method: 'GET',
     })
@@ -397,7 +396,7 @@ IntentoConnector.prototype.language = function(slug, langCode, params) {
 
 IntentoConnector.prototype.languages = function(slug, params = {}) {
     const { id, language, ...other } = params
-    let path = getPath(slug, this.debug, this.verbose) + '/languages'
+    let path = slug + '/languages'
 
     if (language) {
         path += '/' + language
