@@ -20,3 +20,9 @@ node index.js --key=$INTENTO_API_KEY \
     --intent=ai.text.translate.provider \
     --responseMapper=shortProviderInfoResponse \
     --id=ai.text.translate.ibm-language-translator
+
+node index.js --key=$INTENTO_API_KEY \
+    --intent=translate.providers \
+    --responseMapper=authDetails \
+    --integrated --own_auth \
+    --fields=auth

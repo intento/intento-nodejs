@@ -646,6 +646,20 @@ function shortProviderInfoResponse(data = {}) {
 }
 
 /**
+ * own_auth details
+ *
+ * @param {array} data response data
+ * @returns {undefined}
+ */
+function authDetails(data = []) {
+    data = data.sort(sortByKey('id'))
+    data.forEach((p, idx) => {
+        console.log(`${idx + 1}. ${p.id}`)
+        console.log(prettyJSON(p.auth), '\n')
+    })
+}
+
+/**
  * Choose a function to log response results
  *
  * @param {string} intent name
@@ -659,6 +673,7 @@ function getDefaultOuputFn(intent) {
             usageResponse,
             shortProviderInfoResponse,
             providersCompactResponse,
+            authDetails,
         }[responseMapper]
     }
 
@@ -869,4 +884,26 @@ function intentRequiresText(intent = DEFAULT_INTENT) {
     }
 
     return intent.indexOf('text') !== -1
+}
+
+/**
+ * generates function to sort an array of objects by one of the object keys
+ *
+ * @param {string} key
+ * @returns {function} sorting hat
+ */
+function sortByKey(key) {
+    return (a, b) => {
+        const nameA = a[key].toUpperCase() // ignore upper and lowercase
+        const nameB = b[key].toUpperCase() // ignore upper and lowercase
+        if (nameA < nameB) {
+            return -1
+        }
+        if (nameA > nameB) {
+            return 1
+        }
+
+        // names must be equal
+        return 0
+    }
 }
