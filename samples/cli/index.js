@@ -416,7 +416,7 @@ async function errorFriendlyCallback(
                         if (!results || results.done === false) {
                             console.log(`Operation ${data.id} is still in progress`)
                             console.log(`Request operation results later with a command`)
-                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output=${output || `${Date.now()}_output.txt`}`)
+                            console.log(`\tnode index.js --key=${apikey} --intent=operations --id=${data.id} --output="${output || `${Date.now()}_output.txt`}"`)
                         }
                     }
                 }
