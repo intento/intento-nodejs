@@ -91,12 +91,15 @@ describe('Structure', () => {
         expect(typeof client.ai.text.sentiment.fulfill).toBe('function')
         expect(typeof client.ai.text.sentiment.providers).toBe('function')
         expect(typeof client.ai.text.sentiment.provider).toBe('function')
+        expect(typeof client.ai.text.sentiment.languages).toBe('function')
+        expect(typeof client.ai.text.sentiment.language).toBe('function')
 
         expect(client.ai.text.dictionary).toBeDefined()
         expect(typeof client.ai.text.dictionary.fulfill).toBe('function')
         expect(typeof client.ai.text.dictionary.providers).toBe('function')
         expect(typeof client.ai.text.dictionary.provider).toBe('function')
         expect(typeof client.ai.text.dictionary.languages).toBe('function')
+        expect(typeof client.ai.text.dictionary.language).toBe('function')
 
         expect(client.settings).toBeDefined()
         expect(typeof client.settings.languages).toBe('function')

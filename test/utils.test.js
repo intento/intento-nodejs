@@ -80,4 +80,12 @@ describe('ownCredentials', () => {
 
         expect(t(auth)).toEqual(t(auth2))
     })
+
+    it('accepts list of keys', () => {
+        expect.assertions(1)
+        const auth = [{ key: 'value' }]
+        const someProvider = 'some-provider'
+        const auth2 = ownCredentials(JSON.stringify(auth), [someProvider])
+        expect(t({ [someProvider]: auth })).toEqual(t(auth2))
+    })
 })
