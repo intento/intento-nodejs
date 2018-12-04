@@ -87,9 +87,13 @@ function IntentoConnector(credentials = {}, options = {}) {
                 // Example param: `lang_detect`
                 return this.providers(slug, params)
             },
-            provider: (providerId, params) => {
+            provider: (providerId, params = {}) => {
                 // GET /ai/text/translate/{providerId} without params, may accept params in the future
-                return this.provider(slug, providerId, params)
+                if (typeof providerId === 'string') {
+                    return this.provider(slug, { id: providerId, ...params })
+                }
+                // assume that all params are passed in second parameter
+                return this.provider(slug, providerId)
             },
         }
     }
@@ -130,7 +134,7 @@ function IntentoConnector(credentials = {}, options = {}) {
             ocr: anyIntentGenerator('/ai/image/ocr'),
         },
         speech: {
-            transcribe: anyIntentGenerator('/ai/image/transcribe'),
+            transcribe: anyIntentGenerator('/ai/speech/transcribe'),
         },
     })
 

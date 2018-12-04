@@ -21,7 +21,7 @@
     "clean": "rimraf lib",
     "lint": "eslint src test",
     "eslint": "eslint",
-    "jest": "jest",
+    "jest": "jest --env node",
     "test": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "build": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",

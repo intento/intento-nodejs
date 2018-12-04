@@ -114,7 +114,7 @@ function stringToList(value) {
  * Accepts
  * - auth="{\"key\": \"$SOME_PROVIDER_APIKEY\" }" - JSON decoded object, any structure accepted
  * - auth="{\"user\": \"$SOME_PROVIDER_USERNAME\", \"password\": \"$SOME_PROVIDER_PASSWORD\" }" - JSON decoded object, any structure accepted
- * - auth="[{\"key\": \"$SOME_PROVIDER_APIKEY\" }]" - JSON decoded list of objects, , any structure accepted
+ * - auth="[{\"key\": \"$SOME_PROVIDER_APIKEY\" }]" - JSON decoded list of objects, any structure accepted
  * - auth="{\"some-provider-id\":[{\"key\": \"$SOME_PROVIDER_APIKEY\" }]}" - JSON decoded full auth object, where keys are provider ids
  * - auth={'some-provider-id':[{ key: $SOME_PROVIDER_APIKEY }] } - javascript object, where keys are provider ids
  * @param {string|object} auth - credential description

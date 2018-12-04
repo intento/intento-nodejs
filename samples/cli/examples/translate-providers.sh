@@ -21,6 +21,7 @@ node index.js --key=$INTENTO_API_KEY \
     --responseMapper=shortProviderInfoResponse \
     --id=ai.text.translate.ibm-language-translator
 
+echo "List auth data for integrated providers"
 node index.js --key=$INTENTO_API_KEY \
     --intent=translate.providers \
     --responseMapper=authDetails \
