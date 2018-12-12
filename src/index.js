@@ -292,11 +292,12 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         output_format,
         pretty_print,
         processing = {},
+        ...other
     } = parameters
     const providerList = stringToList(provider)
 
     const content = {
-        context: { text, from, to, lang, category, format },
+        context: { text, from, to, lang, category, format, ...other },
         service: {
             provider: providerList,
             auth: ownCredentials(auth, providerList),

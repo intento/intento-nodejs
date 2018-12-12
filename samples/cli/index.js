@@ -59,6 +59,7 @@ const {
     encoding = 'utf-8',
     secret_credentials_file,
     auth_file,
+    image_file,
     only_operation_id,
     attempts = ATTEMPTS_TO_REQUEST_ASYNC_RESULTS,
     timedelta = INTERVAL_TO_REQUEST_ASYNC_RESULTS,
@@ -184,6 +185,10 @@ async function processRequest(intentProcessor, argv) {
         OTHER_OPTIONS.auth = await getDataFromFile(auth_file, encoding)
     }
 
+    if (image_file) {
+        OTHER_OPTIONS.image = base64_encode(image_file)
+    }
+
     const params = { ...OTHER_OPTIONS }
     if (bulk) {
         params.bulk = true
@@ -216,14 +221,28 @@ async function processRequest(intentProcessor, argv) {
     }
 }
 
+
 /**
- * Read file content
+ * function to encode file data to base64 encoded string
+ *
+ * @param {string} filename path to a file
+ * @returns {string} encoded string
+ */
+function base64_encode(filename) {
+    // read binary data
+    var bitmap = fs.readFileSync(filename)
+    // convert binary data to base64 encoded string
+    return new Buffer.from(bitmap).toString('base64')
+}
+
+
+/**
+ * Get abs path to a file
  *
  * @param {string} filename relative or absolute path to a file
- * @param {string} [encoding='utf-8'] character encoding
- * @returns {string} content of a file
+ * @returns {string} abs path to a file
  */
-async function getDataFromFile(filename, encoding = 'utf-8') {
+async function getFilePath(filename) {
     let filePath
 
     if (!filename) {
@@ -240,6 +259,20 @@ async function getDataFromFile(filename, encoding = 'utf-8') {
             return ''
         }
     }
+
+    return filePath
+}
+
+
+/**
+ * Read file content
+ *
+ * @param {string} filename relative or absolute path to a file
+ * @param {string} [encoding='utf-8'] character encoding
+ * @returns {string} content of a file
+ */
+async function getDataFromFile(filename, encoding = 'utf-8') {
+    const filePath = getFilePath(filename)
 
     try {
         const data = await readFile(filePath, { encoding })
