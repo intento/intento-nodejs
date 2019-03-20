@@ -14,6 +14,7 @@ In case you don't have a key to use Intento API, please register here [console.i
 
 - [Installation](#installation)
 - [Command line interface](#command-line-interface)
+- [Try it in a browser](#try-it-in-a-browser)
 - [Basic usage](#basic-usage)
     - [Translation](#translation)
     - [Sentiment analysis](#sentiment-analysis)
@@ -60,6 +61,19 @@ yarn add intento-nodejs
 ## Command line interface
 
 See [CLI example](https://github.com/intento/intento-nodejs/tree/master/samples/cli) as one of the ways to use this SDK.
+
+## Try it in a browser
+
+Requires `serve` to be installed globally in your system
+
+```sh
+yarn global add serve
+yarn build # it will prepare minified files, see ./dist folder
+yarn test-in-browser
+# Visit http://localhost:5000/samples/browser-app
+```
+
+Go to an example browser app at [http://localhost:5000/samples/browser-app](http://localhost:5000/samples/browser-app)
 
 ## Basic usage
 

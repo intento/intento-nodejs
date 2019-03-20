@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <script src="/dist/intentoConnector.js"></script>
+    <form id="test">
+        <label for="keyInput">apikey</label>
+        <input type="text" placeholder="enter your apikey" id="keyInput" value=""/>
+        <button type="submit">Click me and wait</button>
+    </form>
+    <p>Visit <a href="https://console.inten.to" target="_blank">console.inten.to</a> to get the key.</p>
+
+    <pre id="output"></pre>
+    <p style="opacity: 0.5">More information in the browser console</p>
+    <script>
+        const testForm = document.getElementById('test');
+        const keyInput = document.getElementById('keyInput');
+        const outputNode = document.getElementById('output');
+        let client;
+
+        testForm.addEventListener('submit', submitTest);
+
+        function init (apikey) {
+            console.info('Init client with apikey', apikey);
+
+            client = new IntentoConnector({ apikey })
+        }
+
+        function submitTest(e) {
+            e.preventDefault()
+            if (!client || !client.apikey || keyInput.value !== client.apikey) {
+                init(keyInput.value);
+            }
+            client.ai.text.translate
+                .providers()
+                .then(prettyPrintProviders)
+                .catch(prettyCatch)
+        }
+
+        function prettyPrintProviders(data) {
+            let results = ''
+            if (!data || !data.length) {
+                results += `\nThere are no providers.`
+            } else if (data.length === 1) {
+                results += `\nThere is one provider:`
+            } else {
+                results += `\nThere are overall ${data.length} providers:`
+            }
+
+            data.forEach((p, i) => {
+                results += `\n  ${i + 1}. ${p.name}`
+            })
+
+            outputNode.innerText = results
+            console.log('Full response', data);
+
+        }
+
+        function prettyCatch(errorResponse) {
+            console.error('\nError: ' + errorResponse.message)
+            console.error('\n\n')
+        }
+    </script>
+</body>
+
+</html>
