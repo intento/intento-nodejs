@@ -24,7 +24,9 @@
     "jest": "jest --env node",
     "test": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "test-in-browser": "serve . && echo 'Visit  http://localhost:5000/samples/browser-app'",
-    "build": "webpack",
+    "build_pack": "cross-env BABEL_ENV=production babel src --out-dir lib",
+    "build_dist": "webpack",
+    "build": "yarn build_pack; yarn build_dist",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
     "format_test": "prettier --config test/.prettierrc --write 'test*/*.js'",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
@@ -48,5 +50,8 @@
     "rimraf": "^2.6.2",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
+  },
+  "dependencies": {
+    "cross-env": "^5.2.0"
   }
 }
