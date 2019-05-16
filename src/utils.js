@@ -122,7 +122,7 @@ function stringToList(value) {
  * @returns {object} - correct auth object
  */
 function ownCredentials(auth, providerList) {
-    if (!auth) {
+    if (!auth || Object.keys(auth).length === 0) {
         return
     }
     if (!providerList || !providerList.length) {

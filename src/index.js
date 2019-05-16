@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.4.1'
+const VERSION = '0.4.3'
 const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
