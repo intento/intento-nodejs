@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.4.3'
+const VERSION = '0.5.0'
 const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
@@ -128,6 +128,7 @@ function IntentoConnector(credentials = {}, options = {}) {
             classify: textIntentGenerator('/ai/text/classify'),
             transliterate: textIntentGenerator('/ai/text/transliterate'),
             'detect-intent': textIntentGenerator('/ai/text/detect-intent'),
+            'detect-language': textIntentGenerator('/ai/text/detect-language'),
         },
         image: {
             tagging: anyIntentGenerator('/ai/image/tagging'),

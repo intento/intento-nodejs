@@ -43,6 +43,11 @@ describe('provider information', () => {
         const response = await client.ai.text['detect-intent'].provider(providerId)
         expect(t(response)).toEqual(t('/ai/text/detect-intent/' + providerId))
     })
+    it('get text detect-language provider', async () => {
+        expect.assertions(1)
+        const response = await client.ai.text['detect-language'].provider(providerId)
+        expect(t(response)).toEqual(t('/ai/text/detect-language/' + providerId))
+    })
     it('get image tagging provider', async () => {
         expect.assertions(1)
         const response = await client.ai.image.tagging.provider(providerId)

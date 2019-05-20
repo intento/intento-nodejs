@@ -101,6 +101,13 @@ describe('Structure', () => {
         expect(typeof client.ai.text.dictionary.languages).toBe('function')
         expect(typeof client.ai.text.dictionary.language).toBe('function')
 
+        expect(client.ai.text['detect-language']).toBeDefined()
+        expect(typeof client.ai.text['detect-language'].fulfill).toBe('function')
+        expect(typeof client.ai.text['detect-language'].providers).toBe('function')
+        expect(typeof client.ai.text['detect-language'].provider).toBe('function')
+        expect(typeof client.ai.text['detect-language'].languages).toBe('function')
+        expect(typeof client.ai.text['detect-language'].language).toBe('function')
+
         expect(client.settings).toBeDefined()
         expect(typeof client.settings.languages).toBe('function')
         expect(typeof client.settings.processingRules).toBe('function')
@@ -178,6 +185,30 @@ describe('Dictionary Intent', () => {
     })
     it('Languages returns a promise', () => {
         const ret = client.ai.text.dictionary.languages()
+        expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
+    })
+})
+
+
+describe('Language Detect Intent', () => {
+    it('Fulfill returns a promise', () => {
+        const ret = client.ai.text['detect-language'].fulfill()
+        expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
+    })
+    it('Providers returns a promise', () => {
+        const ret = client.ai.text['detect-language'].providers()
+        expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
+    })
+    it('Provider returns a promise', () => {
+        const ret = client.ai.text['detect-language'].provider('')
+        expect(ret instanceof Promise).toBe(true)
+        ret.catch(prettyCatch)
+    })
+    it('Languages returns a promise', () => {
+        const ret = client.ai.text['detect-language'].languages()
         expect(ret instanceof Promise).toBe(true)
         ret.catch(prettyCatch)
     })
