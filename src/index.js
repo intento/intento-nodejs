@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.6.0'
+const VERSION = '0.7.0'
 const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
@@ -283,6 +283,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         category,
         provider,
         bidding,
+        routing,
         failover,
         failover_list,
         auth,
@@ -306,6 +307,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             // prettier-ignore
             'async': asyncMode,
             bidding,
+            routing,
             failover,
             failover_list,
             multiple_translations,
