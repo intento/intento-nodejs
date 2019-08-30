@@ -80,7 +80,7 @@ Go to an example browser app at [http://localhost:5000/samples/browser-app](http
 Initialise the client
 
 ```js
-const IntentoConnector = require('./src/index')
+const IntentoConnector = require('intento-nodejs')
 const client = new IntentoConnector({ apikey: YOUR_INTENTO_KEY })
 ```
 
