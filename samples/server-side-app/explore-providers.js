@@ -2,7 +2,9 @@ if (process) {
     const currentNodeJSVersion = Number(process.version.match(/^v?(\d+\.\d+)/)[1])
     const minimalNodeJSVersion = '10.0'
     if (currentNodeJSVersion < Number(minimalNodeJSVersion)) {
-        console.error(`\nMinimal node version required for this script is ${minimalNodeJSVersion}.0.`)
+        console.error(
+            `\nMinimal node version required for this script is ${minimalNodeJSVersion}.0.`
+        )
         console.error(`Your node version is ${currentNodeJSVersion}.`)
         console.log('Please, upgrade your node\n')
         process.exit(1)

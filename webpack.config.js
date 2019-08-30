@@ -6,8 +6,8 @@ const serverDevConfig = {
     mode: 'development',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'intentoConnector.node.js'
-    }
+        filename: 'intentoConnector.node.js',
+    },
 }
 
 const serverConfig = {
@@ -16,8 +16,8 @@ const serverConfig = {
     mode: 'production',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'intentoConnector.node.min.js'
-    }
+        filename: 'intentoConnector.node.min.js',
+    },
 }
 
 const clientDevConfig = {
@@ -26,8 +26,8 @@ const clientDevConfig = {
     mode: 'development',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'intentoConnector.js'
-    }
+        filename: 'intentoConnector.js',
+    },
 }
 
 const clientConfig = {
@@ -36,8 +36,8 @@ const clientConfig = {
     mode: 'production',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'intentoConnector.min.js'
-    }
+        filename: 'intentoConnector.min.js',
+    },
 }
 
 module.exports = [serverDevConfig, serverConfig, clientDevConfig, clientConfig]

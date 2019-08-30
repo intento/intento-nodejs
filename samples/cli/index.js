@@ -221,7 +221,6 @@ async function processRequest(intentProcessor, argv) {
     }
 }
 
-
 /**
  * function to encode file data to base64 encoded string
  *
@@ -234,7 +233,6 @@ function base64_encode(filename) {
     // convert binary data to base64 encoded string
     return new Buffer.from(bitmap).toString('base64')
 }
-
 
 /**
  * Get abs path to a file
@@ -262,7 +260,6 @@ async function getFilePath(filename) {
 
     return filePath
 }
-
 
 /**
  * Read file content

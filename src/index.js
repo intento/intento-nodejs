@@ -200,9 +200,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     }
     if (this.verbose) {
         console.log(
-            `\nAPI request\n 'apikey: ${
-                requestOptions.headers.apikey
-            }' https://${requestOptions.host}${requestOptions.path}`
+            `\nAPI request\n 'apikey: ${requestOptions.headers.apikey}' https://${requestOptions.host}${requestOptions.path}`
         )
     }
 
@@ -232,9 +230,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
 
     if (this.curl) {
         const { host, path, headers } = requestOptions
-        let requestString = `curl -X${method} -H 'apikey: ${
-            headers.apikey
-        }' https://${host}${path}`
+        let requestString = `curl -X${method} -H 'apikey: ${headers.apikey}' https://${host}${path}`
         const curlData = data || JSON.stringify(content, null, 4) || ''
 
         if (curlData) {
@@ -352,7 +348,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.getUserAgent = function (params = {}) {
+IntentoConnector.prototype.getUserAgent = function(params = {}) {
     const { customHeader = false } = params
     const markers = []
 
