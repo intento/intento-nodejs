@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.7.0'
+const VERSION = '0.7.1'
 const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
@@ -188,6 +188,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     const requestOptions = {
         host: this.host,
         headers: {
+            'content-type': 'application/json',
             'User-Agent': this.getUserAgent(),
             'X-User-Agent': this.getUserAgent({ customHeader: true }),
             apikey: this.apikey,
