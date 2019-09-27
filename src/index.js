@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.7.1'
+const VERSION = '0.8.0'
 const SDK_NAME = 'Intento.NodeJS'
 
 const https = require('https')
@@ -292,6 +292,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         pretty_print,
         processing = {},
         trace,
+        userdata,
         ...other
     } = parameters
     const providerList = stringToList(provider)
@@ -313,6 +314,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             pretty_print,
             trace, // https://github.com/intento/intento-api/blob/edaefaa932267d7b09f0e07a74a0731c96e5c7bc/README.md#request-body-in-service
         },
+        userdata,
     }
 
     if (processing && (processing.pre || processing.post)) {
