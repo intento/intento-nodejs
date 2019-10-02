@@ -30,7 +30,7 @@ In case you don't have a key to use Intento API, please register here [console.i
 - [Text meanings capabilities (dictionary)](#text-meanings-capabilities-dictionary)
 - [Smart routing](#smart-routing)
     - [Basic smart routing](#basic-smart-routing)
-    - [Specifying the bidding strategy](#specifying-the-bidding-strategy)
+    - [Specifying a custom routing strategy](#specifying-a-custom-routing-strategy)
     - [Async mode](#async-mode)
 - [Failover mode](#failover-mode)
 - [Using a service provider with your own keys](#using-a-service-provider-with-your-own-keys)
@@ -241,21 +241,16 @@ Response:
 }
 ```
 
-### Specifying the bidding strategy
+### Specifying a custom routing strategy
 
-By default, when the provider is missing, requests are routed to a provider with the best expected price/performance ratio. This behavior may be controlled by specifying the desired bidding strategy in the `bidding` parameter. Supported values are:
-
-- `best` (default)
-- `best_quality` - the best expected quality regardless of the price
-- `best_price` - the cheapest provider
-- `random` - a randomly chosen provider
+By default, when the provider is missing, requests are routed to a provider with the best expected price/performance ratio. This behavior may be controlled by specifying the desired routing strategy in the `routing` parameter. To set up routing for your account contact us at hello@inten.to.
 
 ```js
 client.ai.text.translate
     .fulfill({
         text: 'A sample text',
         to: 'es',
-        bidding: 'best_quality',
+        routing: 'best-quality',
     })
     .then(console.log)
 ```
@@ -351,7 +346,7 @@ If the operation is not completed the value of `done` is false. Wait and make re
 
 ## Failover mode
 
-Both for smart routing mode and basic mode, a failover is supported. By default, the failover is off, thus when the selected provider fails, an error is returned. To enable the failover mode, set the `failover` to `true`. By default, failover is governed by the default bidding strategy (`best`). To control this behavior, another bidding strategy may be specified via `bidding` parameter. Alternatively, you may specify a list of providers to consider for the failover (`failover_list`). This option overrides the bidding strategy for the failover procedure.
+Both for smart routing mode and basic mode, a failover is supported. By default, the failover is off, thus when the selected provider fails, an error is returned. To enable the failover mode, set the `failover` to `true`. By default, failover is governed by the default routing strategy (`best`). To control this behavior, another routing strategy may be specified via `routing` parameter. Alternatively, you may specify a list of providers to consider for the failover (`failover_list`). This option overrides the routing strategy for the failover procedure.
 
 In the following example we set the provider, but specify the list of alternatives to control the failover:
 

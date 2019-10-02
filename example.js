@@ -91,7 +91,7 @@ client.ai.text.translate
     .fulfill({
         text: "How's it going?",
         to: 'pt',
-        bidding: 'best_price',
+        routing: 'best_price',
     })
     .then(data => {
         console.log('\nTranslate with a "best_price" strategy \n')
