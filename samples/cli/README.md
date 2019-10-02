@@ -521,7 +521,7 @@ These examples in [a script](./examples/translate-with-custom-model.sh).
 ```sh
 node index.js --key=some_invalid_key \
     --intent=translate \
-    --provider=ai.text.translate.google.automl_api.v1alpha1 \
+    --provider=ai.text.translate.google.translate_api.v3beta1 \
     --from=en \
     --to=pt \
     "epigenetics markers for cancer and bowel syndrome treatment in a hospital setting"
@@ -534,7 +534,7 @@ Because this provider requires `category` (custom model)
 ```sh
 node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
-    --provider=ai.text.translate.google.automl_api.v1alpha1 \
+    --provider=ai.text.translate.google.translate_api.v3beta1 \
     --from=en \
     --to=pt \
     "epigenetics markers for cancer and bowel syndrome treatment in a hospital setting"
@@ -549,7 +549,7 @@ Because this provider requires credentials to use your custom model.
 ```sh
 node index.js --key=$INTENTO_API_KEY \
     --intent=translate \
-    --provider=ai.text.translate.google.automl_api.v1alpha1 \
+    --provider=ai.text.translate.google.translate_api.v3beta1 \
     --category=YOUR_CUSTOM_CATEGORY \
     --from=en \
     --to=pt \
