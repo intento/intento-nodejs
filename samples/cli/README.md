@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-A simple [example](own-keys-auth.sh) for translating a string to russian
+A simple [example](examples/own-keys-auth.sh) for translating a string to russian
 
 ```sh
 node index.js --key=$INTENTO_API_KEY \
