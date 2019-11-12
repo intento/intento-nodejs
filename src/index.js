@@ -1,8 +1,10 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.8.0'
+const VERSION = '0.9.0'
 const SDK_NAME = 'Intento.NodeJS'
+
+const DEFAULT_AWAIT_DELAY = 1000
 
 const https = require('https')
 const querystring = require('querystring')
@@ -286,6 +288,8 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
         auth,
         // prettier-ignore
         'async': asyncMode,
+        awaitAsync,
+        awaitDelay = DEFAULT_AWAIT_DELAY,
         multiple_translations,
         input_format,
         output_format,
@@ -342,6 +346,39 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             })
             throw new Error('Please specify a provider')
         }
+    }
+
+    const that = this
+    // RECURSION
+    /**
+     *  @param {number} [delay] time in milliseconds
+     *  @param {object} [data] any object with id key
+     *  @returns {promise} promise
+    */
+    function later(delay, data) {
+        return new Promise(function (resolve) {
+            setTimeout(function () {
+                that.makeRequest({
+                    path: `/operations/${data.id}`,
+                    method: 'GET',
+                }).then(operationResponse => {
+                    if (operationResponse.done) {
+                        resolve(operationResponse)
+                    } else {
+                        return later(delay, data)
+                    }
+                })
+            }, delay)
+        })
+    }
+    if (asyncMode && awaitAsync) {
+        return this.makeRequest({
+            path: slug,
+            content,
+            method: 'POST',
+        }).then(data => {
+            return later(awaitDelay, data)
+        })
     }
 
     return this.makeRequest({
