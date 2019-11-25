@@ -32,6 +32,8 @@ In case you don't have a key to use Intento API, please register here [console.i
     - [Basic smart routing](#basic-smart-routing)
     - [Specifying a custom routing strategy](#specifying-a-custom-routing-strategy)
     - [Async mode](#async-mode)
+    - [Async mode with awaiting results](#async-mode-with-awaiting-results)
+        - [Change request frequency](#change-request-frequency)
 - [Failover mode](#failover-mode)
 - [Using a service provider with your own keys](#using-a-service-provider-with-your-own-keys)
 - [Advanced Examples](#advanced-examples)
@@ -342,6 +344,96 @@ If the operation is not completed the value of `done` is false. Wait and make re
     "done": false,
     "response": null
 }
+```
+
+### Async mode with awaiting results
+
+Add `awaitAsync: true` to parameters to get results directly:
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: "How's it going?",
+        to: 'es',
+        async: true,
+        awaitAsync: true
+    })
+    .then(res => {
+        console.log(JSON.stringify(res, null, 4))
+    })
+```
+
+The response will be similar to the following one:
+
+```js
+{
+    "id": "qa2wed4r-3e4r-5t6y-6y7u-23456789",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "¿Qué tal va todo?"
+            ],
+            "meta": {
+                "detected_source_language": [
+                    "en"
+                ]
+            },
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.deepl.api",
+                    "name": "DeepL API",
+                    "vendor": "DeepL",
+                    "description": "API",
+                    "logo": "https://inten.to/static/img/api/deepl_translate.png"
+                }
+            }
+        }
+    ],
+    "meta": {
+        "providers": [
+            {
+                "id": "ai.text.translate.deepl.api",
+                "name": "DeepL API",
+                "vendor": "DeepL",
+                "description": "API",
+                "logo": "https://inten.to/static/img/api/deepl_translate.png"
+            }
+        ],
+        "from": null,
+        "to": "es",
+        "format": null,
+        "glossary": null,
+        "smart_routing": "default",
+        "category": "default",
+        "own_keys": false,
+        "size": 15,
+        "intento_user_agent": [
+            "Intento.NodeJS/0.9.0"
+        ],
+        "userdata": {}
+    },
+    "error": null
+}
+```
+
+#### Change request frequency
+
+Add `awaitDelay` (number in milliseconds) to parameters to change how often results are requested. It does not speed up the process.
+Default value is `1000`.
+
+```js
+client.ai.text.translate
+    .fulfill({
+        text: "How's it going?",
+        to: 'es',
+        async: true,
+        awaitAsync: true,
+        awaitDelay: 500
+    })
+    .then(res => {
+        console.log(JSON.stringify(res, null, 4))
+    })
 ```
 
 ## Failover mode
