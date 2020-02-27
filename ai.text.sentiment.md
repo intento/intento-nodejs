@@ -8,7 +8,6 @@ More on that in the [documentation](https://github.com/intento/intento-api/blob/
 
 - [Basic usage](#basic-usage)
 - [Bulk mode](#bulk-mode)
-    - [:lock: Multi mode](#lock-multi-mode)
 - [Explore sentiment analysis providers](#explore-sentiment-analysis-providers)
     - [Response structure for provider-related requests](#response-structure-for-provider-related-requests)
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
@@ -110,65 +109,6 @@ The response contains the processed texts and a service information:
         }
     }
 }
-```
-
-### :lock: Multi mode
-
-In the multi mode, the processing of the text is performed using a list of providers. The mode is activated by passing an array of provider identificators.
-
-```js
-client.ai.text.sentiment
-    .fulfill({
-        text: [
-            'We love this trail and make the trip every year. The views are breathtaking and well worth the hike!'
-        ],
-        lang: 'en',
-        provider: [
-            'ai.text.sentiment.ibm.natural_language_understanding',
-            'ai.text.sentiment.aylien.text_analysis_api.1-0'
-        ],
-    })
-    .then(console.log)
-```
-
-The response contains the analyzed text and a service information:          ↑
-
-```json
-[
-    {
-        "results": [
-            {
-                "sentiment_label": "positive",
-                "sentiment_score": 0.931392
-            }
-        ],
-        "meta": {},
-        "service": {
-            "provider": {
-                "id": "ai.text.sentiment.ibm.natural_language_understanding",
-                "name": "IBM Watson Natural Language Understanding"
-            }
-        }
-    },
-    {
-        "results": [
-            {
-                "sentiment_label": "positive",
-                "sentiment_score": 1.0,
-                "sentiment_confidence": 0.9975973963737488,
-                "sentiment_subjectivity": "unknown",
-                "subjectivity_confidence": 0.0
-            }
-        ],
-        "meta": {},
-        "service": {
-            "provider": {
-                "id": "ai.text.sentiment.aylien.text_analysis_api.1-0",
-                "name": "AYLIEN Text Analysis API"
-            }
-        }
-    }
-]
 ```
 
 ## Explore sentiment analysis providers
