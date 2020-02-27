@@ -82,7 +82,7 @@ function IntentoConnector(credentials = {}, options = {}) {
             fulfill: params => {
                 // POST /ai/text/translate with params
                 // Example params: `from`, `to`, `text
-                return this.fulfill(slug, params)
+                return this.fulfill(slug, { async: true, awaitAsync: true, ...params })
             },
             providers: params => {
                 // GET /ai/text/translate with params
@@ -377,6 +377,9 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             content,
             method: 'POST',
         }).then(data => {
+            if (this.dryRun) {
+                return data
+            }
             return later(awaitDelay, data)
         })
     }

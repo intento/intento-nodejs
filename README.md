@@ -1,4 +1,4 @@
-# Intento nodejs
+# Intento SDK for Node.js
 
 An adapter to query Intento API.
 
@@ -8,7 +8,7 @@ To get more information check out [the site](https://inten.to/).
 
 [API User Manual](https://github.com/intento/intento-api)
 
-In case you don't have a key to use Intento API, please register here [console.inten.to](https://console.inten.to)
+In case you don't have a key to use Intento API, please register here [inten.to](https://inten.to)
 
 <!-- TOC depthFrom:2 -->
 
@@ -220,7 +220,7 @@ To use the smart routing, just omit the `provider` parameter:
 ```js
 client.ai.text.translate
     .fulfill({
-        text: 'A sample text',
+        text: "How's it going?",
         to: 'es'
     })
     .then(console.log)
@@ -230,16 +230,53 @@ Response:
 
 ```json
 {
-    "results": [
-        "Un texto de ejemplo"
-    ],
-    "meta": {},
-    "service": {
-        "provider": {
-            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
-            "name": "Microsoft Translator API"
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "¿Qué tal va todo?"
+            ],
+            "meta": {
+                "detected_source_language": [
+                    "en"
+                ]
+            },
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.deepl.api",
+                    "name": "DeepL API",
+                    "vendor": "DeepL",
+                    "description": "API",
+                    "logo": "https://inten.to/static/img/api/deepl_translate.png"
+                }
+            }
         }
-    }
+    ],
+    "meta": {
+        "providers": [
+            {
+                "id": "ai.text.translate.deepl.api",
+                "name": "DeepL API",
+                "vendor": "DeepL",
+                "description": "API",
+                "logo": "https://inten.to/static/img/api/deepl_translate.png"
+            }
+        ],
+        "from": null,
+        "to": "es",
+        "format": null,
+        "glossary": null,
+        "smart_routing": "default",
+        "category": "default",
+        "own_keys": false,
+        "size": 15,
+        "intento_user_agent": [
+            "Intento.NodeJS/1.0.0"
+        ],
+        "userdata": {}
+    },
+    "error": null
 }
 ```
 
@@ -271,6 +308,7 @@ client.ai.text.translate
         from: 'en',
         to: 'es',
         async: true,
+        awaitAsync: false,
         provider: [
             'ai.text.translate.google.translate_api.2-0',
             'ai.text.translate.yandex.translate_api.1-5'
