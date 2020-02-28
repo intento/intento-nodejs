@@ -22,7 +22,7 @@ describe('auth with own keys', () => {
         const sampleRequest = {
             context: {},
             service: {
-                provider: ['some-provider'],
+                provider: 'some-provider',
                 auth: { 'some-provider': [{ key: 'value' }] },
                 async: true,
             },

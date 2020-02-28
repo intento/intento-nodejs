@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.9.0'
+const VERSION = '0.10.0'
 const SDK_NAME = 'Intento.NodeJS'
 
 const DEFAULT_AWAIT_DELAY = 1000
@@ -304,7 +304,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     const content = {
         context: { text, from, to, lang, category, format, ...other },
         service: {
-            provider: providerList,
+            provider,
             auth: ownCredentials(auth, providerList),
             // prettier-ignore
             'async': asyncMode,

@@ -309,10 +309,7 @@ client.ai.text.translate
         to: 'es',
         async: true,
         awaitAsync: false,
-        provider: [
-            'ai.text.translate.google.translate_api.2-0',
-            'ai.text.translate.yandex.translate_api.1-5'
-        ]
+        provider: 'ai.text.translate.yandex.translate_api.1-5'
     })
     .then(console.log)
 ```
@@ -344,19 +341,6 @@ The response
     "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda",
     "done": true,
     "response": [
-        {
-            "results": [
-                "Un texto de ejemplo 1",
-                "Un texto de ejemplo 2"
-            ],
-            "meta": {},
-            "service": {
-                "provider": {
-                    "id": "ai.text.translate.microsoft.translator_text_api.2-0",
-                    "name": "Microsoft Translator API"
-                }
-            }
-        },
         {
             "results": [
                 "Un texto de ejemplo 1",
