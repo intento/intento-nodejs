@@ -679,14 +679,18 @@ function providersWithFlags(data = {}) {
             custom_model,
             delegated_credentials,
         } = provider
-        console.log([id,
-            production,
-            integrated,
-            billable,
-            own_auth,
-            stock_model,
-            custom_model,
-            delegated_credentials,].join(','))
+        console.log(
+            [
+                id,
+                production,
+                integrated,
+                billable,
+                own_auth,
+                stock_model,
+                custom_model,
+                delegated_credentials,
+            ].join(',')
+        )
     })
 }
 

@@ -51,20 +51,33 @@ The response contains the translated text, service information and meta informat
 
 ```json
 {
-    "results": [
-        "¿Cómo te va?"
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "¿Cómo va todo?"
+            ],
+            "meta": {
+                "detected_source_language": [
+                    "en"
+                ]
+            },
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.deepl.api",
+                    "name": "DeepL API",
+                    "vendor": "DeepL",
+                    "description": "API",
+                    "logo": "https://inten.to/static/img/api/deepl_translate.png"
+                }
+            }
+        }
     ],
     "meta": {
-        "detected_source_language": [
-            "en"
-        ]
+        // information about initial request
     },
-    "service": {
-        "provider": {
-            "id": "ai.text.translate.google.translate_api.2-0",
-            "name": "Google Cloud Translation API"
-        }
-    }
+    "error": null
 }
 ```
 
@@ -88,17 +101,35 @@ The response contains the translated texts and a service information on which pr
 
 ```json
 {
-    "results": [
-        "Ein Beispieltext",
-        "Hallo Welt"
-    ],
-    "meta": {},
-    "service": {
-        "provider": {
-            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
-            "name": "Microsoft Translator API"
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "Un texto de muestra",
+                "Hola mundo"
+            ],
+            "meta": {
+                "detected_source_language": [
+                    "en",
+                    "en"
+                ]
+            },
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.deepl.api",
+                    "name": "DeepL API",
+                    "vendor": "DeepL",
+                    "description": "API",
+                    "logo": "https://inten.to/static/img/api/deepl_translate.png"
+                }
+            }
         }
-    }
+    ],
+    "meta": {
+        // information about initial request
+    },
+    "error": null
 }
 ```
 
@@ -178,7 +209,7 @@ To translate a text using a specified format just add a `format` field into `con
 ```js
 client.ai.text.translate
     .fulfill({
-        text: '<p>A <div>sample</div> text</p>',
+        text: '<p>A <b>sample</b> text</p>',
         to: 'ru',
         format: 'html', // <-- specify input format
         provider: 'ai.text.translate.google.translate_api.2-0',
@@ -190,16 +221,33 @@ The response contains the translated text with preserved formatting:
 
 ```json
 {
-    "results": ["<p> <div> \u043e\u0431\u0440\u0430\u0437\u0435\u0446 </div> \u0442\u0435\u043a\u0441\u0442 </p>"],
-    "meta": {
-        "detected_source_language": ["en"]
-    },
-    "service": {
-        "provider": {
-            "id": "ai.text.translate.google.translate_api.2-0",
-            "name": "Google Cloud Translation API"
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "<p> <b>Образец</b> текста </p>"
+            ],
+            "meta": {
+                "detected_source_language": [
+                    "en"
+                ]
+            },
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.google.translate_api.2-0",
+                    "name": "Google Cloud Basic Translation API",
+                    "vendor": "Google Cloud",
+                    "description": "Basic Translation API",
+                    "logo": "https://inten.to/static/img/api/ggl_translate.png"
+                }
+            }
         }
-    }
+    ],
+    "meta": {
+        // information about initial request
+    },
+    "error": null
 }
 ```
 
@@ -319,7 +367,7 @@ Response:
         "score": 0,
         "price": 0
     },
-    ...
+    // other providers
 ]
 ```
 

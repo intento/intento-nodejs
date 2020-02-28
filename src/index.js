@@ -83,7 +83,11 @@ function IntentoConnector(credentials = {}, options = {}) {
                 // POST /ai/text/translate with params
                 // Example params: `from`, `to`, `text
                 if (slug.indexOf('translate') !== -1) {
-                    return this.fulfill(slug, { async: true, awaitAsync: true, ...params })
+                    return this.fulfill(slug, {
+                        async: true,
+                        awaitAsync: true,
+                        ...params,
+                    })
                 }
                 return this.fulfill(slug, params)
             },
@@ -357,10 +361,10 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
      *  @param {number} [delay] time in milliseconds
      *  @param {object} [data] any object with id key
      *  @returns {promise} promise
-    */
+     */
     function later(delay, data) {
-        return new Promise(function (resolve) {
-            setTimeout(function () {
+        return new Promise(function(resolve) {
+            setTimeout(function() {
                 that.makeRequest({
                     path: `/operations/${data.id}`,
                     method: 'GET',
