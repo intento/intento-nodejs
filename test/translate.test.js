@@ -19,8 +19,8 @@ const CONTENT = {
 const SAMPLE_REQUEST = {
     context: { text: ' A sample text ', to: 'es' },
     service: {
-        async: true,
         provider: 'ai.text.translate.microsoft.translator_text_api.2-0',
+        async: true,
     },
 }
 

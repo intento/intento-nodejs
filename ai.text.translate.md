@@ -25,7 +25,6 @@ client.ai.text.translate
 - [Filtering providers by capabilities](#filtering-providers-by-capabilities)
     - [Providers with language detect feature](#providers-with-language-detect-feature)
     - [Providers supporting html input](#providers-supporting-html-input)
-    - [Provider supporting bulk translation](#provider-supporting-bulk-translation)
     - [Providers able to translate to Afrikaans](#providers-able-to-translate-to-afrikaans)
     - [Combine filters](#combine-filters)
 - [Getting information about a provider](#getting-information-about-a-provider)
@@ -322,14 +321,6 @@ Response:
     },
     ...
 ]
-```
-
-### Provider supporting bulk translation
-
-```js
-client.ai.text.translate
-    .providers({ bulk: true })
-    .then(data => data.forEach(p => console.info(p.name)))
 ```
 
 ### Providers able to translate to Afrikaans
