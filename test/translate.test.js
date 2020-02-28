@@ -20,6 +20,7 @@ const SAMPLE_REQUEST = {
     context: { text: ' A sample text ', to: 'es' },
     service: {
         provider: 'ai.text.translate.microsoft.translator_text_api.2-0',
+        async: true,
     },
 }
 
@@ -59,6 +60,7 @@ describe('ai.text.translate', () => {
             ...SAMPLE_REQUEST,
             service: {
                 ...SAMPLE_REQUEST.service,
+                async: true,
                 processing: { pre: ['punctuation_set'], post: ['punctuation_set'] },
             },
         }

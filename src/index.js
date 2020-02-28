@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '0.10.0'
+const VERSION = '1.0.0'
 const SDK_NAME = 'Intento.NodeJS'
 
 const DEFAULT_AWAIT_DELAY = 1000
@@ -82,6 +82,13 @@ function IntentoConnector(credentials = {}, options = {}) {
             fulfill: params => {
                 // POST /ai/text/translate with params
                 // Example params: `from`, `to`, `text
+                if (slug.indexOf('translate') !== -1) {
+                    return this.fulfill(slug, {
+                        async: true,
+                        awaitAsync: true,
+                        ...params,
+                    })
+                }
                 return this.fulfill(slug, params)
             },
             providers: params => {
@@ -354,10 +361,10 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
      *  @param {number} [delay] time in milliseconds
      *  @param {object} [data] any object with id key
      *  @returns {promise} promise
-    */
+     */
     function later(delay, data) {
-        return new Promise(function (resolve) {
-            setTimeout(function () {
+        return new Promise(function(resolve) {
+            setTimeout(function() {
                 that.makeRequest({
                     path: `/operations/${data.id}`,
                     method: 'GET',
@@ -377,6 +384,9 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
             content,
             method: 'POST',
         }).then(data => {
+            if (this.dryRun) {
+                return data
+            }
             return later(awaitDelay, data)
         })
     }

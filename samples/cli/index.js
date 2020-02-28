@@ -662,6 +662,39 @@ function providersCompactResponse(data = {}) {
 }
 
 /**
+ * Log response showing provider list info except for language-related fields
+ *
+ * @param {array} data response data
+ * @returns {undefined}
+ */
+function providersWithFlags(data = {}) {
+    data.forEach(provider => {
+        const {
+            id,
+            production,
+            integrated,
+            billable,
+            own_auth,
+            stock_model,
+            custom_model,
+            delegated_credentials,
+        } = provider
+        console.log(
+            [
+                id,
+                production,
+                integrated,
+                billable,
+                own_auth,
+                stock_model,
+                custom_model,
+                delegated_credentials,
+            ].join(',')
+        )
+    })
+}
+
+/**
  * Log response showing a provider info except for languages
  *
  * @param {array} data response data
@@ -703,6 +736,7 @@ function getDefaultOuputFn(intent) {
             usageResponse,
             shortProviderInfoResponse,
             providersCompactResponse,
+            providersWithFlags,
             authDetails,
         }[responseMapper]
     }
@@ -919,7 +953,7 @@ function intentRequiresText(intent = DEFAULT_INTENT) {
 /**
  * generates function to sort an array of objects by one of the object keys
  *
- * @param {string} key
+ * @param {string} key any object property
  * @returns {function} sorting hat
  */
 function sortByKey(key) {

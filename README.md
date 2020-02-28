@@ -1,4 +1,4 @@
-# Intento nodejs
+# Intento SDK for Node.js
 
 An adapter to query Intento API.
 
@@ -8,7 +8,7 @@ To get more information check out [the site](https://inten.to/).
 
 [API User Manual](https://github.com/intento/intento-api)
 
-In case you don't have a key to use Intento API, please register here [console.inten.to](https://console.inten.to)
+In case you don't have a key to use Intento API, please register here [inten.to](https://inten.to)
 
 <!-- TOC depthFrom:2 -->
 
@@ -31,9 +31,6 @@ In case you don't have a key to use Intento API, please register here [console.i
 - [Smart routing](#smart-routing)
     - [Basic smart routing](#basic-smart-routing)
     - [Specifying a custom routing strategy](#specifying-a-custom-routing-strategy)
-    - [Async mode](#async-mode)
-    - [Async mode with awaiting results](#async-mode-with-awaiting-results)
-        - [Change request frequency](#change-request-frequency)
 - [Failover mode](#failover-mode)
 - [Using a service provider with your own keys](#using-a-service-provider-with-your-own-keys)
 - [Advanced Examples](#advanced-examples)
@@ -220,7 +217,7 @@ To use the smart routing, just omit the `provider` parameter:
 ```js
 client.ai.text.translate
     .fulfill({
-        text: 'A sample text',
+        text: "How's it going?",
         to: 'es'
     })
     .then(console.log)
@@ -230,128 +227,7 @@ Response:
 
 ```json
 {
-    "results": [
-        "Un texto de ejemplo"
-    ],
-    "meta": {},
-    "service": {
-        "provider": {
-            "id": "ai.text.translate.microsoft.translator_text_api.2-0",
-            "name": "Microsoft Translator API"
-        }
-    }
-}
-```
-
-### Specifying a custom routing strategy
-
-By default, when the provider is missing, requests are routed to a provider with the best expected price/performance ratio. This behavior may be controlled by specifying the desired routing strategy in the `routing` parameter. To set up routing for your account contact us at hello@inten.to.
-
-```js
-client.ai.text.translate
-    .fulfill({
-        text: 'A sample text',
-        to: 'es',
-        routing: 'best-quality',
-    })
-    .then(console.log)
-```
-
-### Async mode
-
-If the server responded with a status of 413 (Request Entity Too Large), then the request data is too large for the synchronous processing. In this case, you should switch to the asynchronous mode by adding `async: true` to the parameters. The current approach to handling the oversized requests [is described in a separate document](https://github.com/intento/intento-api/blob/master/processing-oversized-requests.md).
-
-```js
-client.ai.text.translate
-    .fulfill({
-        text: [
-            'A sample text',
-            'Another sample text'
-        ],
-        from: 'en',
-        to: 'es',
-        async: true,
-        provider: 'ai.text.translate.yandex.translate_api.1-5'
-    })
-    .then(console.log)
-```
-
-The response contains `id` of the operation:
-
-```json
-{
-    "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda"
-}
-```
-
-Wait for processing to complete. To retrieve the result of the operation, call
-
-```js
-client.operations
-    .fulfill({
-        id: "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda"
-    })
-    .then(console.log)
-```
-
-TTL of the resource is 30 days.
-
-The response
-
-```json
-{
-    "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda",
-    "done": true,
-    "response": [
-        {
-            "results": [
-                "Un texto de ejemplo 1",
-                "Un texto de ejemplo 2"
-            ],
-            "meta": {},
-            "service": {
-                "provider": {
-                    "id": "ai.text.translate.yandex.translate_api.1-5",
-                    "name": "Yandex Translate API"
-                }
-            }
-        }
-    ]
-}
-```
-
-If the operation is not completed the value of `done` is false. Wait and make request later.
-
-```json
-{
-    "id": "ea1684f1-4ec7-431d-9b7e-bfbe98cf0bda",
-    "done": false,
-    "response": null
-}
-```
-
-### Async mode with awaiting results
-
-Add `awaitAsync: true` to parameters to get results directly:
-
-```js
-client.ai.text.translate
-    .fulfill({
-        text: "How's it going?",
-        to: 'es',
-        async: true,
-        awaitAsync: true
-    })
-    .then(res => {
-        console.log(JSON.stringify(res, null, 4))
-    })
-```
-
-The response will be similar to the following one:
-
-```js
-{
-    "id": "qa2wed4r-3e4r-5t6y-6y7u-23456789",
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
     "done": true,
     "response": [
         {
@@ -375,49 +251,24 @@ The response will be similar to the following one:
         }
     ],
     "meta": {
-        "providers": [
-            {
-                "id": "ai.text.translate.deepl.api",
-                "name": "DeepL API",
-                "vendor": "DeepL",
-                "description": "API",
-                "logo": "https://inten.to/static/img/api/deepl_translate.png"
-            }
-        ],
-        "from": null,
-        "to": "es",
-        "format": null,
-        "glossary": null,
-        "smart_routing": "default",
-        "category": "default",
-        "own_keys": false,
-        "size": 15,
-        "intento_user_agent": [
-            "Intento.NodeJS/0.9.0"
-        ],
-        "userdata": {}
+        // information about initial request
     },
     "error": null
 }
 ```
 
-#### Change request frequency
+### Specifying a custom routing strategy
 
-Add `awaitDelay` (number in milliseconds) to parameters to change how often results are requested. It does not speed up the process.
-Default value is `1000`.
+By default, when the provider is missing, requests are routed to a provider with the best expected price/performance ratio. This behavior may be controlled by specifying the desired routing strategy in the `routing` parameter. To set up routing for your account contact us at hello@inten.to.
 
 ```js
 client.ai.text.translate
     .fulfill({
-        text: "How's it going?",
+        text: 'A sample text',
         to: 'es',
-        async: true,
-        awaitAsync: true,
-        awaitDelay: 500
+        routing: 'best-quality',
     })
-    .then(res => {
-        console.log(JSON.stringify(res, null, 4))
-    })
+    .then(console.log)
 ```
 
 ## Failover mode
@@ -452,7 +303,7 @@ In the tech proxy mode, the custom credentials are passed in the `auth` service 
 
 ```js
 client.ai.text.translate
-    .fullfill({
+    .fulfill({
         text: "A sample text",
         to: 'es',
         provider: 'some-provider-id',
@@ -482,7 +333,7 @@ For example for google translate custom auth structure is `{ key: YOUR_GOOGLE_KE
 
 ```js
 client.ai.text.translate
-    .fullfill({
+    .fulfill({
         text: "A sample text",
         to: 'es',
         provider: 'ai.text.translate.google.translate_api.2-0',
@@ -501,20 +352,33 @@ Response:
 
 ```json
 {
-    "results": [
-        "Un texto de muestra"
+    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "done": true,
+    "response": [
+        {
+            "results": [
+                "Un texto de muestra"
+            ],
+            "meta": {
+                "detected_source_language": [
+                    "en"
+                ]
+            },
+            "service": {
+                "provider": {
+                    "id": "ai.text.translate.google.translate_api.2-0",
+                    "name": "Google Cloud Basic Translation API",
+                    "vendor": "Google Cloud",
+                    "description": "Basic Translation API",
+                    "logo": "https://inten.to/static/img/api/ggl_translate.png"
+                }
+            }
+        }
     ],
     "meta": {
-        "detected_source_language": [
-            "en"
-        ]
+        // information about initial request
     },
-    "service": {
-        "provider": {
-            "id": "ai.text.translate.google.translate_api.2-0",
-            "name": "Google Cloud Translation API"
-        }
-    }
+    "error": null
 }
 ```
 

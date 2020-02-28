@@ -24,6 +24,7 @@ describe('auth with own keys', () => {
             service: {
                 provider: 'some-provider',
                 auth: { 'some-provider': [{ key: 'value' }] },
+                async: true,
             },
         }
         const requestObj = await client.ai.text.translate.fulfill(content)
