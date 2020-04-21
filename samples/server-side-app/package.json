@@ -4,5 +4,10 @@
   "description": "sample nodejs application using intento api",
   "main": "index.js",
   "license": "Apache-2.0",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --config .prettierrc --write '*.js'"
+  },
   "dependencies": {}
 }

@@ -1,3 +1,11 @@
+const utils = require('./utils')
+const {
+    printProviderNames,
+    printProvidersInfo,
+    printProviderBriefInfo,
+    printProvidersAsTable,
+} = utils
+
 if (process) {
     const currentNodeJSVersion = Number(process.version.match(/^v?(\d+\.\d+)/)[1])
     const minimalNodeJSVersion = '10.0'
@@ -28,6 +36,12 @@ client.ai.text.dictionary
     .then(printProvidersInfo)
     .catch(console.error)
 
+// https://github.com/intento/intento-api/blob/master/ai.text.translate.md#using-previously-trained-custom-models
+client.ai.text.translate
+    .providers({ custom_model: true })
+    .then(printProviderBriefInfo)
+    .catch(console.error)
+
 client.ai.text.translate
     .providers({ format: 'xml' })
     .then(data => {
@@ -54,52 +68,3 @@ client.ai.text.translate
     .catch(console.error)
 
 // helpers
-
-/**
- * Print provider names only
- *
- * @param {array} data list of provider descriptions
- * @returns {undefined}
- */
-function printProviderNames(data) {
-    console.log(`There are overall ${data.length} providers:`)
-    data.forEach((p, i) => console.log(`  ${i + 1}. ${p.name}`))
-}
-
-/**
- * Print provider full, but "zip" info about language pairs
- *
- * @param {array} data list of provider descriptions
- * @returns {undefined}
- */
-function printProvidersInfo(data) {
-    console.log(`There are overall ${data.length} providers:`)
-    console.info(
-        data.map(provider => ({
-            ...provider,
-            symmetric: provider.symmetric.length,
-            pairs: provider.pairs.length,
-        }))
-    )
-}
-
-/**
- * Print provider as table view
- * console.table requires node@^v10.0.0
- * @param {array} data list of provider descriptions
- * @returns {undefined}
- */
-function printProvidersAsTable(data) {
-    console.log(`\nThere are overall ${data.length} providers:`)
-
-    console.table(
-        data.map(({ id, name, symmetric, pairs }) => ({
-            name,
-            symmetric: symmetric.length,
-            pairs: pairs.length,
-            id,
-        })),
-        ['name', 'symmetric', 'pairs', 'id']
-    )
-    console.log('\n\n')
-}
