@@ -31,8 +31,8 @@ function printProvidersInfo(data) {
     console.info(
         data.map(provider => ({
             ...provider,
-            symmetric: provider.symmetric.length,
-            pairs: provider.pairs.length,
+            symmetric: (provider.symmetric || []).length,
+            pairs: (provider.pairs || []).length,
         }))
     )
 }
@@ -47,7 +47,7 @@ function printProvidersAsTable(data) {
     console.log(`\nThere are overall ${data.length} providers:`)
 
     console.table(
-        data.map(({ id, name, symmetric, pairs }) => ({
+        data.map(({ id, name, symmetric = [], pairs = [] }) => ({
             name,
             symmetric: symmetric.length,
             pairs: pairs.length,
@@ -72,7 +72,7 @@ function sortByKey(key) {
         one = -1
         label = key.slice(1)
     }
-    return function(a, b) {
+    return function (a, b) {
         const nameA = (a[label] || '').toUpperCase() // ignore upper and lowercase
         const nameB = (b[label] || '').toUpperCase() // ignore upper and lowercase
         if (nameA < nameB) {
@@ -87,11 +87,17 @@ function sortByKey(key) {
     }
 }
 
+// eslint-disable-next-line require-jsdoc
+function prettyPrint(data) {
+    console.log(JSON.stringify(data, null, 4))
+}
+
 const utils = {
     printProviderNames,
     printProviderBriefInfo,
     printProvidersInfo,
     printProvidersAsTable,
+    prettyPrint,
 }
 
 module.exports = utils
