@@ -7,3 +7,4 @@ node ai.text.dictionary.js
 node ai.text.sentiment.js
 node readme-examples.js
 node translate.md-examples.js
+node ai.text.detect-language.js
