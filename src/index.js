@@ -372,7 +372,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
                     if (operationResponse.done) {
                         resolve(operationResponse)
                     } else {
-                        return later(delay, data)
+                        return resolve(later(delay, data))
                     }
                 })
             }, delay)
