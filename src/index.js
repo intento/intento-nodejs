@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '1.0.0'
+const VERSION = '1.0.1'
 const SDK_NAME = 'Intento.NodeJS'
 
 const DEFAULT_AWAIT_DELAY = 1000
@@ -189,7 +189,7 @@ module.exports.default = Object.assign({}, module.exports)
 
 IntentoConnector.prototype.version = VERSION
 
-IntentoConnector.prototype.makeRequest = function(options = {}) {
+IntentoConnector.prototype.makeRequest = function (options = {}) {
     const { path = '', params, content, data, method = 'GET' } = options
 
     const urlParams = querystring.stringify(params)
@@ -260,7 +260,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                 responseHandler(resp, resolve, reject, this.debug, this.verbose)
             )
 
-            req.on('error', function(err) {
+            req.on('error', function (err) {
                 if (err.code === 'ENOTFOUND') {
                     console.error('Host look up failed: \n', err)
                     console.log('\nPlease, check internet connection\n')
@@ -268,7 +268,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
                     customErrorLog(err, 'Fails getting a response from the API')
                 }
             })
-            req.on('timeout', function(err) {
+            req.on('timeout', function (err) {
                 customErrorLog(err, 'Are you offline?')
             })
             req.write(data || JSON.stringify(content) || '')
@@ -279,7 +279,7 @@ IntentoConnector.prototype.makeRequest = function(options = {}) {
     })
 }
 
-IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
+IntentoConnector.prototype.fulfill = function (slug, parameters = {}) {
     const {
         text,
         to,
@@ -363,8 +363,8 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
      *  @returns {promise} promise
      */
     function later(delay, data) {
-        return new Promise(function(resolve) {
-            setTimeout(function() {
+        return new Promise(function (resolve) {
+            setTimeout(function () {
                 that.makeRequest({
                     path: `/operations/${data.id}`,
                     method: 'GET',
@@ -400,7 +400,7 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.getUserAgent = function(params = {}) {
+IntentoConnector.prototype.getUserAgent = function (params = {}) {
     const { customHeader = false } = params
     const markers = []
 
@@ -426,7 +426,7 @@ IntentoConnector.prototype.getUserAgent = function(params = {}) {
     return markers.join(' ')
 }
 
-IntentoConnector.prototype.providers = function(slug, params) {
+IntentoConnector.prototype.providers = function (slug, params) {
     if (params && params.id) {
         // a description of a provider was requested
         return this.provider(slug, params)
@@ -438,7 +438,7 @@ IntentoConnector.prototype.providers = function(slug, params) {
     })
 }
 
-IntentoConnector.prototype.provider = function(slug, params = {}) {
+IntentoConnector.prototype.provider = function (slug, params = {}) {
     const { id, ...otherParams } = params
 
     return this.makeRequest({
@@ -448,11 +448,11 @@ IntentoConnector.prototype.provider = function(slug, params = {}) {
     })
 }
 
-IntentoConnector.prototype.language = function(slug, langCode, params) {
+IntentoConnector.prototype.language = function (slug, langCode, params) {
     return this.languages(slug, { ...params, id: langCode })
 }
 
-IntentoConnector.prototype.languages = function(slug, params = {}) {
+IntentoConnector.prototype.languages = function (slug, params = {}) {
     const { id, language, ...other } = params
     let path = slug + '/languages'
 
@@ -469,7 +469,7 @@ IntentoConnector.prototype.languages = function(slug, params = {}) {
     })
 }
 
-IntentoConnector.prototype.settingsLanguages = function(params) {
+IntentoConnector.prototype.settingsLanguages = function (params) {
     return this.makeRequest({
         path: '/settings/languages',
         content: params,
@@ -477,7 +477,7 @@ IntentoConnector.prototype.settingsLanguages = function(params) {
     })
 }
 
-IntentoConnector.prototype.processingRules = function(params) {
+IntentoConnector.prototype.processingRules = function (params) {
     return this.makeRequest({
         path: '/settings/processing-rules',
         params,
@@ -485,7 +485,7 @@ IntentoConnector.prototype.processingRules = function(params) {
     })
 }
 
-IntentoConnector.prototype.asyncOperations = function(params) {
+IntentoConnector.prototype.asyncOperations = function (params) {
     let path = '/operations/'
     const { id, ...other } = params
     if (id) {
@@ -498,7 +498,7 @@ IntentoConnector.prototype.asyncOperations = function(params) {
     })
 }
 
-IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
+IntentoConnector.prototype.usageFulfill = function (path, parameters = {}) {
     const {
         from,
         to,
@@ -538,14 +538,14 @@ IntentoConnector.prototype.usageFulfill = function(path, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.listCredentials = function(path) {
+IntentoConnector.prototype.listCredentials = function (path) {
     return this.makeRequest({
         path,
         method: 'GET',
     })
 }
 
-IntentoConnector.prototype.addCredentials = function(path, parameters = {}) {
+IntentoConnector.prototype.addCredentials = function (path, parameters = {}) {
     const { credential_id, credential_type, secret_credentials } = parameters
     return this.makeRequest({
         path: path,
@@ -558,7 +558,7 @@ IntentoConnector.prototype.addCredentials = function(path, parameters = {}) {
     })
 }
 
-IntentoConnector.prototype.removeCredentials = function(path, parameters = {}) {
+IntentoConnector.prototype.removeCredentials = function (path, parameters = {}) {
     const { credential_id } = parameters
     return this.makeRequest({
         path: path + '/' + credential_id,
