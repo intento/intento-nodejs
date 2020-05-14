@@ -23,6 +23,7 @@
     "eslint": "eslint",
     "jest": "jest --env node",
     "test": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
+    "test:win": "cross-env NODE_ENV=production && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "test-in-browser": "serve . && echo 'Visit  http://localhost:5000/samples/browser-app'",
     "build_pack": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "build_dist": "webpack",
