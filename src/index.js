@@ -372,7 +372,9 @@ IntentoConnector.prototype.fulfill = function(slug, parameters = {}) {
                     if (operationResponse.done) {
                         resolve(operationResponse)
                     } else {
-                        return later(delay, data)
+                        // previous promise must be resolved, pass the new promise in chain
+                        // TODO: make test with double of requests here (maybe mocking this request to get the exact result)
+                        return resolve(later(delay, data))
                     }
                 })
             }, delay)
