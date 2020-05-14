@@ -1,5 +1,5 @@
 'use strict'
-require('dotenv').load();
+require('dotenv').load()
 
 const IntentoConnector = require('../src/index')
 
