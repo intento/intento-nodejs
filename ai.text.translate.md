@@ -49,7 +49,7 @@ client.ai.text.translate
 
 The response contains the translated text, service information and meta information (i.e. detected language):
 
-```json
+```jsonc
 {
     "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
     "done": true,
@@ -99,7 +99,7 @@ client.ai.text.translate
 
 The response contains the translated texts and a service information on which provider was used:
 
-```json
+```jsonc
 {
     "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
     "done": true,
@@ -219,7 +219,7 @@ client.ai.text.translate
 
 The response contains the translated text with preserved formatting:
 
-```json
+```jsonc
 {
     "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
     "done": true,
@@ -353,7 +353,7 @@ client.ai.text.translate
 
 Response:
 
-```json
+```jsonc
 [
     {
         "id": "ai.text.translate.microsoft.translator_text_api.3-0",
