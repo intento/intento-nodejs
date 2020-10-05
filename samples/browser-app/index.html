@@ -8,7 +8,7 @@
     <script src="../../dist/intentoConnector.js"></script>
     <form id="test">
         <label for="keyInput">apikey</label>
-        <input type="text" placeholder="enter your apikey" id="keyInput" value=""/>
+        <input type="text" placeholder="enter your apikey" id="keyInput" value="" />
         <button type="submit">Click me and wait</button>
     </form>
     <p>Visit <a href="https://console.inten.to" target="_blank">console.inten.to</a> to get the key.</p>
@@ -23,7 +23,7 @@
 
         testForm.addEventListener('submit', submitTest);
 
-        function init (apikey) {
+        function init(apikey) {
             console.info('Init client with apikey', apikey);
 
             client = new IntentoConnector({ apikey })
@@ -34,10 +34,36 @@
             if (!client || !client.apikey || keyInput.value !== client.apikey) {
                 init(keyInput.value);
             }
+
+
             client.ai.text.translate
                 .providers()
                 .then(prettyPrintProviders)
                 .catch(prettyCatch)
+
+            try {
+                var body = {
+                    text: "Hello world",
+                    to: 'ru',
+                    from: 'en',
+                    awaitAsync: false,
+                    async: true
+                }
+                client.ai.text.translate.fulfill(body).
+                    then(result => {
+                        setTimeout(() => {
+                            client.operations.fulfill({ id: result.id }).then(
+                                console.log
+                            )
+                        }, 1000)
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+            } catch (exception) {
+                console.log(exception)
+            }
+
         }
 
         function prettyPrintProviders(data) {
