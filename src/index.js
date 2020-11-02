@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '1.0.1'
+const VERSION = '1.0.2'
 const SDK_NAME = 'Intento.NodeJS'
 
 const DEFAULT_AWAIT_DELAY = 1000
@@ -304,6 +304,7 @@ IntentoConnector.prototype.fulfill = function (slug, parameters = {}) {
         processing = {},
         trace,
         userdata,
+        tone,
         ...other
     } = parameters
     const providerList = stringToList(provider)
@@ -317,6 +318,7 @@ IntentoConnector.prototype.fulfill = function (slug, parameters = {}) {
             'async': asyncMode,
             bidding,
             routing,
+            tone,
             failover,
             failover_list,
             multiple_translations,
