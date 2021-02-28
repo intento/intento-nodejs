@@ -22,12 +22,13 @@
     "lint": "eslint src test",
     "eslint": "eslint",
     "jest": "jest --env node",
-    "test": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
-    "test:win": "cross-env NODE_ENV=production && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
+    "test_old": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
+    "test": "cross-env NODE_ENV=production && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "test-in-browser": "serve . && echo 'Visit  http://localhost:5000/samples/browser-app'",
     "build_pack": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "build_dist": "webpack",
-    "build": "yarn build_pack; yarn build_dist",
+    "build_old": "yarn build_pack; yarn build_dist",
+    "build": "run-s build_pack build_dist",
     "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
     "format_test": "prettier --config test/.prettierrc --write 'test*/*.js'",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
@@ -48,11 +49,12 @@
     "dotenv": "^5.0.1",
     "eslint": "^4.19.1",
     "jest": "^22.4.3",
+    "node-fetch": "^3.3.1",
     "rimraf": "^2.6.2",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
-  },
-  "dependencies": {
+    "webpack-cli": "^3.3.11",
+    "yarn-run-all": "^3.1.1",
     "cross-env": "^5.2.0"
-  }
+  },
+  "dependencies": {}
 }
