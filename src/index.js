@@ -17,6 +17,37 @@ const {
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 
 /**
+ * Default fetcher based on https.request
+ *
+ * @returns {undefined}
+ */
+function defaultFetcher({ requestOptions, debug, verbose, data, content }) {
+    return new Promise((resolve, reject) => {
+
+        try {
+            const req = https.request(requestOptions, resp =>
+                responseHandler(resp, resolve, reject, debug, verbose)
+            )
+
+            req.on('error', function (err) {
+                if (err.code === 'ENOTFOUND') {
+                    console.error('Host look up failed: \n', err)
+                    console.log('\nPlease, check internet connection\n')
+                } else {
+                    customErrorLog(err, 'Fails getting a response from the API')
+                }
+            })
+            req.on('timeout', function (err) {
+                customErrorLog(err, 'Are you offline?')
+            })
+            req.write(data || JSON.stringify(content) || '')
+            req.end()
+        } catch (e) {
+            customErrorLog(e, 'Fails to send a request to the API')
+        }
+    })
+}
+/**
  * Main class for connectiong to Intento API
  * Typical usage:
  *      const client = new IntentoConnector({ apikey: YOUR_APIKEY })
@@ -32,6 +63,7 @@ function IntentoConnector(credentials = {}, options = {}) {
         curl = false,
         dryRun = false,
         userAgent,
+        fetcher = defaultFetcher
     } = options
     if (typeof credentials === 'string') {
         this.credentials = { apikey: credentials }
@@ -45,7 +77,7 @@ function IntentoConnector(credentials = {}, options = {}) {
     this.verbose = verbose
     this.dryRun = dryRun
     this.userAgent = userAgent
-
+    this.fetcher = fetcher
     const { apikey, host = HOST } = this.credentials
 
     if (!apikey) {
@@ -250,33 +282,12 @@ IntentoConnector.prototype.makeRequest = function (options = {}) {
         console.log(`\nTest request\n${requestString}`)
     }
 
-    return new Promise((resolve, reject) => {
-        if (this.dryRun) {
-            resolve(data || content || requestOptions.path || '')
-        }
+    if (this.dryRun) {
+        return Promise.resolve(data || content || requestOptions.path || '')
+    }
 
-        try {
-            const req = https.request(requestOptions, resp =>
-                responseHandler(resp, resolve, reject, this.debug, this.verbose)
-            )
+    return this.fetcher({ requestOptions, debug: this.debug, verbose: this.verbose, data, content })
 
-            req.on('error', function (err) {
-                if (err.code === 'ENOTFOUND') {
-                    console.error('Host look up failed: \n', err)
-                    console.log('\nPlease, check internet connection\n')
-                } else {
-                    customErrorLog(err, 'Fails getting a response from the API')
-                }
-            })
-            req.on('timeout', function (err) {
-                customErrorLog(err, 'Are you offline?')
-            })
-            req.write(data || JSON.stringify(content) || '')
-            req.end()
-        } catch (e) {
-            customErrorLog(e, 'Fails to send a request to the API')
-        }
-    })
 }
 
 IntentoConnector.prototype.fulfill = function (slug, parameters = {}) {
