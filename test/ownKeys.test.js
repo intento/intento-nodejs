@@ -3,7 +3,7 @@ const IntentoConnector = require('../src/index')
 const { stringify: t } = require('./utils')
 
 // Quickly load .env files into the environment
-require('dotenv').load()
+require('dotenv').config()
 const apikey = process.env.INTENTO_API_KEY
 const host = process.env.INTENTO_API_HOST
 

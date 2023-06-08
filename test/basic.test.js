@@ -1,10 +1,10 @@
 'use strict'
-require('dotenv').load()
+require('dotenv').config()
 
 const IntentoConnector = require('../src/index')
 
 // Quickly load .env files into the environment
-// require('dotenv').load()
+// require('dotenv').config()
 const apikey = process.env.INTENTO_API_KEY
 const HOST = process.env.INTENTO_API_HOST || 'api.inten.to'
 let client
