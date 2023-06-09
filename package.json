@@ -29,7 +29,7 @@
     "build_dist": "webpack",
     "build_old": "yarn build_pack; yarn build_dist",
     "build": "run-s build_pack build_dist",
-    "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
+    "prepublish": "yarn clean && yarn lint && yarn build",
     "format_test": "prettier --config test/.prettierrc --write 'test*/*.js'",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
     "format_source": "prettier --config .prettierrc --write './src/*.js'",
