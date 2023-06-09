@@ -40,7 +40,7 @@ ai.*.md
 # dotenv environment variables file
 .env*
 
-.babelrc
+.babelrc*
 .editorconfig
 .gitignore
 .eslintrc
