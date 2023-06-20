@@ -1,4 +1,6 @@
 const path = require('path')
+const webpack = require('webpack')
+const stdLibBrowser = require('node-stdlib-browser')
 
 const resolve = {
     fallback: {
@@ -8,6 +10,13 @@ const resolve = {
         url: require.resolve('url/'),
     },
 }
+
+const plugins = [
+    new webpack.ProvidePlugin({
+        process: stdLibBrowser.process,
+        Buffer: [stdLibBrowser.buffer, 'Buffer'],
+    }),
+]
 
 const serverDevConfig = {
     entry: './src/build.js',
@@ -43,6 +52,7 @@ const clientDevConfig = {
         hashFunction: 'xxhash64',
     },
     resolve,
+    plugins,
 }
 
 const clientConfig = {
@@ -55,6 +65,7 @@ const clientConfig = {
         hashFunction: 'xxhash64',
     },
     resolve,
+    plugins,
 }
 
 module.exports = [serverDevConfig, serverConfig, clientDevConfig, clientConfig]
