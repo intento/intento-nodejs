@@ -22,13 +22,14 @@
     "lint": "eslint src test",
     "eslint": "eslint",
     "jest": "jest --env node",
-    "test": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
-    "test:win": "cross-env NODE_ENV=production && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
+    "test_old": "export $(cat .env) && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
+    "test": "cross-env NODE_ENV=production && jest --env node --coverage --collectCoverageFrom=src/*.js --forceExit test/*",
     "test-in-browser": "serve . && echo 'Visit  http://localhost:5000/samples/browser-app'",
     "build_pack": "cross-env BABEL_ENV=production babel src --out-dir lib",
     "build_dist": "webpack",
-    "build": "yarn build_pack; yarn build_dist",
-    "prepublish": "yarn clean && yarn lint && yarn test && yarn build",
+    "build_old": "yarn build_pack; yarn build_dist",
+    "build": "run-s build_pack build_dist",
+    "prepublish": "yarn clean && yarn lint && yarn build",
     "format_test": "prettier --config test/.prettierrc --write 'test*/*.js'",
     "format_ex": "prettier --config .prettierrc --write '*.js'",
     "format_source": "prettier --config .prettierrc --write './src/*.js'",
@@ -51,11 +52,13 @@
     "https-browserify": "^1.0.0",
     "jest": "^29.5.0",
     "node-stdlib-browser": "^1.2.0",
+    "node-fetch": "^3.3.1",
     "rimraf": "^5.0.1",
     "stream-http": "^3.2.0",
     "url": "^0.11.0",
     "webpack": "^5.86.0",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "yarn-run-all": "^3.1.1"
   },
   "dependencies": {}
 }
