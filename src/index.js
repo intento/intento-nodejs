@@ -6,8 +6,7 @@ const SDK_NAME = 'Intento.NodeJS'
 
 const DEFAULT_AWAIT_DELAY = 1000
 
-const https = require('https')
-const querystring = require('querystring')
+const axios = require('axios')
 const {
     responseHandler,
     customErrorLog,
@@ -192,7 +191,7 @@ IntentoConnector.prototype.version = VERSION
 IntentoConnector.prototype.makeRequest = function (options = {}) {
     const { path = '', params, content, data, method = 'GET' } = options
 
-    const urlParams = querystring.stringify(params)
+    const urlParams = new URLSearchParams(params).toString()
 
     const requestOptions = {
         host: this.host,
@@ -256,7 +255,7 @@ IntentoConnector.prototype.makeRequest = function (options = {}) {
         }
 
         try {
-            const req = https.request(requestOptions, resp =>
+            const req = axios.request(requestOptions, resp =>
                 responseHandler(resp, resolve, reject, this.debug, this.verbose)
             )
 
