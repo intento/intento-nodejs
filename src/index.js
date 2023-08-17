@@ -1,7 +1,7 @@
 /* global window */
 'use strict'
 
-const VERSION = '1.0.4'
+const VERSION = '1.0.5'
 const SDK_NAME = 'Intento.NodeJS'
 
 const DEFAULT_AWAIT_DELAY = 1000
