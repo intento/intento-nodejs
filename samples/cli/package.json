@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "minimist": "^1.2.6",
+    "minimist": "^1.2.8",
     "neat-csv": "^3.0.0",
-    "progress": "^2.0.0"
+    "progress": "^2.0.3"
   },
   "scripts": {
     "test": "for i in `ls examples|grep .sh`; do sh examples/$i; done > test.log"
