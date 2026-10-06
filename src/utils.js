@@ -3,7 +3,7 @@ const ERROR_MESSAGE_PREFIX = 'Utils error: '
 /**
  * Process request response
  *
- * @param {object} response any http response (JSON)
+ * @param {object} response `{ statusCode, statusMessage, body }` where body is the raw response text
  * @param {Function} resolve Promise resolve
  * @param {Function} reject Promise reject
  * @param {boolean} [debug=false] debug mode (more logging)
@@ -17,62 +17,45 @@ function responseHandler(
     debug = false,
     verbose = false
 ) {
-    /* istanbul ignore next */
-    response.setEncoding('utf8')
+    const { statusCode, statusMessage, body = '' } = response
 
-    /* istanbul ignore next */
-    if (response.statusCode >= 500) {
+    if (statusCode >= 500) {
         customErrorLog(response)
-        reject(response)
     }
 
-    /* istanbul ignore next */
-    let body = ''
-    /* istanbul ignore next */
-    response.on('data', function(chunk) {
-        body += chunk
-    })
-
-    /* istanbul ignore next */
-    response.on('end', function() {
-        try {
-            let data = null
-            if (body.length > 0) {
-                if (body[0] === '{' || body[0] === '[') {
-                    data = JSON.parse(body)
-                } else if (body[0] === '<') {
-                    if (response.statusCode >= 400) {
-                        throwError('HTML 4xx response: ' + body)
-                    } else {
-                        throwError('Unexpected 2xx or 3xx response: ' + body)
-                    }
-                } else if (body === 'OK') {
-                    // temporary workaround TODO change API response
-                    data = { status: 'OK' }
+    try {
+        let data = null
+        if (body.length > 0) {
+            if (body[0] === '{' || body[0] === '[') {
+                data = JSON.parse(body)
+            } else if (body[0] === '<') {
+                if (statusCode >= 400) {
+                    throwError('HTML 4xx response: ' + body)
                 } else {
-                    throwError('Unexpected response: ' + body)
+                    throwError('Unexpected 2xx or 3xx response: ' + body)
                 }
-            }
-            if (response.statusCode >= 400) {
-                if (data.error) {
-                    reject(data)
-                } else {
-                    reject({
-                        statusCode: response.statusCode,
-                        statusMessage: response.statusMessage,
-                        ...data,
-                    })
-                }
+            } else if (body === 'OK') {
+                // temporary workaround TODO change API response
+                data = { status: 'OK' }
             } else {
-                resolve(data)
+                throwError('Unexpected response: ' + body)
             }
-        } catch (e) {
-            if (debug || verbose) {
-                customErrorLog(e)
-            }
-            reject(response)
         }
-    })
+        if (statusCode >= 400) {
+            if (data && data.error) {
+                reject(data)
+            } else {
+                reject({ statusCode, statusMessage, ...data })
+            }
+        } else {
+            resolve(data)
+        }
+    } catch (e) {
+        if (debug || verbose) {
+            customErrorLog(e)
+        }
+        reject(response)
+    }
 }
 
 /**

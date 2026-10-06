@@ -201,7 +201,8 @@ IntentoConnector.prototype.makeRequest = function (options = {}) {
             'X-User-Agent': this.getUserAgent({ customHeader: true }),
             apikey: this.apikey,
         },
-        path: path + (urlParams ? '?' + urlParams : ''),
+        // exactly one leading slash: the host must end before anything the caller supplied
+        path: '/' + path.replace(/^\/+/, '') + (urlParams ? '?' + urlParams : ''),
         method,
     }
     if (this.debug) {
@@ -249,32 +250,49 @@ IntentoConnector.prototype.makeRequest = function (options = {}) {
         console.log(`\nTest request\n${requestString}`)
     }
 
+    if (this.dryRun) {
+        return Promise.resolve(data || content || requestOptions.path || '')
+    }
+
     return new Promise((resolve, reject) => {
-        if (this.dryRun) {
-            resolve(data || content || requestOptions.path || '')
-        }
-
-        try {
-            const req = axios.request(requestOptions, resp =>
-                responseHandler(resp, resolve, reject, this.debug, this.verbose)
+        axios
+            .request({
+                url: `https://${requestOptions.host}${requestOptions.path}`,
+                method,
+                headers: requestOptions.headers,
+                // `data` is validated JSON text, `content` a plain object; with neither, no body is sent
+                data: data || JSON.stringify(content),
+                responseType: 'text',
+                // every HTTP status reaches responseHandler; only transport failures reject here.
+                // Redirects are not followed: follow-redirects would forward the apikey header to
+                // a cross-origin target (browsers follow transparently and cannot be told not to)
+                maxRedirects: 0,
+                validateStatus: () => true,
+            })
+            .then(response =>
+                responseHandler(
+                    {
+                        statusCode: response.status,
+                        statusMessage: response.statusText,
+                        body: response.data,
+                    },
+                    resolve,
+                    reject,
+                    this.debug,
+                    this.verbose
+                )
             )
-
-            req.on('error', function (err) {
+            .catch(err => {
                 if (err.code === 'ENOTFOUND') {
                     console.error('Host look up failed: \n', err)
                     console.log('\nPlease, check internet connection\n')
+                } else if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
+                    customErrorLog(err, 'Are you offline?')
                 } else {
                     customErrorLog(err, 'Fails getting a response from the API')
                 }
+                reject(err)
             })
-            req.on('timeout', function (err) {
-                customErrorLog(err, 'Are you offline?')
-            })
-            req.write(data || JSON.stringify(content) || '')
-            req.end()
-        } catch (e) {
-            customErrorLog(e, 'Fails to send a request to the API')
-        }
     })
 }
 

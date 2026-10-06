@@ -1,7 +1,7 @@
 const {
     ERROR_MESSAGE_PREFIX,
     // getPath,
-    // responseHandler,
+    responseHandler,
     // customErrorLog,
     // stringToList,
     ownCredentials,
@@ -87,5 +87,55 @@ describe('ownCredentials', () => {
         const someProvider = 'some-provider'
         const auth2 = ownCredentials(JSON.stringify(auth), [someProvider])
         expect(t({ [someProvider]: auth })).toEqual(t(auth2))
+    })
+})
+describe('responseHandler', () => {
+    const handle = response =>
+        new Promise((resolve, reject) => responseHandler(response, resolve, reject))
+    const ok = body => ({ statusCode: 200, statusMessage: 'OK', body })
+    const notFound = body => ({ statusCode: 404, statusMessage: 'Not Found', body })
+
+    it('resolves parsed JSON objects and arrays', async () => {
+        await expect(handle(ok('{"a": 1}'))).resolves.toEqual({ a: 1 })
+        await expect(handle(ok('[1, 2]'))).resolves.toEqual([1, 2])
+    })
+    it('resolves null for an empty body', async () => {
+        await expect(handle(ok(''))).resolves.toBeNull()
+    })
+    it('maps a bare OK body to a status object', async () => {
+        await expect(handle(ok('OK'))).resolves.toEqual({ status: 'OK' })
+    })
+    it('rejects with the API error object when the body has one', async () => {
+        const body = '{"error": {"code": 404, "message": "no such intent ai/"}}'
+        await expect(handle(notFound(body))).rejects.toEqual({
+            error: { code: 404, message: 'no such intent ai/' },
+        })
+    })
+    it('rejects with status fields when a 4xx body has no error key', async () => {
+        await expect(handle(notFound('{"detail": "x"}'))).rejects.toEqual({
+            statusCode: 404,
+            statusMessage: 'Not Found',
+            detail: 'x',
+        })
+        await expect(handle(notFound(''))).rejects.toEqual({
+            statusCode: 404,
+            statusMessage: 'Not Found',
+        })
+    })
+    it('rejects with the raw response for HTML or garbage bodies', async () => {
+        const html = notFound('<html>nope</html>')
+        await expect(handle(html)).rejects.toBe(html)
+        const garbage = ok('not json')
+        await expect(handle(garbage)).rejects.toBe(garbage)
+    })
+    it('logs and rejects on 5xx', async () => {
+        const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+        const response = { statusCode: 502, statusMessage: 'Bad Gateway', body: '' }
+        await expect(handle(response)).rejects.toEqual({
+            statusCode: 502,
+            statusMessage: 'Bad Gateway',
+        })
+        expect(spy).toHaveBeenCalledWith('', 502, 'Bad Gateway')
+        spy.mockRestore()
     })
 })
