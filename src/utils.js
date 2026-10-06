@@ -139,7 +139,7 @@ function ownCredentials(auth, providerList) {
         let authKeysParsed
         try {
             authKeysParsed = JSON.parse(auth)
-        } catch (e) {
+        } catch {
             throwError(
                 'Can not parse `auth` parameter. `auth` should be stringified json.'
             )
@@ -156,7 +156,7 @@ function ownCredentials(auth, providerList) {
         try {
             // keep authObj undefined
             authKeys = JSON.parse(auth)
-        } catch (e) {
+        } catch {
             throwError(
                 'Can not parse `auth` parameter. `auth` should be stringified json.'
             )

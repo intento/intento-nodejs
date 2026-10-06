@@ -43,4 +43,4 @@ lib/
 */*/.*.env
 
 dist/
-package/
+package/.claude/
