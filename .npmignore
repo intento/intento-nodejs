@@ -43,11 +43,12 @@ ai.*.md
 .babelrc*
 .editorconfig
 .gitignore
-.eslintrc
+eslint.config.js
 .markdownlint.json
 .prettierignore
 .prettierrc
 .vscode
+.claude
 yarn.lock
 
 example.js
